@@ -6,7 +6,7 @@ import Button from "../Button/Button";
 import FooterBg from "./FooterBg/FooterBg";
 import Profiles from "../Profiles/Profiles";
 import { theme } from "tailwind.config";
-import { MENULINKS } from "../../constants";
+import { MENULINKS, METADATA } from "../../constants";
 
 const Footer = () => {
   const [playbackRate, setPlaybackRate] = useState(0.75);
@@ -53,7 +53,7 @@ const Footer = () => {
               <button onClick={handleClick} className="link cursor-none">
                 <span className="block animate-bounce">❤️</span>
               </button>{" "}
-              by <span className="text-white">Shubh Porwal</span>
+              by <span className="text-white">{METADATA.author}</span>
             </p>
           </div>
         </div>
