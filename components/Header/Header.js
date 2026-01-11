@@ -1,107 +1,42 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import ThemeToggle from "../ThemeToggle/ThemeToggle";
-import { MENULINKS, METADATA } from "../../constants";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
-const Header = ({ children }) => {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+const Header = () => {
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      setScrolled(window.scrollY > 50);
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleKeyDown = useCallback((e) => {
-    if (e.key === "Escape" && isMenuOpen) {
-      setIsMenuOpen(false);
-    }
-  }, [isMenuOpen]);
-
-  useEffect(() => {
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown]);
-
-  // Prevent scroll when menu is open
-  useEffect(() => {
-    if (isMenuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-  }, [isMenuOpen]);
-
   return (
-    <>
-      <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "py-4" : "py-6"
-          }`}
-        style={{
-          backgroundColor: isScrolled ? 'var(--bg-primary)' : 'transparent',
-          borderBottom: isScrolled ? '1px solid var(--border)' : 'none'
-        }}
-      >
-        <div className="section-container flex justify-between items-center">
-          {/* Logo / Name */}
-          <a
-            href="#home"
-            className="text-body-md font-medium"
-            style={{ color: 'var(--fg-primary)' }}
-          >
-            KA
-          </a>
+    <header
+      className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled
+          ? "bg-paper/80 dark:bg-void/80 backdrop-blur-md border-b border-ink/5 dark:border-white/5 py-4"
+          : "bg-transparent py-6 md:py-8"
+        }`}
+    >
+      <div className="max-w-7xl mx-auto px-6 md:px-12 flex justify-between items-center">
+        <Link href="/" className="text-lg font-bold tracking-tight text-ink dark:text-white hover:opacity-70 transition-opacity">
+          KA.
+        </Link>
 
-          {/* Right side controls */}
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-
-            {/* Menu button */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="w-10 h-10 flex flex-col items-center justify-center gap-1.5 z-[60]"
-              aria-label="Toggle menu"
-            >
-              <span
-                className={`w-6 h-px transition-all duration-300 ${isMenuOpen ? "rotate-45 translate-y-[3px]" : ""
-                  }`}
-                style={{ backgroundColor: 'var(--fg-primary)' }}
-              />
-              <span
-                className={`w-6 h-px transition-all duration-300 ${isMenuOpen ? "-rotate-45 -translate-y-[3px]" : ""
-                  }`}
-                style={{ backgroundColor: 'var(--fg-primary)' }}
-              />
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Full screen menu overlay */}
-      <div
-        className={`menu-overlay ${isMenuOpen ? "active" : ""}`}
-        style={{ backgroundColor: 'var(--bg-primary)' }}
-      >
-        <div className="section-container h-full flex flex-col justify-center">
-          <nav className="space-y-6">
-            {MENULINKS.map((link, i) => (
-              <a
-                key={link.ref}
-                href={`#${link.ref}`}
-                onClick={() => setIsMenuOpen(false)}
-                className="menu-link block"
-                style={{ transitionDelay: `${0.1 + i * 0.05}s` }}
-              >
-                {link.name}
-              </a>
-            ))}
-          </nav>
-        </div>
+        <nav className="flex gap-8">
+          <Link href="#work" className="text-sm font-medium text-ink/70 dark:text-ash/70 hover:text-ink dark:hover:text-white transition-colors">
+            Work
+          </Link>
+          <Link href="#capabilities" className="text-sm font-medium text-ink/70 dark:text-ash/70 hover:text-ink dark:hover:text-white transition-colors">
+            Capabilities
+          </Link>
+          <Link href="#contact" className="text-sm font-medium text-ink/70 dark:text-ash/70 hover:text-ink dark:hover:text-white transition-colors">
+            Contact
+          </Link>
+        </nav>
       </div>
-    </>
+    </header>
   );
 };
 

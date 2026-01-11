@@ -1,70 +1,23 @@
-import Profiles from "../Profiles/Profiles";
 import { METADATA } from "../../constants";
 
 const Footer = () => {
-  const currentYear = new Date().getFullYear();
-
   return (
-    <footer
-      className="section-container py-16"
-      style={{ borderTop: '1px solid var(--border)' }}
-    >
-      <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-12 mb-16">
-          {/* Left column */}
-          <div>
-            <p
-              className="text-body-lg mb-4"
-              style={{ color: 'var(--fg-primary)' }}
-            >
-              {METADATA.author}
-            </p>
-            <p
-              className="text-body-md mb-6"
-              style={{ color: 'var(--fg-muted)' }}
-            >
-              Full-Stack Developer based in Lagos, Nigeria.
-              <br />
-              Building products that matter.
-            </p>
-            <Profiles />
-          </div>
+    <footer className="py-12 border-t border-ink/5 dark:border-white/5 mt-24">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-6">
+        <p className="text-sm text-ink/40 dark:text-ash/40 font-medium">
+          © {new Date().getFullYear()} {METADATA.author}.
+        </p>
 
-          {/* Right column */}
-          <div className="md:text-right">
-            <p
-              className="text-body-sm mb-4"
-              style={{ color: 'var(--fg-muted)' }}
-            >
-              Currently available for new opportunities
-            </p>
-            <a
-              href="mailto:kingsley.aremu@gmail.com"
-              className="text-body-md link-underline"
-              style={{ color: 'var(--fg-primary)' }}
-            >
-              kingsley.aremu@gmail.com
-            </a>
-          </div>
-        </div>
-
-        {/* Bottom */}
-        <div
-          className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pt-8"
-          style={{ borderTop: '1px solid var(--border)' }}
-        >
-          <p
-            className="text-body-sm"
-            style={{ color: 'var(--fg-muted)' }}
-          >
-            © {currentYear} {METADATA.author}
-          </p>
-          <p
-            className="text-body-sm"
-            style={{ color: 'var(--fg-muted)' }}
-          >
-            Designed & built with intention
-          </p>
+        <div className="flex gap-6">
+          <a href="mailto:kingsley.aremu@gmail.com" className="text-sm text-ink/60 dark:text-ash/60 hover:text-ink dark:hover:text-white transition-colors">
+            Email
+          </a>
+          <a href="https://linkedin.com/in/kingsley-aremu" target="_blank" rel="noopener noreferrer" className="text-sm text-ink/60 dark:text-ash/60 hover:text-ink dark:hover:text-white transition-colors">
+            LinkedIn
+          </a>
+          <a href="https://github.com/kingsleyaremu" target="_blank" rel="noopener noreferrer" className="text-sm text-ink/60 dark:text-ash/60 hover:text-ink dark:hover:text-white transition-colors">
+            GitHub
+          </a>
         </div>
       </div>
     </footer>

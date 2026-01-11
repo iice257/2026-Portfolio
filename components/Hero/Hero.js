@@ -1,115 +1,47 @@
-import { useEffect, useRef, useLayoutEffect } from "react";
+import { useEffect, useRef } from "react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-import Profiles from "../Profiles/Profiles";
-import { MENULINKS } from "../../constants";
 
 const Hero = () => {
-  const sectionRef = useRef(null);
-  const headingRef = useRef(null);
-  const subtitleRef = useRef(null);
+  const containerRef = useRef(null);
+  const textRef = useRef(null);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
-        defaults: {
-          ease: "power3.out",
-          duration: 1
+      gsap.fromTo(
+        textRef.current.children,
+        {
+          y: 50,
+          opacity: 0,
+        },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 1.2,
+          stagger: 0.1,
+          ease: "power2.out",
         }
-      });
-
-      // Initial load animation
-      tl.fromTo(
-        headingRef.current,
-        { opacity: 0, y: 60 },
-        { opacity: 1, y: 0 }
-      )
-        .fromTo(
-          subtitleRef.current,
-          { opacity: 0, y: 40 },
-          { opacity: 1, y: 0 },
-          "-=0.6"
-        )
-        .fromTo(
-          sectionRef.current.querySelectorAll(".hero-reveal"),
-          { opacity: 0, y: 30 },
-          { opacity: 1, y: 0, stagger: 0.15 },
-          "-=0.4"
-        );
-
-      // Parallax on scroll
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: "top top",
-        end: "bottom top",
-        scrub: true,
-        onUpdate: (self) => {
-          const progress = self.progress;
-          gsap.set(headingRef.current, {
-            y: progress * 100,
-            opacity: 1 - progress * 0.5
-          });
-        }
-      });
-    });
+      );
+    }, containerRef);
 
     return () => ctx.revert();
   }, []);
 
   return (
     <section
-      ref={sectionRef}
-      id={MENULINKS[0].ref}
-      className="min-h-screen flex flex-col justify-center section-container relative"
+      ref={containerRef}
+      className="min-h-screen flex flex-col justify-center px-6 md:px-12 lg:px-24 max-w-7xl mx-auto"
     >
-      <div className="max-w-4xl">
-        {/* Eyebrow */}
-        <p className="text-body-sm tracking-widest uppercase mb-6 hero-reveal" style={{ color: 'var(--fg-muted)' }}>
-          Full-Stack Developer
-        </p>
-
-        {/* Main heading */}
-        <h1
-          ref={headingRef}
-          className="text-display-2xl md:text-display-xl sm:text-display-lg font-light tracking-tight mb-8"
-          style={{ color: 'var(--fg-primary)' }}
-        >
-          Kingsley Aremu
+      <div ref={textRef} className="flex flex-col gap-6">
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter text-black dark:text-white leading-[1.05]">
+          Kingsley Aremu.
         </h1>
-
-        {/* Subtitle */}
-        <p
-          ref={subtitleRef}
-          className="text-body-xl max-w-2xl mb-12 leading-relaxed"
-          style={{ color: 'var(--fg-secondary)' }}
-        >
-          Building high-performance web and mobile applications with React, React Native, and modern JavaScript.
-          Focused on craft, clarity, and shipping products that matter.
+        <p className="text-xl md:text-2xl text-ink/80 dark:text-ash/80 max-w-2xl font-light leading-relaxed">
+          Full-Stack Engineer crafting digital experiences with purpose, precision, and minimal aesthetics.
         </p>
-
-        {/* Currently working on */}
-        <p className="text-body-md mb-8 hero-reveal" style={{ color: 'var(--fg-muted)' }}>
-          Currently building at <span style={{ color: 'var(--fg-primary)' }}>W3Pets</span>
-        </p>
-
-        {/* Social links */}
-        <div className="hero-reveal">
-          <Profiles />
-        </div>
-      </div>
-
-      {/* Scroll indicator */}
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 hero-reveal">
-        <div className="flex flex-col items-center gap-2">
-          <span className="text-caption uppercase tracking-widest" style={{ color: 'var(--fg-muted)' }}>
-            Scroll
+        <div className="pt-8">
+          <span className="inline-block px-4 py-2 border border-ink/10 dark:border-ash/20 rounded-full text-sm uppercase tracking-widest font-medium">
+            Available for work
           </span>
-          <div
-            className="w-px h-12"
-            style={{
-              background: 'linear-gradient(to bottom, var(--fg-muted), transparent)'
-            }}
-          />
         </div>
       </div>
     </section>

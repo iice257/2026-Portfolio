@@ -1,137 +1,56 @@
-import { useEffect, useRef } from "react";
-import { MENULINKS, PROJECTS } from "../../constants";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+import Link from "next/link";
 import Image from "next/image";
+import { PROJECTS } from "../../constants";
 
-const Projects = ({ isDesktop }) => {
-  const sectionRef = useRef(null);
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      const projects = sectionRef.current.querySelectorAll(".project-card");
-
-      projects.forEach((project, i) => {
-        const image = project.querySelector(".project-image");
-        const content = project.querySelector(".project-content");
-
-        // Parallax on image
-        gsap.fromTo(
-          image,
-          { scale: 1.1 },
-          {
-            scale: 1,
-            ease: "none",
-            scrollTrigger: {
-              trigger: project,
-              start: "top bottom",
-              end: "bottom top",
-              scrub: true,
-            }
-          }
-        );
-
-        // Content reveal
-        gsap.fromTo(
-          content.children,
-          { opacity: 0, y: 40 },
-          {
-            opacity: 1,
-            y: 0,
-            stagger: 0.1,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: project,
-              start: "top 70%",
-              end: "top 30%",
-              scrub: 0.5,
-            }
-          }
-        );
-      });
-    });
-
-    return () => ctx.revert();
-  }, [isDesktop]);
-
+const Projects = () => {
   return (
-    <section
-      ref={sectionRef}
-      id={MENULINKS[2].ref}
-      className="section-spacing"
-    >
-      <div className="section-container">
-        {/* Section header */}
-        <div className="mb-20 max-w-3xl">
-          <p
-            className="text-caption uppercase tracking-widest mb-4"
-            style={{ color: 'var(--fg-muted)' }}
-          >
-            Selected Work
-          </p>
-          <h2
-            className="text-display-md font-light"
-            style={{ color: 'var(--fg-primary)' }}
-          >
-            Projects I&apos;ve built with care
-          </h2>
-        </div>
+    <section id="work" className="py-32 px-6 md:px-12 lg:px-24 max-w-7xl mx-auto">
+      <div className="mb-24">
+        <h2 className="text-sm font-medium uppercase tracking-widest text-ink/40 dark:text-ash/40 mb-4">
+          Selected Work
+        </h2>
+        <div className="h-px w-full bg-ink/10 dark:bg-white/10" />
       </div>
 
-      {/* Projects list */}
-      <div className="space-y-32">
+      <div className="flex flex-col gap-32">
         {PROJECTS.map((project, index) => (
-          <article
-            key={project.name}
-            className="project-card"
-          >
-            {/* Image container */}
-            <div className="relative overflow-hidden aspect-[16/9] mb-8">
-              <div className="project-image absolute inset-0">
-                <Image
-                  src={project.image}
-                  alt={project.name}
-                  fill
-                  className="object-cover"
-                  sizes="100vw"
-                />
+          <div key={project.name} className="group relative grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-16 items-center">
+            {/* Text */}
+            <div className={`md:col-span-5 flex flex-col gap-6 ${index % 2 === 1 ? 'md:order-last' : ''}`}>
+              <h3 className="text-3xl md:text-4xl font-bold tracking-tight text-ink dark:text-white group-hover:opacity-70 transition-opacity">
+                {project.name}
+              </h3>
+              <p className="text-lg text-ink/60 dark:text-ash/60 leading-relaxed font-light">
+                {project.description}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {project.tech.map((tech) => (
+                  <span
+                    key={tech}
+                    className="px-3 py-1 text-xs uppercase tracking-wider font-medium border border-ink/10 dark:border-white/10 rounded-full text-ink/50 dark:text-ash/50"
+                  >
+                    {tech}
+                  </span>
+                ))}
+              </div>
+              <div className="pt-4">
+                <Link href={project.url} className="inline-flex items-center text-sm font-medium uppercase tracking-widest border-b border-ink/20 dark:border-white/20 pb-1 hover:border-ink dark:hover:border-white transition-colors">
+                  View Project
+                </Link>
               </div>
             </div>
 
-            {/* Content */}
-            <div className="section-container">
-              <div className="project-content max-w-3xl">
-                <span
-                  className="text-caption uppercase tracking-widest mb-2 block"
-                  style={{ color: 'var(--fg-muted)' }}
-                >
-                  0{index + 1}
-                </span>
-                <h3
-                  className="text-display-sm font-light mb-4"
-                  style={{ color: 'var(--fg-primary)' }}
-                >
-                  {project.name}
-                </h3>
-                <p
-                  className="text-body-lg mb-6"
-                  style={{ color: 'var(--fg-secondary)' }}
-                >
-                  {project.description}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {project.tech.map((tech) => (
-                    <span
-                      key={tech}
-                      className="tag"
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </div>
+            {/* Image */}
+            <div className="md:col-span-7 relative aspect-[16/10] overflow-hidden bg-gray-100 dark:bg-white/5 rounded-sm">
+              <Image
+                src={project.image}
+                alt={project.name}
+                fill
+                className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
             </div>
-          </article>
+          </div>
         ))}
       </div>
     </section>
