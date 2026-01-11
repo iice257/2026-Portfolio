@@ -1,37 +1,76 @@
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-import { MENULINKS, WORK_CONTENTS } from "../../constants";
+import { MENULINKS } from "../../constants";
 
 const Work = () => {
   const sectionRef = useRef(null);
+  const titleRef = useRef(null);
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      const items = sectionRef.current.querySelectorAll(".work-item");
-
+      // Title animation
       gsap.fromTo(
-        items,
-        { opacity: 0, x: -30 },
+        titleRef.current,
+        { y: 60, opacity: 0 },
         {
+          y: 0,
           opacity: 1,
-          x: 0,
-          stagger: 0.15,
-          ease: "power2.out",
+          duration: 1,
+          ease: "power3.out",
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 70%",
-            end: "top 20%",
-            scrub: 0.5,
+            toggleActions: "play none none reverse",
           }
         }
       );
+
+      // Each work item reveals with different timing
+      const items = sectionRef.current.querySelectorAll(".work-item");
+      items.forEach((item, i) => {
+        const line = item.querySelector(".work-line");
+        const content = item.querySelector(".work-content");
+
+        // Line grows from left
+        gsap.fromTo(
+          line,
+          { scaleX: 0, transformOrigin: "left" },
+          {
+            scaleX: 1,
+            duration: 0.8,
+            ease: "power2.inOut",
+            scrollTrigger: {
+              trigger: item,
+              start: "top 80%",
+              toggleActions: "play none none reverse",
+            }
+          }
+        );
+
+        // Content fades up
+        gsap.fromTo(
+          content,
+          { y: 30, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            delay: 0.2,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: item,
+              start: "top 75%",
+              toggleActions: "play none none reverse",
+            }
+          }
+        );
+      });
     });
 
     return () => ctx.revert();
   }, []);
 
-  // Flatten work contents into a simple array
   const experiences = [
     {
       company: "W3Pets",
@@ -57,19 +96,20 @@ const Work = () => {
     <section
       ref={sectionRef}
       id={MENULINKS[3].ref}
-      className="section-spacing section-container"
+      className="section-spacing"
+      style={{ backgroundColor: 'var(--bg-primary)' }}
     >
-      <div className="max-w-4xl mx-auto">
+      <div className="section-container">
         {/* Section header */}
-        <div className="mb-16">
+        <div className="mb-20 md:mb-28" ref={titleRef}>
           <p
-            className="text-caption uppercase tracking-widest mb-4"
+            className="text-micro mb-6"
             style={{ color: 'var(--fg-muted)' }}
           >
-            Experience
+            EXPERIENCE
           </p>
           <h2
-            className="text-display-md font-light"
+            className="text-display-lg font-extralight"
             style={{ color: 'var(--fg-primary)' }}
           >
             Where I&apos;ve worked
@@ -77,40 +117,52 @@ const Work = () => {
         </div>
 
         {/* Experience list */}
-        <div className="space-y-12">
+        <div className="max-w-4xl">
           {experiences.map((exp, i) => (
             <article
               key={exp.company}
-              className="work-item grid md:grid-cols-3 gap-6 pb-12"
-              style={{ borderBottom: '1px solid var(--border)' }}
+              className="work-item mb-16 last:mb-0"
             >
-              <div>
-                <p
-                  className="text-body-sm"
-                  style={{ color: 'var(--fg-muted)' }}
-                >
-                  {exp.period}
-                </p>
-              </div>
-              <div className="md:col-span-2">
-                <h3
-                  className="text-body-lg font-medium mb-1"
-                  style={{ color: 'var(--fg-primary)' }}
-                >
-                  {exp.role}
-                </h3>
-                <p
-                  className="text-body-md mb-4"
-                  style={{ color: 'var(--fg-secondary)' }}
-                >
-                  {exp.company}
-                </p>
-                <p
-                  className="text-body-md"
-                  style={{ color: 'var(--fg-muted)' }}
-                >
-                  {exp.description}
-                </p>
+              {/* Top line */}
+              <div
+                className="work-line h-px w-full mb-8"
+                style={{ backgroundColor: 'var(--border)' }}
+              />
+
+              <div className="work-content grid md:grid-cols-12 gap-6 md:gap-12">
+                {/* Left - Period */}
+                <div className="md:col-span-3">
+                  <p
+                    className="text-body-sm font-medium"
+                    style={{ color: 'var(--fg-muted)' }}
+                  >
+                    {exp.period}
+                  </p>
+                </div>
+
+                {/* Right - Content */}
+                <div className="md:col-span-9">
+                  <div className="flex flex-col md:flex-row md:items-baseline md:justify-between gap-2 mb-4">
+                    <h3
+                      className="text-body-xl font-medium"
+                      style={{ color: 'var(--fg-primary)' }}
+                    >
+                      {exp.role}
+                    </h3>
+                    <span
+                      className="text-body-md"
+                      style={{ color: 'var(--fg-secondary)' }}
+                    >
+                      {exp.company}
+                    </span>
+                  </div>
+                  <p
+                    className="text-editorial font-light leading-relaxed"
+                    style={{ color: 'var(--fg-muted)' }}
+                  >
+                    {exp.description}
+                  </p>
+                </div>
               </div>
             </article>
           ))}

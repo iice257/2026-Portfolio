@@ -4,57 +4,64 @@ import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 
 const Philosophy = () => {
   const sectionRef = useRef(null);
-  const textRef = useRef(null);
+  const wordsRef = useRef([]);
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      // Pin the section while text animates
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: "top top",
-        end: "+=100%",
-        pin: true,
-        scrub: 1,
-        onUpdate: (self) => {
-          const progress = self.progress;
+      const words = wordsRef.current;
 
-          // Fade in and scale text
-          gsap.set(textRef.current, {
-            opacity: progress < 0.5 ? progress * 2 : 2 - (progress * 2),
-            scale: 1 + (progress * 0.05),
-          });
-        }
+      // Text-reading scroll animation - progressive reveal
+      words.forEach((word, i) => {
+        gsap.fromTo(
+          word,
+          {
+            opacity: 0.15,
+            filter: "blur(4px)"
+          },
+          {
+            opacity: 1,
+            filter: "blur(0px)",
+            ease: "none",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: `${10 + (i * 4)}% center`,
+              end: `${25 + (i * 4)}% center`,
+              scrub: true,
+            }
+          }
+        );
       });
     });
 
     return () => ctx.revert();
   }, []);
 
+  const text = "I believe in building with intention, shipping with precision, and designing for impact.";
+  const words = text.split(" ");
+
   return (
     <section
       ref={sectionRef}
-      className="min-h-screen flex items-center justify-center"
+      className="min-h-[200vh] flex items-start justify-center pt-[30vh]"
       style={{ backgroundColor: 'var(--bg-primary)' }}
     >
-      <div className="section-container text-center">
+      <div className="section-container text-center sticky top-[30vh]">
         <h2
-          ref={textRef}
-          className="text-giant font-extralight max-w-5xl mx-auto"
+          className="text-display-xl md:text-giant font-extralight max-w-5xl mx-auto leading-[1.2]"
           style={{ color: 'var(--fg-primary)' }}
         >
-          I believe in building with{" "}
-          <span className="font-light" style={{ color: 'var(--fg-primary)' }}>
-            intention
-          </span>
-          , shipping with{" "}
-          <span className="font-light" style={{ color: 'var(--fg-primary)' }}>
-            precision
-          </span>
-          , and designing for{" "}
-          <span className="font-light" style={{ color: 'var(--fg-primary)' }}>
-            impact
-          </span>
-          .
+          {words.map((word, i) => (
+            <span
+              key={i}
+              ref={el => wordsRef.current[i] = el}
+              className="inline-block mr-[0.3em] transition-all duration-100"
+              style={{
+                fontWeight: ['intention,', 'precision,', 'impact.'].includes(word) ? 400 : 200
+              }}
+            >
+              {word}
+            </span>
+          ))}
         </h2>
       </div>
     </section>

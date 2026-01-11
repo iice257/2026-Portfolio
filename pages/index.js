@@ -10,6 +10,7 @@ import Work from "@/components/Work/Work";
 import Contact from "@/components/Contact/Contact";
 import Footer from "@/components/Footer/Footer";
 import ProgressIndicator from "@/components/ProgressIndicator/ProgressIndicator";
+import BackgroundShapes from "@/components/BackgroundShapes/BackgroundShapes";
 
 gsap.registerPlugin(ScrollTrigger);
 gsap.config({ nullTargetWarn: false });
@@ -43,10 +44,11 @@ export default function Home() {
 
   return (
     <>
+      <BackgroundShapes />
       <Header />
       <ProgressIndicator />
 
-      <main>
+      <main className="relative z-10">
         <Hero />
         <Philosophy />
         <Skills />

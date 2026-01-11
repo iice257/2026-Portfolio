@@ -80,6 +80,14 @@ const Contact = () => {
           >
             LinkedIn
           </a>
+          {" "}·{" "}
+          <a
+            href="tel:+2348168367367"
+            className="link-underline"
+            style={{ color: 'var(--fg-primary)' }}
+          >
+            +234-816-836-7367
+          </a>
         </p>
       </div>
     </section>
