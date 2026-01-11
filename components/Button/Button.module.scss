@@ -1,0 +1,50 @@
+.primary__button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  font-family: theme("fontFamily.sans");
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+
+  padding: 0.875rem 1.75rem;
+  background-clip: padding-box;
+  border-radius: 0;
+  color: var(--bg-primary);
+  background: var(--fg-primary);
+  border: 1px solid var(--fg-primary);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &:hover,
+  &:active {
+    background: transparent;
+    color: var(--fg-primary);
+  }
+}
+
+.secondary__button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  font-family: theme("fontFamily.sans");
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+
+  padding: 0.875rem 1.75rem;
+  background-clip: padding-box;
+  border-radius: 0;
+  color: var(--fg-primary);
+  background: transparent;
+  border: 1px solid var(--border);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &:hover,
+  &:active {
+    background: var(--fg-primary);
+    color: var(--bg-primary);
+    border-color: var(--fg-primary);
+  }
+}

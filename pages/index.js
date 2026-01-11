@@ -1,30 +1,61 @@
-import Head from "next/head";
-import { METADATA } from "../constants";
+import { useState, useEffect } from "react";
+import gsap from "gsap";
+import ScrollTrigger from "gsap/dist/ScrollTrigger";
 import Header from "@/components/Header/Header";
-import Footer from "@/components/Footer/Footer";
 import Hero from "@/components/Hero/Hero";
-import Projects from "@/components/Projects/Projects";
+import Philosophy from "@/components/Philosophy/Philosophy";
 import Skills from "@/components/Skills/Skills";
+import Projects from "@/components/Projects/Projects";
+import Work from "@/components/Work/Work";
 import Contact from "@/components/Contact/Contact";
+import Footer from "@/components/Footer/Footer";
+import ProgressIndicator from "@/components/ProgressIndicator/ProgressIndicator";
+
+gsap.registerPlugin(ScrollTrigger);
+gsap.config({ nullTargetWarn: false });
 
 export default function Home() {
+  const [isDesktop, setIsDesktop] = useState(true);
+
+  useEffect(() => {
+    const { orientation } = window;
+    const result =
+      typeof orientation === "undefined" &&
+      navigator.userAgent.indexOf("IEMobile") === -1;
+
+    setIsDesktop(result);
+
+    // Smooth scroll to anchor links
+    const handleAnchorClick = (e) => {
+      const href = e.target.getAttribute("href");
+      if (href?.startsWith("#")) {
+        e.preventDefault();
+        const element = document.querySelector(href);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      }
+    };
+
+    document.addEventListener("click", handleAnchorClick);
+    return () => document.removeEventListener("click", handleAnchorClick);
+  }, []);
+
   return (
     <>
-      <Head>
-        <title>{METADATA.title}</title>
-        <meta name="description" content={METADATA.description} />
-      </Head>
+      <Header />
+      <ProgressIndicator />
 
-      <div className="flex flex-col min-h-screen bg-paper dark:bg-void transition-colors duration-500 text-ink dark:text-ash font-sans selection:bg-accent-light/30 dark:selection:bg-accent-dark/30">
-        <Header />
-        <main className="flex-grow">
-          <Hero />
-          <Projects />
-          <Skills />
-          <Contact />
-        </main>
-        <Footer />
-      </div>
+      <main>
+        <Hero />
+        <Philosophy />
+        <Skills />
+        <Projects isDesktop={isDesktop} />
+        <Work />
+        <Contact />
+      </main>
+
+      <Footer />
     </>
   );
 }

@@ -1,37 +1,90 @@
-import { SKILLS } from "../../constants";
+import { useLayoutEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+import { MENULINKS, SKILLS } from "../../constants";
 
 const Skills = () => {
+  const sectionRef = useRef(null);
+
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      const items = sectionRef.current.querySelectorAll(".skill-item");
+
+      gsap.fromTo(
+        items,
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.05,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 80%",
+            end: "top 20%",
+            scrub: 0.5,
+          }
+        }
+      );
+    });
+
+    return () => ctx.revert();
+  }, []);
+
+  // Combine all skills into categories
+  const capabilities = {
+    "Frontend": ["React", "React Native", "TypeScript", "Next.js", "Tailwind CSS"],
+    "Backend": ["Node.js", "PHP / Laravel", "FastAPI", "Python"],
+    "Data": ["MySQL", "MongoDB"],
+    "Practices": ["Performance Optimization", "Responsive Design", "UI/UX Awareness", "System Maintenance"]
+  };
+
   return (
-    <section id="capabilities" className="py-32 px-6 md:px-12 lg:px-24 max-w-7xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
-        <div className="md:col-span-4">
-          <h2 className="text-sm font-medium uppercase tracking-widest text-ink/40 dark:text-ash/40 mb-6">
+    <section
+      ref={sectionRef}
+      id={MENULINKS[1].ref}
+      className="section-spacing section-container"
+    >
+      <div className="max-w-5xl mx-auto">
+        {/* Section header */}
+        <div className="mb-16">
+          <p
+            className="text-caption uppercase tracking-widest mb-4 skill-item"
+            style={{ color: 'var(--fg-muted)' }}
+          >
             Capabilities
+          </p>
+          <h2
+            className="text-display-md font-light skill-item"
+            style={{ color: 'var(--fg-primary)' }}
+          >
+            Technologies & expertise
           </h2>
         </div>
 
-        <div className="md:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-12">
-          <div>
-            <h3 className="text-xl font-semibold mb-6 text-ink dark:text-white">Languages & Tools</h3>
-            <ul className="flex flex-col gap-3">
-              {SKILLS.languagesAndTools.map((skill) => (
-                <li key={skill} className="text-ink/60 dark:text-ash/60 font-light text-lg border-b border-ink/5 dark:border-white/5 pb-2">
-                  {skill.charAt(0).toUpperCase() + skill.slice(1)}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-xl font-semibold mb-6 text-ink dark:text-white">Frameworks & Libraries</h3>
-            <ul className="flex flex-col gap-3">
-              {SKILLS.librariesAndFrameworks.map((skill) => (
-                <li key={skill} className="text-ink/60 dark:text-ash/60 font-light text-lg border-b border-ink/5 dark:border-white/5 pb-2">
-                  {skill.charAt(0).toUpperCase() + skill.slice(1)}
-                </li>
-              ))}
-            </ul>
-          </div>
+        {/* Skills grid */}
+        <div className="grid md:grid-cols-2 gap-12 md:gap-16">
+          {Object.entries(capabilities).map(([category, skills]) => (
+            <div key={category} className="skill-item">
+              <h3
+                className="text-body-sm uppercase tracking-widest mb-6"
+                style={{ color: 'var(--fg-muted)' }}
+              >
+                {category}
+              </h3>
+              <ul className="space-y-3">
+                {skills.map((skill) => (
+                  <li
+                    key={skill}
+                    className="text-body-lg"
+                    style={{ color: 'var(--fg-primary)' }}
+                  >
+                    {skill}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       </div>
     </section>

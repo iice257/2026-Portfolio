@@ -1,66 +1,62 @@
-/** @type {import('tailwindcss').Config} */
+const defaultTheme = require("tailwindcss/defaultTheme");
+
 module.exports = {
+  content: ["./pages/**/*.{js,jsx}", "./components/**/*.{js,jsx}"],
   darkMode: "class",
-  content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
   theme: {
+    screens: {
+      xs: "475px",
+      ...defaultTheme.screens,
+    },
+    colors: {
+      transparent: "transparent",
+      current: "currentColor",
+      white: "#fafafa",
+      black: "#050505", // True dark, not pitch black
+      neutral: {
+        50: "#fafafa",
+        100: "#f5f5f5",
+        200: "#e5e5e5",
+        300: "#d4d4d4",
+        400: "#a3a3a3",
+        500: "#737373",
+        600: "#525252",
+        700: "#404040",
+        800: "#262626",
+        900: "#171717",
+        950: "#0a0a0a",
+      },
+      accent: {
+        DEFAULT: "#2a2a2a", // Minimalist accent
+      },
+    },
+    fontFamily: {
+      sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+      display: ["var(--font-inter)", "system-ui", "sans-serif"],
+    },
     extend: {
-      fontFamily: {
-        sans: ["Inter", "sans-serif"],
-        display: ["Inter", "sans-serif"],
-      },
-      colors: {
-        void: "#050505",
-        paper: "#F5F5F7",
-        ink: "#1D1D1F",
-        ash: "#86868b",
-        white: "#FFFFFF",
-        black: "#000000",
-        accent: {
-          light: "#6366F1",
-          dark: "#818CF8",
-        },
-      },
       fontSize: {
-        xs: ["0.75rem", { lineHeight: "1rem" }],
-        sm: ["0.875rem", { lineHeight: "1.25rem" }],
-        base: ["1rem", { lineHeight: "1.5rem" }],
-        lg: ["1.125rem", { lineHeight: "1.75rem" }],
-        xl: ["1.25rem", { lineHeight: "1.75rem" }],
-        "2xl": ["1.5rem", { lineHeight: "2rem" }],
-        "3xl": ["1.875rem", { lineHeight: "2.25rem" }],
-        "4xl": ["2.25rem", { lineHeight: "2.5rem" }],
-        "5xl": ["3rem", { lineHeight: "1" }],
-        "6xl": ["3.75rem", { lineHeight: "1" }],
-        "7xl": ["4.5rem", { lineHeight: "1" }],
-        "8xl": ["6rem", { lineHeight: "1" }],
-        "9xl": ["8rem", { lineHeight: "1" }],
+        // Massive Kinetic Series
+        "kinetic-base": ["clamp(3rem, 8vw, 10rem)", { lineHeight: "0.85", letterSpacing: "-0.04em" }],
+        "kinetic-lg": ["clamp(4rem, 12vw, 16rem)", { lineHeight: "0.8", letterSpacing: "-0.05em" }],
+        "kinetic-xl": ["clamp(5rem, 18vw, 24rem)", { lineHeight: "0.75", letterSpacing: "-0.06em" }],
+
+        // Editorial Series
+        "display-2xl": ["4.5rem", { lineHeight: "1", letterSpacing: "-0.02em" }],
+        "display-xl": ["3.75rem", { lineHeight: "1", letterSpacing: "-0.02em" }],
+        "display-lg": ["3rem", { lineHeight: "1.1", letterSpacing: "-0.02em" }],
+        "body-lg": ["1.125rem", { lineHeight: "1.5" }],
+        "body-md": ["1rem", { lineHeight: "1.5" }],
+        "meta": ["0.75rem", { lineHeight: "1.4", letterSpacing: "0.1em", textTransform: "uppercase" }],
       },
-      letterSpacing: {
-        tighter: "-0.05em",
-        tight: "-0.025em",
-        normal: "0em",
-        wide: "0.025em",
-        wider: "0.05em",
-        widest: "0.1em",
+      transitionTimingFunction: {
+        "cinematic": "cubic-bezier(0.19, 1, 0.22, 1)", // Expo.easeOut equivalent
+        "scrape": "cubic-bezier(0.87, 0, 0.13, 1)", // Heavy friction
       },
-      animation: {
-        "fade-in": "fadeIn 0.5s ease-out forwards",
-        "slide-up": "slideUp 0.8s ease-out forwards",
-      },
-      keyframes: {
-        fadeIn: {
-          "0%": { opacity: "0" },
-          "100%": { opacity: "1" },
-        },
-        slideUp: {
-          "0%": { opacity: "0", transform: "translateY(20px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
-        },
-      },
+      spacing: {
+        "screen-w": "100vw",
+        "screen-h": "100vh",
+      }
     },
   },
   plugins: [],

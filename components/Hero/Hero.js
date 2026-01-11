@@ -1,48 +1,71 @@
-import { useEffect, useRef } from "react";
+import { useRef, useLayoutEffect } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+import { MENULINKS } from "../../constants";
 
 const Hero = () => {
-  const containerRef = useRef(null);
+  const sectionRef = useRef(null);
   const textRef = useRef(null);
+  const subRef = useRef(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        textRef.current.children,
-        {
-          y: 50,
-          opacity: 0,
-        },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 1.2,
-          stagger: 0.1,
-          ease: "power2.out",
+      // Intro Reveal
+      const tl = gsap.timeline({
+        defaults: { ease: "cinematic", duration: 1.5 }
+      });
+
+      tl.fromTo(textRef.current,
+        { yPercent: 120, autoAlpha: 0, rotateX: 20 },
+        { yPercent: 0, autoAlpha: 1, rotateX: 0 }
+      )
+        .fromTo(subRef.current,
+          { autoAlpha: 0, y: 30 },
+          { autoAlpha: 1, y: 0, duration: 1 },
+          "-=1"
+        );
+
+      // Scroll Parallax
+      gsap.to(textRef.current, {
+        yPercent: 50,
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: true
         }
-      );
-    }, containerRef);
+      });
+    });
 
     return () => ctx.revert();
   }, []);
 
   return (
     <section
-      ref={containerRef}
-      className="min-h-screen flex flex-col justify-center px-6 md:px-12 lg:px-24 max-w-7xl mx-auto"
+      ref={sectionRef}
+      id={MENULINKS[0].ref}
+      className="relative min-h-screen flex flex-col justify-end pb-32 overflow-hidden px-4 md:px-12"
     >
-      <div ref={textRef} className="flex flex-col gap-6">
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter text-black dark:text-white leading-[1.05]">
-          Kingsley Aremu.
-        </h1>
-        <p className="text-xl md:text-2xl text-ink/80 dark:text-ash/80 max-w-2xl font-light leading-relaxed">
-          Full-Stack Engineer crafting digital experiences with purpose, precision, and minimal aesthetics.
-        </p>
-        <div className="pt-8">
-          <span className="inline-block px-4 py-2 border border-ink/10 dark:border-ash/20 rounded-full text-sm uppercase tracking-widest font-medium">
-            Available for work
+      <div className="absolute inset-0 bg-paper dark:bg-black opacity-100 z-[-1]" />
+
+      <div className="max-w-[90vw]">
+        {/* Eyebrow */}
+        <div ref={subRef} className="flex flex-col md:flex-row gap-6 md:items-end mb-8 md:mb-12">
+          <span className="text-meta tracking-[0.2em] text-neutral-500">
+            (EST. 2026)
+          </span>
+          <span className="text-body-md text-neutral-900 dark:text-neutral-200 max-w-sm">
+            Crafting digital experiences where typography is the interface and motion is the narrative.
           </span>
         </div>
+
+        {/* Massive Headline */}
+        <h1
+          ref={textRef}
+          className="text-kinetic-xl font-bold leading-[0.8] tracking-tighter text-black dark:text-neutral-100 whitespace-nowrap will-change-transform"
+        >
+          KINGSLEY<br />AREMU
+        </h1>
       </div>
     </section>
   );
