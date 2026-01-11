@@ -1,61 +1,107 @@
-import { useCallback, useEffect, useRef } from "react";
-import Image from "next/image";
-import { Howl } from "howler";
-import SoundBar from "./SoundBar/SoundBar";
-
-const multiPop = new Howl({
-  src: ["/sounds/multi-pop.mp3"],
-});
+import { useCallback, useEffect, useRef, useState } from "react";
+import ThemeToggle from "../ThemeToggle/ThemeToggle";
+import { MENULINKS, METADATA } from "../../constants";
 
 const Header = ({ children }) => {
-  const inputRef = useRef(null);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const handleClick = useCallback((e) => {
-    if (e.target.checked) multiPop.play();
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleKeyDown = useCallback((e) => {
-    if (e.key === "Escape" && inputRef.current?.checked) {
-      inputRef.current.checked = false;
+    if (e.key === "Escape" && isMenuOpen) {
+      setIsMenuOpen(false);
     }
-  }, []);
+  }, [isMenuOpen]);
 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
+  // Prevent scroll when menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+  }, [isMenuOpen]);
+
   return (
-    <nav className="w-full fixed top-0 py-8 z-50 select-none bg-gradient-to-b from-black shadow-black transition-all duration-300">
-      <div className="flex justify-between section-container">
-        <a href="#home" className="link">
-          <Image
-            src="/logo.svg"
-            alt="Logo - Shubh Porwal"
-            width={25}
-            height={25}
-          />
-        </a>
-        <div className="outer-menu relative flex items-center gap-8 z-[1]">
-          <SoundBar />
-          <input
-            ref={inputRef}
-            aria-labelledby="menu"
-            aria-label="menu"
-            className="checkbox-toggle link absolute top-0 right-0 w-6 h-6 opacity-0"
-            type="checkbox"
-            onClick={handleClick}
-          />
-          <div className="hamburger w-6 h-6 flex items-center justify-center">
-            <div className="relative flex-none w-full bg-white duration-300 flex items-center justify-center" />
+    <>
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "py-4" : "py-6"
+          }`}
+        style={{
+          backgroundColor: isScrolled ? 'var(--bg-primary)' : 'transparent',
+          borderBottom: isScrolled ? '1px solid var(--border)' : 'none'
+        }}
+      >
+        <div className="section-container flex justify-between items-center">
+          {/* Logo / Name */}
+          <a
+            href="#home"
+            className="text-body-md font-medium"
+            style={{ color: 'var(--fg-primary)' }}
+          >
+            KA
+          </a>
+
+          {/* Right side controls */}
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+
+            {/* Menu button */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="w-10 h-10 flex flex-col items-center justify-center gap-1.5 z-[60]"
+              aria-label="Toggle menu"
+            >
+              <span
+                className={`w-6 h-px transition-all duration-300 ${isMenuOpen ? "rotate-45 translate-y-[3px]" : ""
+                  }`}
+                style={{ backgroundColor: 'var(--fg-primary)' }}
+              />
+              <span
+                className={`w-6 h-px transition-all duration-300 ${isMenuOpen ? "-rotate-45 -translate-y-[3px]" : ""
+                  }`}
+                style={{ backgroundColor: 'var(--fg-primary)' }}
+              />
+            </button>
           </div>
-          {children}
+        </div>
+      </header>
+
+      {/* Full screen menu overlay */}
+      <div
+        className={`menu-overlay ${isMenuOpen ? "active" : ""}`}
+        style={{ backgroundColor: 'var(--bg-primary)' }}
+      >
+        <div className="section-container h-full flex flex-col justify-center">
+          <nav className="space-y-6">
+            {MENULINKS.map((link, i) => (
+              <a
+                key={link.ref}
+                href={`#${link.ref}`}
+                onClick={() => setIsMenuOpen(false)}
+                className="menu-link block"
+                style={{ transitionDelay: `${0.1 + i * 0.05}s` }}
+              >
+                {link.name}
+              </a>
+            ))}
+          </nav>
         </div>
       </div>
-    </nav>
+    </>
   );
 };
 

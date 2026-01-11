@@ -3,79 +3,48 @@
   display: inline-flex;
   align-items: center;
   text-decoration: none;
-  font-family: theme("fontFamily.mono");
-  font-size: 0.8rem;
-  font-weight: 800;
+  font-family: theme("fontFamily.sans");
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.025em;
 
-  padding: 0.65rem 1.75rem;
+  padding: 0.875rem 1.75rem;
   background-clip: padding-box;
-  border-radius: 0.4rem;
-  color: #fff;
-  background-size: 220%;
-  outline: 2px solid theme("colors.indigo.dark");
-  background-image: linear-gradient(
-    120deg,
-    transparent 0%,
-    transparent 50%,
-    theme("colors.purple") 50%
-  );
-  transition: all 0.3s ease-in-out;
+  border-radius: 0;
+  color: var(--bg-primary);
+  background: var(--fg-primary);
+  border: 1px solid var(--fg-primary);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 
   &:hover,
   &:active {
-    background-position: 100%;
-    color: #fff;
-    box-shadow: 0 0 1rem theme("colors.indigo.dark");
+    background: transparent;
+    color: var(--fg-primary);
   }
 }
-
-// .primary__button[disabled] {
-//   pointer-events: none;
-//   background-position: 120%;
-//   box-shadow: 0 0 0rem theme("colors.indigo.dark");
-
-//   color: inherit;
-
-//   background-image: linear-gradient(
-//     120deg,
-//     transparent 33%,
-//     theme("colors.purple") 33%,
-//     theme("colors.purple")66%,
-//     transparent 66%
-//   );
-
-//   animation-name: load;
-//   animation-duration: 1s;
-//   animation-iteration-count: infinite;
-// }
 
 .secondary__button {
   position: relative;
   display: inline-flex;
   align-items: center;
   text-decoration: none;
-  font-family: theme("fontFamily.mono");
-  font-size: 0.8rem;
-  font-weight: 800;
+  font-family: theme("fontFamily.sans");
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.025em;
 
-  padding: 0.65rem 1.75rem;
+  padding: 0.875rem 1.75rem;
   background-clip: padding-box;
-  border-radius: 0.4rem;
-  color: #fff;
-  background-size: 220%;
-  outline: 2px solid #fff;
-  background-image: linear-gradient(
-    120deg,
-    transparent 0%,
-    transparent 50%,
-    theme("colors.purple") 50%
-  );
-  transition: all 0.3s ease-in-out;
+  border-radius: 0;
+  color: var(--fg-primary);
+  background: transparent;
+  border: 1px solid var(--border);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 
   &:hover,
   &:active {
-    background-position: 100%;
-    color: #fff;
-    box-shadow: 0 0 1rem theme("colors.gray.dark.5");
+    background: var(--fg-primary);
+    color: var(--bg-primary);
+    border-color: var(--fg-primary);
   }
 }

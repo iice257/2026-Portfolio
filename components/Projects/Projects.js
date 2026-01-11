@@ -2,122 +2,137 @@ import { useEffect, useRef } from "react";
 import { MENULINKS, PROJECTS } from "../../constants";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-import ProjectTile from "./ProjectTile/ProjectTile";
+import Image from "next/image";
 
-const Projects = ({ isDesktop, clientHeight }) => {
+const Projects = ({ isDesktop }) => {
   const sectionRef = useRef(null);
-  const sectionTitleRef = useRef(null);
 
   useEffect(() => {
-    let projectsScrollTrigger;
-    let projectsTimeline;
+    const ctx = gsap.context(() => {
+      const projects = sectionRef.current.querySelectorAll(".project-card");
 
-    if (isDesktop) {
-      [projectsTimeline, projectsScrollTrigger] = getProjectsSt();
-    } else {
-      const projectWrapper =
-        sectionRef.current.querySelector(".project-wrapper");
-      projectWrapper.style.width = "calc(100vw - 1rem)";
-      projectWrapper.style.overflowX = "scroll";
-    }
+      projects.forEach((project, i) => {
+        const image = project.querySelector(".project-image");
+        const content = project.querySelector(".project-content");
 
-    const [revealTimeline, revealScrollTrigger] = getRevealSt();
+        // Parallax on image
+        gsap.fromTo(
+          image,
+          { scale: 1.1 },
+          {
+            scale: 1,
+            ease: "none",
+            scrollTrigger: {
+              trigger: project,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: true,
+            }
+          }
+        );
 
-    return () => {
-      projectsScrollTrigger && projectsScrollTrigger.kill();
-      projectsTimeline && projectsTimeline.kill();
-      revealScrollTrigger && revealScrollTrigger.kill();
-      revealTimeline && revealTimeline.progress(1);
-    };
-  }, [sectionRef, sectionTitleRef, isDesktop]);
-
-  const getRevealSt = () => {
-    const revealTl = gsap.timeline({ defaults: { ease: "none" } });
-
-    revealTl.from(
-      sectionRef.current.querySelectorAll(".staggered-reveal"),
-      { opacity: 0, duration: 0.5, stagger: 0.5 },
-      "<"
-    );
-
-    const scrollTrigger = ScrollTrigger.create({
-      trigger: sectionRef.current,
-      start: "top bottom",
-      end: "bottom bottom",
-      scrub: 0,
-      animation: revealTl,
+        // Content reveal
+        gsap.fromTo(
+          content.children,
+          { opacity: 0, y: 40 },
+          {
+            opacity: 1,
+            y: 0,
+            stagger: 0.1,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: project,
+              start: "top 70%",
+              end: "top 30%",
+              scrub: 0.5,
+            }
+          }
+        );
+      });
     });
 
-    return [revealTl, scrollTrigger];
-  };
-
-  const getProjectsSt = () => {
-    const timeline = gsap.timeline({ defaults: { ease: "none" } });
-    const sidePadding =
-      document.body.clientWidth -
-      sectionRef.current.querySelector(".inner-container").clientWidth;
-    const elementWidth =
-      sidePadding +
-      sectionRef.current.querySelector(".project-wrapper").clientWidth;
-    sectionRef.current.style.width = `${elementWidth}px`;
-    const width = window.innerWidth - elementWidth;
-    const duration = `${(elementWidth / window.innerHeight) * 100}%`;
-    timeline
-      .to(sectionRef.current, { x: width })
-      .to(sectionTitleRef.current, { x: -width }, "<");
-
-    const scrollTrigger = ScrollTrigger.create({
-      trigger: sectionRef.current,
-      start: "top top",
-      end: duration,
-      scrub: 0,
-      pin: true,
-      animation: timeline,
-      pinSpacing: "margin",
-    });
-
-    return [timeline, scrollTrigger];
-  };
+    return () => ctx.revert();
+  }, [isDesktop]);
 
   return (
     <section
       ref={sectionRef}
       id={MENULINKS[2].ref}
-      className={`${
-        isDesktop && "min-h-screen"
-      } w-full relative select-none section-container transform-gpu`}
+      className="section-spacing"
     >
-      <div className="flex flex-col py- justify-center h-full">
-        <div
-          className="flex flex-col inner-container transform-gpu"
-          ref={sectionTitleRef}
-        >
-          <p className="uppercase tracking-widest text-gray-light-1 staggered-reveal">
-            PROJECTS
+      <div className="section-container">
+        {/* Section header */}
+        <div className="mb-20 max-w-3xl">
+          <p
+            className="text-caption uppercase tracking-widest mb-4"
+            style={{ color: 'var(--fg-muted)' }}
+          >
+            Selected Work
           </p>
-          <h1 className="text-6xl mt-2 font-medium text-gradient w-fit staggered-reveal">
-            My Projects
-          </h1>
-          <h2 className="text-[1.65rem] font-medium md:max-w-lg max-w-sm mt-2 staggered-reveal">
-            Some things I&apos;ve built with love, expertise and a pinch of
-            magical ingredients.{" "}
+          <h2
+            className="text-display-md font-light"
+            style={{ color: 'var(--fg-primary)' }}
+          >
+            Projects I&apos;ve built with care
           </h2>
         </div>
-        <div
-          className={`${
-            clientHeight > 650 ? "mt-12" : "mt-8"
-          } flex project-wrapper no-scrollbar w-fit staggered-reveal`}
-        >
-          {PROJECTS.map((project, index) => (
-            <ProjectTile
-              classes={
-                index === PROJECTS.length - 1 ? "" : "mr-10 xs:mr-12 sm:mr-16"
-              }
-              project={project}
-              key={project.name}
-            />
-          ))}
-        </div>
+      </div>
+
+      {/* Projects list */}
+      <div className="space-y-32">
+        {PROJECTS.map((project, index) => (
+          <article
+            key={project.name}
+            className="project-card"
+          >
+            {/* Image container */}
+            <div className="relative overflow-hidden aspect-[16/9] mb-8">
+              <div className="project-image absolute inset-0">
+                <Image
+                  src={project.image}
+                  alt={project.name}
+                  fill
+                  className="object-cover"
+                  sizes="100vw"
+                />
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="section-container">
+              <div className="project-content max-w-3xl">
+                <span
+                  className="text-caption uppercase tracking-widest mb-2 block"
+                  style={{ color: 'var(--fg-muted)' }}
+                >
+                  0{index + 1}
+                </span>
+                <h3
+                  className="text-display-sm font-light mb-4"
+                  style={{ color: 'var(--fg-primary)' }}
+                >
+                  {project.name}
+                </h3>
+                <p
+                  className="text-body-lg mb-6"
+                  style={{ color: 'var(--fg-secondary)' }}
+                >
+                  {project.description}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {project.tech.map((tech) => (
+                    <span
+                      key={tech}
+                      className="tag"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </article>
+        ))}
       </div>
     </section>
   );

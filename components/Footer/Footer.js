@@ -1,70 +1,72 @@
-/* eslint-disable @next/next/no-img-element */
-import { useState } from "react";
-import { Fade } from "react-reveal";
-import { Howl } from "howler";
-import Button from "../Button/Button";
-import FooterBg from "./FooterBg/FooterBg";
 import Profiles from "../Profiles/Profiles";
-import { theme } from "tailwind.config";
-import { MENULINKS, METADATA } from "../../constants";
+import { METADATA } from "../../constants";
 
 const Footer = () => {
-  const [playbackRate, setPlaybackRate] = useState(0.75);
-
-  const heartClickSound = new Howl({
-    src: ["/sounds/glug-a.mp3"],
-    rate: playbackRate,
-    volume: 0.5,
-  });
-
-  const handleClick = () => {
-    setPlaybackRate((rate) => rate + 0.1);
-    heartClickSound.play();
-  };
+  const currentYear = new Date().getFullYear();
 
   return (
     <footer
-      className="w-full relative select-none bg-cover"
-      style={{
-        backgroundImage: `linear-gradient(to right, ${theme.colors.indigo.light}, ${theme.colors.indigo.dark})`,
-      }}
+      className="section-container py-16"
+      style={{ borderTop: '1px solid var(--border)' }}
     >
-      <FooterBg />
-      <Fade bottom distance={"4rem"}>
-        <div className="w-full h-full pt-32">
-          <div className="section-container flex flex-col h-full justify-end z-10 items-center py-12">
-            <h1 className="font-medium text-3xl md:text-4xl text-center">
-              Feel free to connect on social media.
-            </h1>
-            <div className="text-center">
-              <Profiles />
-            </div>
-            <div className="pt-4 text-center">
-              <Button
-                href={`#${MENULINKS[4].ref}`}
-                classes="link"
-                type="secondary"
-              >
-                Let&apos;s Talk
-              </Button>
-            </div>
-            <p className="text-center text-white text-sm sm:text-base font-medium tracking-wide mt-8">
-              Developed with{" "}
-              <button onClick={handleClick} className="link cursor-none">
-                <span className="block animate-bounce">❤️</span>
-              </button>{" "}
-              by <span className="text-white">{METADATA.author}</span>
+      <div className="max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-12 mb-16">
+          {/* Left column */}
+          <div>
+            <p
+              className="text-body-lg mb-4"
+              style={{ color: 'var(--fg-primary)' }}
+            >
+              {METADATA.author}
             </p>
+            <p
+              className="text-body-md mb-6"
+              style={{ color: 'var(--fg-muted)' }}
+            >
+              Full-Stack Developer based in Lagos, Nigeria.
+              <br />
+              Building products that matter.
+            </p>
+            <Profiles />
+          </div>
+
+          {/* Right column */}
+          <div className="md:text-right">
+            <p
+              className="text-body-sm mb-4"
+              style={{ color: 'var(--fg-muted)' }}
+            >
+              Currently available for new opportunities
+            </p>
+            <a
+              href="mailto:kingsley.aremu@gmail.com"
+              className="text-body-md link-underline"
+              style={{ color: 'var(--fg-primary)' }}
+            >
+              kingsley.aremu@gmail.com
+            </a>
           </div>
         </div>
-      </Fade>
-      <img
-        src="/footer-curve.svg"
-        className="w-full rotate-180"
-        alt="footer curve"
-        loading="eager"
-        height={180}
-      />
+
+        {/* Bottom */}
+        <div
+          className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pt-8"
+          style={{ borderTop: '1px solid var(--border)' }}
+        >
+          <p
+            className="text-body-sm"
+            style={{ color: 'var(--fg-muted)' }}
+          >
+            © {currentYear} {METADATA.author}
+          </p>
+          <p
+            className="text-body-sm"
+            style={{ color: 'var(--fg-muted)' }}
+          >
+            Designed & built with intention
+          </p>
+        </div>
+      </div>
     </footer>
   );
 };

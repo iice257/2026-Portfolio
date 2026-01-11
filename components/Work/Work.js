@@ -1,100 +1,119 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-import Tabs from "./Tabs/Tabs";
-import StickyScroll from "./StickyScroll/StickyScroll";
 import { MENULINKS, WORK_CONTENTS } from "../../constants";
 
-const Work = ({ isDesktop }) => {
+const Work = () => {
   const sectionRef = useRef(null);
 
-  const tabItems = useMemo(
-    () => [
-      {
-        title: "W3Pets",
-        value: "w3pets",
-        content: (
-          <StickyScroll
-            isDesktop={isDesktop}
-            contentItems={WORK_CONTENTS.W3PETS}
-          />
-        ),
-      },
-      {
-        title: "Nestlé",
-        value: "nestle",
-        content: (
-          <StickyScroll
-            isDesktop={isDesktop}
-            contentItems={WORK_CONTENTS.NESTLE}
-          />
-        ),
-      },
-      {
-        title: "Ice Design",
-        value: "ice-design",
-        content: (
-          <StickyScroll
-            isDesktop={isDesktop}
-            contentItems={WORK_CONTENTS.ICE_DESIGN}
-          />
-        ),
-      },
-    ],
-    [isDesktop]
-  );
-
-  useEffect(() => {
+  useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      const tl = gsap
-        .timeline({ defaults: { ease: "none" } })
-        .from(
-          sectionRef.current.querySelectorAll(".staggered-reveal"),
-          { opacity: 0, duration: 0.5, stagger: 0.5 },
-          "<"
-        );
+      const items = sectionRef.current.querySelectorAll(".work-item");
 
-      ScrollTrigger.create({
-        trigger: sectionRef.current.querySelector(".work-wrapper"),
-        start: "100px bottom",
-        end: "center center",
-        scrub: 0,
-        animation: tl,
-      });
+      gsap.fromTo(
+        items,
+        { opacity: 0, x: -30 },
+        {
+          opacity: 1,
+          x: 0,
+          stagger: 0.15,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 70%",
+            end: "top 20%",
+            scrub: 0.5,
+          }
+        }
+      );
     });
 
     return () => ctx.revert();
   }, []);
 
+  // Flatten work contents into a simple array
+  const experiences = [
+    {
+      company: "W3Pets",
+      role: "Frontend Developer",
+      period: "Jun 2025 — Present",
+      description: "Building responsive, user-friendly interfaces with modern frameworks. Optimizing performance and collaborating with cross-functional teams."
+    },
+    {
+      company: "Nestlé",
+      role: "IT Attendant",
+      period: "Feb 2025 — Present",
+      description: "IT support, system maintenance, and infrastructure optimization. Training staff on software and IT best practices."
+    },
+    {
+      company: "Ice Design Studio",
+      role: "Freelance Web Designer",
+      period: "Feb 2019 — Present",
+      description: "Delivering custom websites for clients. Designing responsive, modern interfaces and managing multiple concurrent projects."
+    }
+  ];
+
   return (
     <section
       ref={sectionRef}
       id={MENULINKS[3].ref}
-      className="w-full relative select-none xs:mt-40 sm:mt-72 mb-96"
+      className="section-spacing section-container"
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/left-pattern.svg"
-        className="absolute hidden left-0 -top-1/4 w-1/12 max-w-xs md:block"
-        loading="lazy"
-        height={700}
-        width={320}
-        alt="left pattern"
-      />
-      <div className="section-container py-16 flex flex-col justify-center">
-        <div className="flex flex-col work-wrapper">
-          <div className="flex flex-col">
-            <p className="uppercase tracking-widest text-gray-light-1 staggered-reveal">
-              WORK
-            </p>
-            <h1 className="text-6xl mt-2 font-medium text-gradient w-fit staggered-reveal">
-              Experience
-            </h1>
-            <h2 className="text-[1.65rem] font-medium md:max-w-lg w-full mt-2 staggered-reveal">
-              A quick recap of where I&apos;ve worked.{" "}
-            </h2>
-          </div>
-          <Tabs tabItems={tabItems} />
+      <div className="max-w-4xl mx-auto">
+        {/* Section header */}
+        <div className="mb-16">
+          <p
+            className="text-caption uppercase tracking-widest mb-4"
+            style={{ color: 'var(--fg-muted)' }}
+          >
+            Experience
+          </p>
+          <h2
+            className="text-display-md font-light"
+            style={{ color: 'var(--fg-primary)' }}
+          >
+            Where I&apos;ve worked
+          </h2>
+        </div>
+
+        {/* Experience list */}
+        <div className="space-y-12">
+          {experiences.map((exp, i) => (
+            <article
+              key={exp.company}
+              className="work-item grid md:grid-cols-3 gap-6 pb-12"
+              style={{ borderBottom: '1px solid var(--border)' }}
+            >
+              <div>
+                <p
+                  className="text-body-sm"
+                  style={{ color: 'var(--fg-muted)' }}
+                >
+                  {exp.period}
+                </p>
+              </div>
+              <div className="md:col-span-2">
+                <h3
+                  className="text-body-lg font-medium mb-1"
+                  style={{ color: 'var(--fg-primary)' }}
+                >
+                  {exp.role}
+                </h3>
+                <p
+                  className="text-body-md mb-4"
+                  style={{ color: 'var(--fg-secondary)' }}
+                >
+                  {exp.company}
+                </p>
+                <p
+                  className="text-body-md"
+                  style={{ color: 'var(--fg-muted)' }}
+                >
+                  {exp.description}
+                </p>
+              </div>
+            </article>
+          ))}
         </div>
       </div>
     </section>
