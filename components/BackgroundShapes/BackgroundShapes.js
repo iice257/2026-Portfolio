@@ -46,7 +46,6 @@ const BackgroundShapes = () => {
     { width: 180, height: 280, top: "15%", left: "5%", opacity: 0.03 },
     { width: 120, height: 400, top: "35%", right: "8%", opacity: 0.025 },
     { width: 250, height: 150, top: "60%", left: "12%", opacity: 0.02 },
-    { width: 100, height: 320, top: "75%", right: "15%", opacity: 0.03 },
   ];
 
   return (

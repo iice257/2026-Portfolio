@@ -126,13 +126,27 @@ const Projects = ({ isDesktop }) => {
         >
           SELECTED WORK
         </p>
-        <h2
-          ref={titleRef}
-          className="text-massive font-extralight"
-          style={{ color: 'var(--fg-primary)' }}
-        >
-          Projects
-        </h2>
+        <div className="flex flex-col md:flex-row md:items-baseline gap-4 md:gap-8">
+          <a
+            href="/projects"
+            ref={titleRef}
+            className="text-massive font-extralight link-underline inline-block"
+            style={{
+              color: 'var(--fg-primary)',
+              textDecoration: 'underline',
+              textDecorationThickness: '1px',
+              textUnderlineOffset: '8px',
+            }}
+          >
+            Projects
+          </a>
+          <span
+            className="text-micro"
+            style={{ color: 'var(--fg-muted)' }}
+          >
+            → CLICK TO EXPAND
+          </span>
+        </div>
       </div>
 
       {/* Projects - refined layout */}
@@ -187,12 +201,13 @@ const Projects = ({ isDesktop }) => {
                   </div>
 
                   {/* Title */}
-                  <h3
-                    className="project-content-item text-display-md font-light mb-4"
+                  <a
+                    href={`/projects/${project.slug}`}
+                    className="project-content-item text-display-md font-light mb-4 block link-underline"
                     style={{ color: 'var(--fg-primary)' }}
                   >
                     {project.name}
-                  </h3>
+                  </a>
 
                   {/* Description */}
                   <p
