@@ -1,25 +1,27 @@
-import { useRef, useEffect } from "react";
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 
 const ProgressIndicator = () => {
   const progressRef = useRef(null);
 
   useEffect(() => {
-    window.addEventListener("scroll", () => {
-      const totalScroll =
-        document.body.scrollTop || document.documentElement.scrollTop;
-      const windowHeight =
-        document.documentElement.scrollHeight -
-        document.documentElement.clientHeight;
-      const scrolled = totalScroll / windowHeight;
-      progressRef.current
-        ? (progressRef.current.style.transform = `scaleX(${scrolled})`)
-        : "";
+    const progress = progressRef.current;
+
+    ScrollTrigger.create({
+      start: "top top",
+      end: "bottom bottom",
+      onUpdate: (self) => {
+        gsap.set(progress, {
+          scaleX: self.progress,
+        });
+      },
     });
-  }, [progressRef]);
+  }, []);
 
   return (
-    <div className="progress w-full fixed top-0 z-50">
-      <div ref={progressRef} className="progress-bar"></div>
+    <div className="progress">
+      <div ref={progressRef} className="progress-bar" />
     </div>
   );
 };

@@ -1,69 +1,100 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ThemeToggle from "../ThemeToggle/ThemeToggle";
 import { MENULINKS } from "../../constants";
 
 const Header = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Lock body scroll when menu is open
   useEffect(() => {
-    if (isMenuOpen) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "";
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleKeyDown = useCallback((e) => {
+    if (e.key === "Escape" && isMenuOpen) {
+      setIsMenuOpen(false);
+    }
+  }, [isMenuOpen]);
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
+
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
   }, [isMenuOpen]);
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full z-50 p-6 md:p-8 flex justify-between items-start mix-blend-difference text-white">
-        {/* Logo - Top Left */}
-        <a href="#home" className="text-sm font-bold tracking-widest uppercase">
-          KA — 26
-        </a>
-
-        {/* Menu Trigger - Top Right */}
-        <div className="flex flex-col items-end gap-1">
-          <button
-            onClick={() => setIsMenuOpen(true)}
-            className="text-sm font-bold tracking-widest uppercase group overflow-hidden relative"
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-400 ${isScrolled ? "py-4" : "py-6"
+          }`}
+        style={{
+          backgroundColor: isScrolled ? 'var(--bg-primary)' : 'transparent',
+          borderBottom: isScrolled ? '1px solid var(--border)' : 'none'
+        }}
+      >
+        <div className="section-container flex justify-between items-center">
+          <a
+            href="#home"
+            className="text-body-sm font-medium tracking-wide"
+            style={{ color: 'var(--fg-primary)' }}
           >
-            <span className="block group-hover:-translate-y-full transition-transform duration-500 ease-cinematic">
-              Menu
-            </span>
-            <span className="absolute top-0 left-0 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-cinematic">
-              Open
-            </span>
-          </button>
+            KA
+          </a>
+
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="w-10 h-10 flex flex-col items-center justify-center gap-1.5 z-[60]"
+              aria-label="Toggle menu"
+            >
+              <span
+                className={`w-6 h-px transition-all duration-300 ${isMenuOpen ? "rotate-45 translate-y-[3px]" : ""
+                  }`}
+                style={{ backgroundColor: 'var(--fg-primary)' }}
+              />
+              <span
+                className={`w-6 h-px transition-all duration-300 ${isMenuOpen ? "-rotate-45 -translate-y-[3px]" : ""
+                  }`}
+                style={{ backgroundColor: 'var(--fg-primary)' }}
+              />
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Full Screen Menu Overlay */}
       <div
-        className={`fixed inset-0 bg-neutral-900 z-[60] transition-transform duration-700 ease-cinematic ${isMenuOpen ? "translate-y-0" : "-translate-y-full"
-          }`}
+        className={`menu-overlay ${isMenuOpen ? "active" : ""}`}
+        style={{ backgroundColor: 'var(--bg-primary)' }}
       >
-        <div className="absolute top-8 right-8">
-          <button
-            onClick={() => setIsMenuOpen(false)}
-            className="text-white text-sm font-bold tracking-widest uppercase"
-          >
-            Close
-          </button>
-        </div>
-
-        <nav className="h-full flex flex-col justify-center px-12 md:px-24">
-          <ul className="flex flex-col gap-4">
+        <div className="section-container h-full flex flex-col justify-center">
+          <nav className="space-y-6">
             {MENULINKS.map((link, i) => (
-              <li key={link.ref} className="overflow-hidden">
-                <a
-                  href={`#${link.ref}`}
-                  onClick={() => setIsMenuOpen(false)}
-                  className="block text-display-lg md:text-kinetic-base font-bold text-neutral-400 hover:text-white transition-colors duration-300 tracking-tighter"
-                >
-                  {link.name}
-                </a>
-              </li>
+              <a
+                key={link.ref}
+                href={`#${link.ref}`}
+                onClick={() => setIsMenuOpen(false)}
+                className="menu-link block"
+                style={{ transitionDelay: `${0.1 + i * 0.05}s` }}
+              >
+                {link.name}
+              </a>
             ))}
-          </ul>
-        </nav>
+          </nav>
+        </div>
       </div>
     </>
   );

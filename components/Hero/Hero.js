@@ -1,72 +1,188 @@
-import { useRef, useLayoutEffect } from "react";
+import { useEffect, useRef, useLayoutEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { MENULINKS } from "../../constants";
 
 const Hero = () => {
   const sectionRef = useRef(null);
-  const textRef = useRef(null);
-  const subRef = useRef(null);
+  const nameRef = useRef(null);
+  const subtitleRef = useRef(null);
+  const scrollIndicatorRef = useRef(null);
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      // Intro Reveal
+      // Initial load animation
       const tl = gsap.timeline({
-        defaults: { ease: "cinematic", duration: 1.5 }
-      });
-
-      tl.fromTo(textRef.current,
-        { yPercent: 120, autoAlpha: 0, rotateX: 20 },
-        { yPercent: 0, autoAlpha: 1, rotateX: 0 }
-      )
-        .fromTo(subRef.current,
-          { autoAlpha: 0, y: 30 },
-          { autoAlpha: 1, y: 0, duration: 1 },
-          "-=1"
-        );
-
-      // Scroll Parallax
-      gsap.to(textRef.current, {
-        yPercent: 50,
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top top",
-          end: "bottom top",
-          scrub: true
+        defaults: {
+          ease: "power3.out",
         }
       });
+
+      // Animate name with stagger effect on each letter
+      const nameChars = nameRef.current.querySelectorAll('.char');
+      tl.fromTo(
+        nameChars,
+        {
+          y: 200,
+          opacity: 0,
+          rotationX: -90
+        },
+        {
+          y: 0,
+          opacity: 1,
+          rotationX: 0,
+          duration: 1.2,
+          stagger: 0.03,
+        }
+      )
+        .fromTo(
+          subtitleRef.current,
+          { opacity: 0, y: 40 },
+          { opacity: 1, y: 0, duration: 0.8 },
+          "-=0.6"
+        )
+        .fromTo(
+          scrollIndicatorRef.current,
+          { opacity: 0 },
+          { opacity: 1, duration: 0.6 },
+          "-=0.4"
+        );
+
+      // Pin the hero section and create parallax effect
+      ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start: "top top",
+        end: "bottom top",
+        pin: false,
+        scrub: 1,
+        onUpdate: (self) => {
+          const progress = self.progress;
+
+          // Parallax on name - moves slower
+          gsap.set(nameRef.current, {
+            y: progress * 150,
+            opacity: 1 - progress * 1.2,
+          });
+
+          // Subtitle moves faster
+          gsap.set(subtitleRef.current, {
+            y: progress * 250,
+            opacity: 1 - progress * 1.5,
+          });
+
+          // Scroll indicator fades quickly
+          gsap.set(scrollIndicatorRef.current, {
+            opacity: 1 - progress * 3,
+          });
+        }
+      });
+
+      // Tracking animation on scroll
+      ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start: "top top",
+        end: "50% top",
+        scrub: true,
+        onUpdate: (self) => {
+          const progress = self.progress;
+          // Tighten letter spacing as you scroll
+          nameRef.current.style.letterSpacing = `${-0.04 + (progress * -0.02)}em`;
+        }
+      });
+
     });
 
     return () => ctx.revert();
   }, []);
 
+  // Split text into characters for animation
+  const splitText = (text) => {
+    return text.split('').map((char, i) => (
+      <span
+        key={i}
+        className="char inline-block"
+        style={{ transformOrigin: 'bottom' }}
+      >
+        {char === ' ' ? '\u00A0' : char}
+      </span>
+    ));
+  };
+
   return (
     <section
       ref={sectionRef}
       id={MENULINKS[0].ref}
-      className="relative min-h-screen flex flex-col justify-end pb-32 overflow-hidden px-4 md:px-12"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      style={{ backgroundColor: 'var(--bg-primary)' }}
     >
-      <div className="absolute inset-0 bg-paper dark:bg-black opacity-100 z-[-1]" />
-
-      <div className="max-w-[90vw]">
-        {/* Eyebrow */}
-        <div ref={subRef} className="flex flex-col md:flex-row gap-6 md:items-end mb-8 md:mb-12">
-          <span className="text-meta tracking-[0.2em] text-neutral-500">
-            (EST. 2026)
-          </span>
-          <span className="text-body-md text-neutral-900 dark:text-neutral-200 max-w-sm">
-            Crafting digital experiences where typography is the interface and motion is the narrative.
-          </span>
+      <div className="section-container-wide w-full">
+        {/* Oversized name - viewport breaking */}
+        <div className="relative">
+          <h1
+            ref={nameRef}
+            className="text-hero font-extralight text-center"
+            style={{
+              color: 'var(--fg-primary)',
+              perspective: '1000px',
+              transformStyle: 'preserve-3d'
+            }}
+          >
+            {splitText('KINGSLEY')}
+            <br />
+            {splitText('AREMU')}
+          </h1>
         </div>
 
-        {/* Massive Headline */}
-        <h1
-          ref={textRef}
-          className="text-kinetic-xl font-bold leading-[0.8] tracking-tighter text-black dark:text-neutral-100 whitespace-nowrap will-change-transform"
+        {/* Subtitle - editorial style */}
+        <div
+          ref={subtitleRef}
+          className="mt-12 text-center max-w-2xl mx-auto"
         >
-          KINGSLEY<br />AREMU
-        </h1>
+          <p
+            className="text-editorial font-light"
+            style={{ color: 'var(--fg-secondary)' }}
+          >
+            Full-Stack Developer crafting digital experiences with precision,
+            performance, and intentional design.
+          </p>
+
+          {/* Micro text for contrast */}
+          <p
+            className="text-micro mt-8"
+            style={{ color: 'var(--fg-muted)' }}
+          >
+            Currently building at W3Pets — Lagos, Nigeria
+          </p>
+        </div>
       </div>
+
+      {/* Scroll indicator */}
+      <div
+        ref={scrollIndicatorRef}
+        className="absolute bottom-12 left-1/2 -translate-x-1/2"
+      >
+        <div className="flex flex-col items-center gap-3">
+          <span
+            className="text-micro"
+            style={{ color: 'var(--fg-muted)' }}
+          >
+            SCROLL
+          </span>
+          <div
+            className="w-px h-16 bg-gradient-to-b from-current to-transparent"
+            style={{ color: 'var(--fg-muted)' }}
+          />
+        </div>
+      </div>
+
+      {/* Background texture (optional) */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-[0.02]"
+        style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, var(--fg-primary) 1px, transparent 0)`,
+          backgroundSize: '40px 40px'
+        }}
+      />
     </section>
   );
 };

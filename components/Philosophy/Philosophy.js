@@ -1,33 +1,27 @@
-import { useEffect, useRef } from "react";
+import { useRef, useLayoutEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 
 const Philosophy = () => {
-  const containerRef = useRef(null);
+  const sectionRef = useRef(null);
   const textRef = useRef(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      // Split text reveal
-      const words = textRef.current.innerText.split(" ");
-      textRef.current.innerHTML = words.map(word => `<span class="inline-block opacity-20 transition-opacity duration-300 mr-4">${word}</span>`).join("");
-
-      const spans = textRef.current.querySelectorAll("span");
-
+      // Pin the section while text animates
       ScrollTrigger.create({
-        trigger: containerRef.current,
-        start: "top 60%",
-        end: "bottom 60%",
-        scrub: 0.5,
+        trigger: sectionRef.current,
+        start: "top top",
+        end: "+=100%",
+        pin: true,
+        scrub: 1,
         onUpdate: (self) => {
-          const index = Math.floor(self.progress * spans.length);
-          spans.forEach((span, i) => {
-            if (i <= index) {
-              span.style.opacity = 1;
-              span.style.transform = "translateY(0)";
-            } else {
-              span.style.opacity = 0.2;
-            }
+          const progress = self.progress;
+
+          // Fade in and scale text
+          gsap.set(textRef.current, {
+            opacity: progress < 0.5 ? progress * 2 : 2 - (progress * 2),
+            scale: 1 + (progress * 0.05),
           });
         }
       });
@@ -37,11 +31,31 @@ const Philosophy = () => {
   }, []);
 
   return (
-    <section ref={containerRef} className="py-48 px-6 md:px-24 bg-paper dark:bg-black min-h-screen flex items-center justify-center">
-      <div className="max-w-6xl">
-        <p ref={textRef} className="text-display-md md:text-display-xl font-bold tracking-tight leading-[1.1] text-black dark:text-white">
-          I believe that code is a medium for art. Minimalism isn&apos;t about absence, but about the extreme focus on the essential. Every interaction is a dialogue, every pixel is a choice. We don&apos;t just build websites; we craft digital atmospheres that command attention and respect.
-        </p>
+    <section
+      ref={sectionRef}
+      className="min-h-screen flex items-center justify-center"
+      style={{ backgroundColor: 'var(--bg-primary)' }}
+    >
+      <div className="section-container text-center">
+        <h2
+          ref={textRef}
+          className="text-giant font-extralight max-w-5xl mx-auto"
+          style={{ color: 'var(--fg-primary)' }}
+        >
+          I believe in building with{" "}
+          <span className="font-light" style={{ color: 'var(--fg-primary)' }}>
+            intention
+          </span>
+          , shipping with{" "}
+          <span className="font-light" style={{ color: 'var(--fg-primary)' }}>
+            precision
+          </span>
+          , and designing for{" "}
+          <span className="font-light" style={{ color: 'var(--fg-primary)' }}>
+            impact
+          </span>
+          .
+        </h2>
       </div>
     </section>
   );
