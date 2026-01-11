@@ -28,15 +28,12 @@ const Skills = () => {
 
       // Stagger each capability category
       const categories = sectionRef.current.querySelectorAll(".capability-category");
-      categories.forEach((cat, i) => {
+      categories.forEach((cat) => {
         const items = cat.querySelectorAll(".capability-item");
 
         gsap.fromTo(
           items,
-          {
-            x: -30,
-            opacity: 0
-          },
+          { x: -30, opacity: 0 },
           {
             x: 0,
             opacity: 1,
@@ -88,47 +85,67 @@ const Skills = () => {
           </h2>
         </div>
 
-        {/* Two-column asymmetric layout */}
+        {/* Enhanced grid layout with visual depth */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24">
-          {/* Left column - larger categories */}
-          <div className="lg:col-span-7 space-y-16">
-            {Object.entries(capabilities).slice(0, 2).map(([category, skills]) => (
-              <div key={category} className="capability-category">
+          {/* Left column - Primary skills */}
+          <div className="lg:col-span-7 space-y-20">
+            {Object.entries(capabilities).slice(0, 2).map(([category, skills], catIndex) => (
+              <div key={category} className="capability-category relative">
+                {/* Large background number */}
                 <div
-                  className="flex items-baseline gap-4 mb-8 pb-4"
+                  className="absolute -left-4 -top-8 text-display-2xl font-thin select-none pointer-events-none"
+                  style={{ color: 'var(--fg-primary)', opacity: 0.05 }}
+                >
+                  {String(catIndex + 1).padStart(2, '0')}
+                </div>
+
+                {/* Category header */}
+                <div
+                  className="flex items-baseline justify-between mb-10 pb-4 relative"
                   style={{ borderBottom: '1px solid var(--border)' }}
                 >
-                  <span
+                  <h3
                     className="text-display-sm font-light"
                     style={{ color: 'var(--fg-primary)' }}
                   >
                     {category}
-                  </span>
+                  </h3>
                   <span
-                    className="text-micro"
-                    style={{ color: 'var(--fg-muted)' }}
+                    className="text-micro px-3 py-1"
+                    style={{
+                      color: 'var(--fg-muted)',
+                      border: '1px solid var(--border)'
+                    }}
                   >
-                    ({skills.length})
+                    {skills.length} SKILLS
                   </span>
                 </div>
-                <div className="space-y-4">
+
+                {/* Skills list with enhanced hover */}
+                <div className="space-y-5">
                   {skills.map((skill, i) => (
                     <div
                       key={skill}
-                      className="capability-item flex items-baseline justify-between group"
+                      className="capability-item flex items-center justify-between group cursor-default"
                     >
-                      <span
-                        className="text-body-xl font-light group-hover:translate-x-2 transition-transform duration-300"
-                        style={{ color: 'var(--fg-primary)' }}
-                      >
-                        {skill}
-                      </span>
-                      <span
-                        className="text-micro opacity-0 group-hover:opacity-100 transition-opacity"
-                        style={{ color: 'var(--fg-muted)' }}
-                      >
-                        {String(i + 1).padStart(2, '0')}
-                      </span>
+                      <div className="flex items-center gap-6">
+                        <span
+                          className="text-micro w-6 text-right"
+                          style={{ color: 'var(--fg-muted)' }}
+                        >
+                          {String(i + 1).padStart(2, '0')}
+                        </span>
+                        <span
+                          className="text-body-xl font-light group-hover:translate-x-3 transition-transform duration-300"
+                          style={{ color: 'var(--fg-primary)' }}
+                        >
+                          {skill}
+                        </span>
+                      </div>
+                      <div
+                        className="w-8 h-px opacity-0 group-hover:opacity-100 group-hover:w-16 transition-all duration-300"
+                        style={{ backgroundColor: 'var(--fg-primary)' }}
+                      />
                     </div>
                   ))}
                 </div>
@@ -136,35 +153,46 @@ const Skills = () => {
             ))}
           </div>
 
-          {/* Right column - smaller categories, offset */}
-          <div className="lg:col-span-5 lg:pt-24 space-y-16">
-            {Object.entries(capabilities).slice(2).map(([category, skills]) => (
-              <div key={category} className="capability-category">
+          {/* Right column - Secondary skills, offset for asymmetry */}
+          <div className="lg:col-span-5 lg:pt-32 space-y-20">
+            {Object.entries(capabilities).slice(2).map(([category, skills], catIndex) => (
+              <div key={category} className="capability-category relative">
+                {/* Large background number */}
                 <div
-                  className="flex items-baseline gap-4 mb-6 pb-3"
+                  className="absolute -left-4 -top-6 text-display-xl font-thin select-none pointer-events-none"
+                  style={{ color: 'var(--fg-primary)', opacity: 0.05 }}
+                >
+                  {String(catIndex + 3).padStart(2, '0')}
+                </div>
+
+                {/* Category header */}
+                <div
+                  className="flex items-baseline justify-between mb-8 pb-3 relative"
                   style={{ borderBottom: '1px solid var(--border)' }}
                 >
-                  <span
+                  <h3
                     className="text-body-lg font-medium"
                     style={{ color: 'var(--fg-primary)' }}
                   >
                     {category}
-                  </span>
+                  </h3>
                   <span
                     className="text-micro"
                     style={{ color: 'var(--fg-muted)' }}
                   >
-                    ({skills.length})
+                    {skills.length}
                   </span>
                 </div>
-                <div className="space-y-3">
+
+                {/* Skills list */}
+                <div className="space-y-4">
                   {skills.map((skill) => (
                     <div
                       key={skill}
-                      className="capability-item"
+                      className="capability-item group"
                     >
                       <span
-                        className="text-body-md font-light"
+                        className="text-body-md font-light group-hover:translate-x-2 transition-transform duration-300 inline-block"
                         style={{ color: 'var(--fg-secondary)' }}
                       >
                         {skill}

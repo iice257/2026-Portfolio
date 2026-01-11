@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState, useRef } from "react";
+import { useRouter } from "next/router";
 import ThemeToggle from "../ThemeToggle/ThemeToggle";
 import { MENULINKS } from "../../constants";
 
 const Header = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
+  const router = useRouter();
+  const [scrollProgress, setScrollProgress] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const lastScrollY = useRef(0);
   const headerRef = useRef(null);
 
   useEffect(() => {
@@ -15,8 +16,9 @@ const Header = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
           const currentScrollY = window.scrollY;
-          setIsScrolled(currentScrollY > 50);
-          lastScrollY.current = currentScrollY;
+          // Progress from 0 to 1 over the first 200px of scroll
+          const progress = Math.min(currentScrollY / 200, 1);
+          setScrollProgress(progress);
           ticking = false;
         });
         ticking = true;
@@ -46,12 +48,41 @@ const Header = () => {
     }
   }, [isMenuOpen]);
 
+  // Handle navigation - if on subpage, go home first
+  const handleNavClick = (e, ref) => {
+    e.preventDefault();
+    setIsMenuOpen(false);
+
+    if (router.pathname !== '/') {
+      // Navigate to home page with hash
+      router.push(`/#${ref}`);
+    } else {
+      // Already on home, just scroll
+      const element = document.getElementById(ref);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+
+  const handleLogoClick = (e) => {
+    e.preventDefault();
+    setIsMenuOpen(false);
+
+    if (router.pathname !== '/') {
+      router.push('/');
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const isScrolled = scrollProgress > 0.1;
+
   return (
     <>
       <header
         ref={headerRef}
-        className={`fixed top-0 left-0 right-0 z-50 ${isScrolled ? "py-4" : "py-6"
-          }`}
+        className={`fixed top-0 left-0 right-0 z-50 ${isScrolled ? "py-4" : "py-6"}`}
         style={{
           backgroundColor: isScrolled ? 'var(--bg-primary)' : 'transparent',
           borderBottom: isScrolled ? '1px solid var(--border)' : 'none',
@@ -60,30 +91,48 @@ const Header = () => {
         }}
       >
         <div className="section-container flex justify-between items-center">
+          {/* Logo with morph effect */}
           <a
-            href="#home"
-            className="text-body-sm font-semibold tracking-wide"
+            href="/"
+            onClick={handleLogoClick}
+            className="relative overflow-hidden"
             style={{ color: 'var(--fg-primary)' }}
           >
-            KA
+            <span
+              className="text-body-sm font-semibold tracking-wide inline-block transition-all duration-500"
+              style={{
+                opacity: 1 - scrollProgress,
+                transform: `translateY(${scrollProgress * -100}%)`,
+              }}
+            >
+              KA
+            </span>
+            <span
+              className="text-body-sm font-medium tracking-wide absolute left-0 top-0 whitespace-nowrap transition-all duration-500"
+              style={{
+                opacity: scrollProgress,
+                transform: `translateY(${(1 - scrollProgress) * 100}%)`,
+              }}
+            >
+              Kingsley Aremu
+            </span>
           </a>
 
           <div className="flex items-center gap-4">
             <ThemeToggle />
 
+            {/* Menu toggle button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="w-10 h-10 flex flex-col items-center justify-center gap-1.5 z-[60]"
-              aria-label="Toggle menu"
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
             >
               <span
-                className={`w-6 h-px transition-all duration-300 ${isMenuOpen ? "rotate-45 translate-y-[3px]" : ""
-                  }`}
+                className={`w-6 h-px transition-all duration-300 ${isMenuOpen ? "rotate-45 translate-y-[3px]" : ""}`}
                 style={{ backgroundColor: 'var(--fg-primary)' }}
               />
               <span
-                className={`w-6 h-px transition-all duration-300 ${isMenuOpen ? "-rotate-45 -translate-y-[3px]" : ""
-                  }`}
+                className={`w-6 h-px transition-all duration-300 ${isMenuOpen ? "-rotate-45 -translate-y-[3px]" : ""}`}
                 style={{ backgroundColor: 'var(--fg-primary)' }}
               />
             </button>
@@ -91,27 +140,18 @@ const Header = () => {
         </div>
       </header>
 
+      {/* Menu overlay */}
       <div
         className={`menu-overlay ${isMenuOpen ? "active" : ""}`}
         style={{ backgroundColor: 'var(--bg-primary)' }}
       >
-        <div className="section-container h-full flex flex-col justify-center relative">
-          {/* Back/Close button */}
-          <button
-            onClick={() => setIsMenuOpen(false)}
-            className="absolute top-8 right-6 md:right-12 text-micro uppercase tracking-widest flex items-center gap-2 hover:opacity-60 transition-opacity"
-            style={{ color: 'var(--fg-muted)' }}
-          >
-            <span>←</span>
-            <span>Back</span>
-          </button>
-
+        <div className="section-container h-full flex flex-col justify-center">
           <nav className="space-y-6">
             {MENULINKS.map((link, i) => (
               <a
                 key={link.ref}
-                href={`#${link.ref}`}
-                onClick={() => setIsMenuOpen(false)}
+                href={`/#${link.ref}`}
+                onClick={(e) => handleNavClick(e, link.ref)}
                 className="menu-link block"
                 style={{ transitionDelay: `${0.1 + i * 0.05}s` }}
               >
@@ -126,3 +166,4 @@ const Header = () => {
 };
 
 export default Header;
+

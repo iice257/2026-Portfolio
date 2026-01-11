@@ -41,11 +41,13 @@ const BackgroundShapes = () => {
     return () => ctx.revert();
   }, []);
 
-  // Non-equal rectangles positioned asymmetrically
+  // Non-equal rectangles positioned asymmetrically - neo-brutalist style
   const shapes = [
-    { width: 180, height: 280, top: "15%", left: "5%", opacity: 0.03 },
-    { width: 120, height: 400, top: "35%", right: "8%", opacity: 0.025 },
-    { width: 250, height: 150, top: "60%", left: "12%", opacity: 0.02 },
+    { width: 180, height: 280, top: "8%", left: "3%", opacity: 0.04 },
+    { width: 100, height: 450, top: "25%", right: "6%", opacity: 0.03 },
+    { width: 280, height: 120, top: "55%", left: "8%", opacity: 0.025 },
+    { width: 140, height: 200, top: "70%", right: "12%", opacity: 0.03 },
+    { width: 220, height: 80, top: "85%", left: "20%", opacity: 0.02 },
   ];
 
   return (
