@@ -86,27 +86,30 @@ const Header = () => {
         <a
           href="/"
           onClick={handleLogoClick}
-          className="relative"
+          className="relative block"
           style={{
             color: 'var(--fg-primary)',
-            minWidth: '120px',
-            height: '24px'
+            minWidth: '140px',
+            height: '24px',
+            cursor: 'none'
           }}
         >
           {/* KA - fades out on scroll */}
           <span
-            className="text-body-sm font-semibold tracking-wide absolute left-0 top-0 transition-opacity duration-500"
+            className="text-body-sm font-semibold tracking-wide absolute left-0 top-0 transition-opacity duration-500 block"
             style={{
               opacity: 1 - scrollProgress,
+              pointerEvents: 'none'
             }}
           >
             KA
           </span>
           {/* Full name - fades in on scroll */}
           <span
-            className="text-body-sm font-medium tracking-wide whitespace-nowrap absolute left-0 top-0 transition-opacity duration-500"
+            className="text-body-sm font-medium tracking-wide whitespace-nowrap absolute left-0 top-0 transition-opacity duration-500 block"
             style={{
               opacity: scrollProgress,
+              pointerEvents: 'none'
             }}
           >
             Kingsley Aremu
@@ -114,7 +117,7 @@ const Header = () => {
         </a>
 
         {/* Right side controls */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 relative z-50">
           <ThemeToggle />
           <SnowToggle />
           <StaggeredMenu

@@ -101,27 +101,23 @@ const Work = () => {
       style={{ backgroundColor: 'var(--bg-primary)' }}
     >
       <div className="section-container">
-        {/* Section header - Same size as other sections */}
+        {/* Section header */}
         <div className="mb-16 md:mb-24">
-          <p
-            className="text-micro mb-6"
-            style={{ color: 'var(--fg-muted)' }}
-          >
-            EXPERIENCE
-          </p>
-          <h2
-            ref={titleRef}
-            className="text-massive font-extralight"
-            style={{ color: 'var(--fg-primary)' }}
-          >
-            Experience
-          </h2>
-          <p
-            className="text-display-sm font-light mt-4"
-            style={{ color: 'var(--fg-secondary)' }}
-          >
-            <ShuffleText text="Where I've worked" duration={0.4} shuffleTimes={4} />
-          </p>
+          <div className="flex flex-col items-start">
+            <h2
+              ref={titleRef}
+              className="text-massive font-extralight leading-none ml-[-0.05em]"
+              style={{ color: 'var(--fg-primary)' }}
+            >
+              <ShuffleText text="Experience" duration={0.6} shuffleTimes={4} />
+            </h2>
+            <p
+              className="text-display-sm font-light mt-4"
+              style={{ color: 'var(--fg-secondary)' }}
+            >
+              Where I've worked
+            </p>
+          </div>
         </div>
 
         {/* Experience list */}

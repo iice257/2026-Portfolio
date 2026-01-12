@@ -51,11 +51,12 @@ const StaggeredMenu = ({
     <>
       {/* Menu Toggle Button - Fixed hamburger icon */}
       <button
-        className="w-10 h-10 relative z-[100] flex items-center justify-center"
+        className="w-10 h-10 relative z-[100] flex items-center justify-center cursor-none"
         onClick={toggleMenu}
         aria-label={isOpen ? 'Close menu' : 'Open menu'}
+        style={{ cursor: 'none' }}
       >
-        <div className="w-6 h-4 relative flex flex-col justify-between">
+        <div className="w-6 h-4 relative flex flex-col justify-between pointer-events-none">
           <span
             className="absolute w-full h-[2px] transition-all duration-300 ease-out"
             style={{
@@ -82,17 +83,18 @@ const StaggeredMenu = ({
         style={{ backgroundColor: '#000000' }}
       >
         {/* Navigation Items - LEFT ALIGNED */}
-        <nav className="px-8 md:px-16 lg:px-24">
+        <nav className="pl-6 md:pl-16 lg:pl-32">
           {items.map((item, index) => (
-            <div key={index} className="border-b border-white/20">
+            <div key={index} className="border-b border-white/10 max-w-4xl">
               <a
                 href={item.link}
-                className={`flex items-center gap-6 py-6 text-white transition-all duration-300 ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                className={`flex items-center gap-8 py-6 text-white transition-all duration-300 cursor-none ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                   }`}
                 style={{
                   transitionDelay: isOpen ? `${0.1 + index * 0.05}s` : '0s',
-                  fontSize: 'clamp(1.5rem, 4vw, 3rem)',
+                  fontSize: 'clamp(3rem, 6vw, 5rem)', // Bigger font
                   fontWeight: 300,
+                  cursor: 'none'
                 }}
                 aria-label={item.ariaLabel || item.label}
                 onClick={(e) => {
@@ -102,17 +104,19 @@ const StaggeredMenu = ({
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.fontWeight = '700';
+                  e.currentTarget.style.paddingLeft = '20px'; // Slight indent on hover
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.fontWeight = '300';
+                  e.currentTarget.style.paddingLeft = '0px';
                 }}
               >
                 {displayItemNumbering && (
-                  <span className="text-sm opacity-40 font-normal w-8">
+                  <span className="text-base md:text-lg font-light w-12 opacity-80" style={{ color: '#e5e5e5' }}>
                     {String(index + 1).padStart(2, '0')}
                   </span>
                 )}
-                <span className="transition-[font-weight] duration-300">{item.label}</span>
+                <span className="transition-[font-weight,padding] duration-300">{item.label}</span>
               </a>
             </div>
           ))}
@@ -120,14 +124,14 @@ const StaggeredMenu = ({
 
         {/* Social Links */}
         {displaySocials && socialItems.length > 0 && (
-          <div className="absolute bottom-8 left-8 md:left-16 lg:left-24 flex gap-6">
+          <div className="absolute bottom-12 left-6 md:left-16 lg:left-32 flex gap-8">
             {socialItems.map((social, index) => (
               <a
                 key={index}
                 href={social.link}
-                className={`text-sm text-white transition-all duration-300 ${isOpen ? 'opacity-60 translate-y-0' : 'opacity-0 translate-y-5'
+                className={`text-sm md:text-base text-white transition-all duration-300 cursor-none ${isOpen ? 'opacity-60 translate-y-0' : 'opacity-0 translate-y-5'
                   }`}
-                style={{ transitionDelay: isOpen ? `${0.3 + index * 0.05}s` : '0s' }}
+                style={{ transitionDelay: isOpen ? `${0.3 + index * 0.05}s` : '0s', cursor: 'none' }}
                 target="_blank"
                 rel="noopener noreferrer"
                 onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}

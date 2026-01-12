@@ -4,6 +4,8 @@ import Meta from "@/components/Meta/Meta";
 import { ThemeProvider, useTheme } from "../context/ThemeContext";
 import { SnowProvider, useSnow } from "../context/SnowContext";
 import { TooltipProvider } from "../context/TooltipContext";
+import { CursorProvider } from "../context/CursorContext";
+import CustomCursor from "../components/Cursor/CustomCursor";
 import Snowfall from "react-snowfall";
 import "../styles/globals.scss";
 // React Bits component styles
@@ -31,6 +33,8 @@ const AppContent = ({ Component, pageProps }) => {
 
   return (
     <>
+      <CustomCursor />
+
       {/* Page wrapper with blur-in animation */}
       <div
         style={{
@@ -68,9 +72,11 @@ const App = ({ Component, pageProps }) => {
     <ThemeProvider>
       <SnowProvider>
         <TooltipProvider>
-          <Meta />
-          <AppContent Component={Component} pageProps={pageProps} />
-          <GoogleAnalytics gaId={GTAG} />
+          <CursorProvider>
+            <Meta />
+            <AppContent Component={Component} pageProps={pageProps} />
+            <GoogleAnalytics gaId={GTAG} />
+          </CursorProvider>
         </TooltipProvider>
       </SnowProvider>
     </ThemeProvider>

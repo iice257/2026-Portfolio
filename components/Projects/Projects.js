@@ -3,11 +3,14 @@ import { MENULINKS, PROJECTS } from "../../constants";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import Image from "next/image";
+import { useCursor } from "../../context/CursorContext";
+import ShuffleText from "../ReactBits/ShuffleText";
 
 const Projects = ({ isDesktop }) => {
   const sectionRef = useRef(null);
   const titleRef = useRef(null);
   const projectsContainerRef = useRef(null);
+  const { setCursorText, setCursorVariant } = useCursor();
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -52,6 +55,16 @@ const Projects = ({ isDesktop }) => {
     return () => ctx.revert();
   }, [isDesktop]);
 
+  const handleMouseEnter = () => {
+    setCursorText("Click for more details");
+    setCursorVariant("project");
+  };
+
+  const handleMouseLeave = () => {
+    setCursorText("");
+    setCursorVariant("default");
+  };
+
   return (
     <section
       ref={sectionRef}
@@ -60,18 +73,12 @@ const Projects = ({ isDesktop }) => {
     >
       {/* Section header */}
       <div className="section-container py-24 md:py-32">
-        <p
-          className="text-micro mb-6"
-          style={{ color: 'var(--fg-muted)' }}
-        >
-          SELECTED WORK
-        </p>
         <h2
           ref={titleRef}
           className="text-massive font-extralight"
           style={{ color: 'var(--fg-primary)', whiteSpace: 'nowrap' }}
         >
-          Projects
+          <ShuffleText text="Projects" duration={0.6} shuffleTimes={4} />
         </h2>
       </div>
 
@@ -83,75 +90,74 @@ const Projects = ({ isDesktop }) => {
           return (
             <div
               key={project.name}
-              className="project-panel min-h-screen grid grid-cols-1 lg:grid-cols-2"
+              className="project-panel min-h-screen grid grid-cols-1 lg:grid-cols-2 group cursor-none"
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+              onClick={() => window.location.href = `/projects/${project.slug}`}
             >
               {/* Image Side - Full height image */}
               <div
                 className={`relative min-h-[50vh] lg:min-h-screen ${isEven ? 'order-2 lg:order-2' : 'order-2 lg:order-1'}`}
               >
-                <Image
-                  src={project.image}
-                  alt={project.name}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  priority={index === 0}
-                />
+                <div className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-105">
+                  <Image
+                    src={project.image}
+                    alt={project.name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    priority={index === 0}
+                  />
+                </div>
               </div>
 
-              {/* Info Side - White/Black background with small preview */}
+              {/* Info Side - Simple text details details - CENTERED SQUARE */}
               <div
-                className={`relative min-h-[50vh] lg:min-h-screen flex flex-col justify-between p-8 md:p-12 lg:p-16 ${isEven ? 'order-1 lg:order-1' : 'order-1 lg:order-2'
+                className={`relative min-h-[50vh] lg:min-h-screen flex items-center justify-center p-8 md:p-12 lg:p-16 ${isEven ? 'order-1 lg:order-1' : 'order-1 lg:order-2'
                   }`}
                 style={{ backgroundColor: 'var(--bg-primary)' }}
               >
-                {/* Small preview image */}
-                <div className="flex-1 flex items-center justify-center">
-                  <div
-                    className="relative w-48 h-48 md:w-64 md:h-64"
-                    style={{
-                      background: `linear-gradient(135deg, ${project.gradient[0]}, ${project.gradient[1]})`,
-                      padding: '16px'
-                    }}
-                  >
-                    <div className="relative w-full h-full">
-                      <Image
-                        src={project.image}
-                        alt={`${project.name} preview`}
-                        fill
-                        className="object-contain"
-                        sizes="256px"
-                      />
-                    </div>
-                    {/* OPEN label */}
-                    <span
-                      className="absolute -top-6 left-0 text-micro"
-                      style={{ color: 'var(--fg-muted)' }}
-                    >
-                      OPEN
-                    </span>
-                  </div>
-                </div>
+                <div className="w-full max-w-lg flex flex-col items-center text-center">
 
-                {/* Bottom row - Project name and number */}
-                <div className="flex justify-between items-end pt-8">
-                  <a
-                    href={`/projects/${project.slug}`}
-                    className="group"
-                  >
-                    <h3
-                      className="text-display-md md:text-display-lg font-bold uppercase tracking-tight group-hover:opacity-70 transition-opacity"
-                      style={{ color: 'var(--fg-primary)' }}
-                    >
-                      {project.name}
-                    </h3>
-                  </a>
+                  {/* Project Number (top-right of content?) or keep at bottom? User said "bring them to the center into a square" */}
+                  {/* I'll put project name on top, then desc, then tags. */}
+
                   <span
-                    className="text-display-md md:text-display-lg font-light"
-                    style={{ color: 'var(--fg-primary)' }}
+                    className="text-display-md font-light mb-8"
+                    style={{ color: 'var(--fg-muted)' }}
                   >
                     {String(index + 1).padStart(2, '0')}
                   </span>
+
+                  <h3
+                    className="text-display-lg font-bold uppercase mb-6 leading-none"
+                    style={{ color: 'var(--fg-primary)' }}
+                  >
+                    {project.name}
+                  </h3>
+                  <p
+                    className="text-editorial font-light mb-8 max-w-md mx-auto"
+                    style={{ color: 'var(--fg-secondary)' }}
+                  >
+                    {project.description}
+                  </p>
+
+                  {/* Tech Stack */}
+                  <div className="flex flex-wrap justify-center gap-x-3 gap-y-2">
+                    {project.tech.map((tech, i) => (
+                      <span key={tech} className="inline-flex items-center">
+                        <span
+                          className="text-body-md font-bold uppercase tracking-wide"
+                          style={{ color: 'var(--fg-primary)' }}
+                        >
+                          {tech}
+                        </span>
+                        {i < project.tech.length - 1 && (
+                          <span className="ml-3" style={{ color: 'var(--fg-muted)' }}>•</span>
+                        )}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -159,34 +165,23 @@ const Projects = ({ isDesktop }) => {
         })}
       </div>
 
-      {/* View All Projects */}
+      {/* View All Projects - Centered, Unbold, Increased Size */}
       <div
-        className="py-24 md:py-32"
+        className="py-32 md:py-48 flex justify-center"
         style={{ backgroundColor: 'var(--bg-primary)' }}
       >
-        <div className="section-container">
-          <a
-            href="/projects"
-            className="inline-flex items-center gap-4 text-display-sm font-light group"
-            style={{ color: 'var(--fg-primary)' }}
-          >
-            <span className="group-hover:translate-x-2 transition-transform duration-300">
-              View All Projects
-            </span>
-            <svg
-              width="28"
-              height="28"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              className="group-hover:translate-x-2 transition-transform duration-300"
-            >
-              <line x1="5" y1="12" x2="19" y2="12" />
-              <polyline points="12 5 19 12 12 19" />
-            </svg>
-          </a>
-        </div>
+        <a
+          href="/projects"
+          className="relative text-giant font-light group inline-block" // Changed to text-giant and font-light (unbold)
+          style={{ color: 'var(--fg-primary)' }}
+        >
+          View All Projects
+
+          {/* Animated underline */}
+          <span
+            className="absolute left-0 bottom-2 h-[3px] w-full bg-current transform scale-x-0 transition-transform duration-500 ease-out group-hover:scale-x-100 origin-left"
+          />
+        </a>
       </div>
     </section>
   );

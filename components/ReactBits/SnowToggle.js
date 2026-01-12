@@ -9,7 +9,7 @@ import { useEffect } from "react";
 const SnowToggle = () => {
   const { isSnowing, toggleSnow } = useSnow();
   const { theme } = useTheme();
-  const { showSnowTooltip, setShowSnowTooltip, setSnowTooltipWasShown, setShowNiceTooltip } = useTooltip();
+  const { showSnowTooltip, setShowSnowTooltip, setSnowTooltipWasShown, setShowNiceTooltip, showNiceTooltip } = useTooltip();
 
   const handleClick = () => {
     toggleSnow();
@@ -83,6 +83,23 @@ const SnowToggle = () => {
           }}
         >
           Works better in dark mode
+          <div
+            className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45"
+            style={{ backgroundColor: 'var(--fg-primary)' }}
+          />
+        </div>
+      )}
+
+      {/* Nice! tooltip - now shown on Snow button */}
+      {showNiceTooltip && (
+        <div
+          className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-2 text-xs whitespace-nowrap z-50"
+          style={{
+            backgroundColor: 'var(--fg-primary)',
+            color: 'var(--bg-primary)',
+          }}
+        >
+          Nice!
           <div
             className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45"
             style={{ backgroundColor: 'var(--fg-primary)' }}
