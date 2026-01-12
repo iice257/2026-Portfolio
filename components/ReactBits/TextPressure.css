@@ -1,0 +1,15 @@
+.text-pressure {
+  display: inline;
+}
+
+.text-pressure--flex {
+  display: inline-flex;
+  flex-wrap: wrap;
+}
+
+.text-pressure-char {
+  display: inline-block;
+  transition: font-weight 0.1s ease-out, font-variation-settings 0.1s ease-out;
+  transform-origin: bottom center;
+  will-change: font-weight, font-variation-settings;
+}

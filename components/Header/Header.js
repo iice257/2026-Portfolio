@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/router";
 import ThemeToggle from "../ThemeToggle/ThemeToggle";
-import { MENULINKS } from "../../constants";
+import SnowToggle from "../ReactBits/SnowToggle";
+import StaggeredMenu from "../ReactBits/StaggeredMenu";
+import { MENULINKS, SOCIAL_LINKS } from "../../constants";
 
 const Header = () => {
   const router = useRouter();
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const headerRef = useRef(null);
 
   useEffect(() => {
@@ -16,7 +17,6 @@ const Header = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
           const currentScrollY = window.scrollY;
-          // Progress from 0 to 1 over the first 200px of scroll
           const progress = Math.min(currentScrollY / 200, 1);
           setScrollProgress(progress);
           ticking = false;
@@ -29,45 +29,8 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleKeyDown = useCallback((e) => {
-    if (e.key === "Escape" && isMenuOpen) {
-      setIsMenuOpen(false);
-    }
-  }, [isMenuOpen]);
-
-  useEffect(() => {
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown]);
-
-  useEffect(() => {
-    if (isMenuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-  }, [isMenuOpen]);
-
-  // Handle navigation - if on subpage, go home first
-  const handleNavClick = (e, ref) => {
-    e.preventDefault();
-    setIsMenuOpen(false);
-
-    if (router.pathname !== '/') {
-      // Navigate to home page with hash
-      router.push(`/#${ref}`);
-    } else {
-      // Already on home, just scroll
-      const element = document.getElementById(ref);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-  };
-
   const handleLogoClick = (e) => {
     e.preventDefault();
-    setIsMenuOpen(false);
 
     if (router.pathname !== '/') {
       router.push('/');
@@ -76,94 +39,99 @@ const Header = () => {
     }
   };
 
+  // Handle menu item navigation
+  const handleNavClick = (item) => {
+    const ref = item.link.replace('/#', '');
+
+    if (router.pathname !== '/') {
+      router.push(item.link);
+    } else {
+      const element = document.getElementById(ref);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+
   const isScrolled = scrollProgress > 0.1;
 
+  // Menu items for StaggeredMenu
+  const menuItems = MENULINKS.map((link) => ({
+    label: link.name,
+    ariaLabel: `Go to ${link.name}`,
+    link: `/#${link.ref}`
+  }));
+
+  // Social items for StaggeredMenu
+  const socialItems = SOCIAL_LINKS.map((social) => ({
+    label: social.name.charAt(0).toUpperCase() + social.name.slice(1),
+    link: social.url
+  }));
+
   return (
-    <>
-      <header
-        ref={headerRef}
-        className={`fixed top-0 left-0 right-0 z-50 ${isScrolled ? "py-4" : "py-6"}`}
-        style={{
-          backgroundColor: isScrolled ? 'var(--bg-primary)' : 'transparent',
-          borderBottom: isScrolled ? '1px solid var(--border)' : 'none',
-          transition: 'padding 0.3s ease, background-color 0.3s ease, border-bottom 0.3s ease',
-          willChange: 'padding, background-color'
-        }}
-      >
-        <div className="section-container flex justify-between items-center">
-          {/* Logo with morph effect */}
-          <a
-            href="/"
-            onClick={handleLogoClick}
-            className="relative overflow-hidden"
-            style={{ color: 'var(--fg-primary)' }}
+    <header
+      ref={headerRef}
+      className="fixed top-0 left-0 right-0 z-50"
+      style={{
+        padding: isScrolled ? '12px 0' : '24px 0',
+        backgroundColor: isScrolled ? 'var(--bg-primary)' : 'transparent',
+        borderBottom: isScrolled ? '1px solid var(--border)' : 'none',
+        backdropFilter: isScrolled ? 'blur(10px)' : 'none',
+        transition: 'padding 0.3s ease, background-color 0.3s ease, border-bottom 0.3s ease',
+        willChange: 'padding, background-color'
+      }}
+    >
+      <div className="section-container flex justify-between items-center">
+        {/* Logo with FADE effect on scroll */}
+        <a
+          href="/"
+          onClick={handleLogoClick}
+          className="relative"
+          style={{
+            color: 'var(--fg-primary)',
+            minWidth: '120px',
+            height: '24px'
+          }}
+        >
+          {/* KA - fades out on scroll */}
+          <span
+            className="text-body-sm font-semibold tracking-wide absolute left-0 top-0 transition-opacity duration-500"
+            style={{
+              opacity: 1 - scrollProgress,
+            }}
           >
-            <span
-              className="text-body-sm font-semibold tracking-wide inline-block transition-all duration-500"
-              style={{
-                opacity: 1 - scrollProgress,
-                transform: `translateY(${scrollProgress * -100}%)`,
-              }}
-            >
-              KA
-            </span>
-            <span
-              className="text-body-sm font-medium tracking-wide absolute left-0 top-0 whitespace-nowrap transition-all duration-500"
-              style={{
-                opacity: scrollProgress,
-                transform: `translateY(${(1 - scrollProgress) * 100}%)`,
-              }}
-            >
-              Kingsley Aremu
-            </span>
-          </a>
+            KA
+          </span>
+          {/* Full name - fades in on scroll */}
+          <span
+            className="text-body-sm font-medium tracking-wide whitespace-nowrap absolute left-0 top-0 transition-opacity duration-500"
+            style={{
+              opacity: scrollProgress,
+            }}
+          >
+            Kingsley Aremu
+          </span>
+        </a>
 
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-
-            {/* Menu toggle button */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="w-10 h-10 flex flex-col items-center justify-center gap-1.5 z-[60]"
-              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-            >
-              <span
-                className={`w-6 h-px transition-all duration-300 ${isMenuOpen ? "rotate-45 translate-y-[3px]" : ""}`}
-                style={{ backgroundColor: 'var(--fg-primary)' }}
-              />
-              <span
-                className={`w-6 h-px transition-all duration-300 ${isMenuOpen ? "-rotate-45 -translate-y-[3px]" : ""}`}
-                style={{ backgroundColor: 'var(--fg-primary)' }}
-              />
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Menu overlay */}
-      <div
-        className={`menu-overlay ${isMenuOpen ? "active" : ""}`}
-        style={{ backgroundColor: 'var(--bg-primary)' }}
-      >
-        <div className="section-container h-full flex flex-col justify-center">
-          <nav className="space-y-6">
-            {MENULINKS.map((link, i) => (
-              <a
-                key={link.ref}
-                href={`/#${link.ref}`}
-                onClick={(e) => handleNavClick(e, link.ref)}
-                className="menu-link block"
-                style={{ transitionDelay: `${0.1 + i * 0.05}s` }}
-              >
-                {link.name}
-              </a>
-            ))}
-          </nav>
+        {/* Right side controls */}
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <SnowToggle />
+          <StaggeredMenu
+            items={menuItems}
+            socialItems={socialItems}
+            displaySocials={true}
+            displayItemNumbering={true}
+            menuButtonColor="var(--fg-primary)"
+            openMenuButtonColor="#ffffff"
+            changeMenuColorOnOpen={true}
+            colors={['#000000', '#000000']}
+            onItemClick={handleNavClick}
+          />
         </div>
       </div>
-    </>
+    </header>
   );
 };
 
 export default Header;
-

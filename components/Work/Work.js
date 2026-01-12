@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { MENULINKS } from "../../constants";
+import ShuffleText from "../ReactBits/ShuffleText";
 
 const Work = () => {
   const sectionRef = useRef(null);
@@ -9,19 +10,19 @@ const Work = () => {
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      // Title animation
+      // Title animation with clip path reveal
       gsap.fromTo(
         titleRef.current,
-        { y: 60, opacity: 0 },
+        { clipPath: "polygon(0 0, 0 0, 0 100%, 0% 100%)" },
         {
-          y: 0,
-          opacity: 1,
-          duration: 1,
-          ease: "power3.out",
+          clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)",
+          duration: 1.5,
+          ease: "power3.inOut",
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 70%",
-            toggleActions: "play none none reverse",
+            end: "top 30%",
+            scrub: 0.5,
           }
         }
       );
@@ -96,12 +97,12 @@ const Work = () => {
     <section
       ref={sectionRef}
       id={MENULINKS[3].ref}
-      className="section-spacing"
+      className="section-spacing-lg"
       style={{ backgroundColor: 'var(--bg-primary)' }}
     >
       <div className="section-container">
-        {/* Section header */}
-        <div className="mb-20 md:mb-28" ref={titleRef}>
+        {/* Section header - Same size as other sections */}
+        <div className="mb-16 md:mb-24">
           <p
             className="text-micro mb-6"
             style={{ color: 'var(--fg-muted)' }}
@@ -109,11 +110,18 @@ const Work = () => {
             EXPERIENCE
           </p>
           <h2
-            className="text-display-lg font-extralight"
+            ref={titleRef}
+            className="text-massive font-extralight"
             style={{ color: 'var(--fg-primary)' }}
           >
-            Where I&apos;ve worked
+            Experience
           </h2>
+          <p
+            className="text-display-sm font-light mt-4"
+            style={{ color: 'var(--fg-secondary)' }}
+          >
+            <ShuffleText text="Where I've worked" duration={0.4} shuffleTimes={4} />
+          </p>
         </div>
 
         {/* Experience list */}

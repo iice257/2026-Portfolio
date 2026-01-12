@@ -2,10 +2,11 @@ import { useEffect, useRef, useLayoutEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { MENULINKS } from "../../constants";
+import TextPressure from "../ReactBits/TextPressure";
 
 const Hero = () => {
   const sectionRef = useRef(null);
-  const nameRef = useRef(null);
+  const nameContainerRef = useRef(null);
   const subtitleRef = useRef(null);
   const scrollIndicatorRef = useRef(null);
 
@@ -18,22 +19,11 @@ const Hero = () => {
         }
       });
 
-      // Animate name with stagger effect on each letter
-      const nameChars = nameRef.current.querySelectorAll('.char');
+      // Animate the name container
       tl.fromTo(
-        nameChars,
-        {
-          y: 200,
-          opacity: 0,
-          rotationX: -90
-        },
-        {
-          y: 0,
-          opacity: 1,
-          rotationX: 0,
-          duration: 1.2,
-          stagger: 0.03,
-        }
+        nameContainerRef.current,
+        { opacity: 0, y: 60 },
+        { opacity: 1, y: 0, duration: 1.2 }
       )
         .fromTo(
           subtitleRef.current,
@@ -48,65 +38,34 @@ const Hero = () => {
           "-=0.4"
         );
 
-      // Pin the hero section and create parallax effect
+      // Parallax on scroll
       ScrollTrigger.create({
         trigger: sectionRef.current,
         start: "top top",
         end: "bottom top",
-        pin: false,
         scrub: 1,
         onUpdate: (self) => {
           const progress = self.progress;
 
-          // Parallax on name - moves slower
-          gsap.set(nameRef.current, {
+          gsap.set(nameContainerRef.current, {
             y: progress * 150,
             opacity: 1 - progress * 1.2,
           });
 
-          // Subtitle moves faster
           gsap.set(subtitleRef.current, {
             y: progress * 250,
             opacity: 1 - progress * 1.5,
           });
 
-          // Scroll indicator fades quickly
           gsap.set(scrollIndicatorRef.current, {
             opacity: 1 - progress * 3,
           });
         }
       });
-
-      // Tracking animation on scroll
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: "top top",
-        end: "50% top",
-        scrub: true,
-        onUpdate: (self) => {
-          const progress = self.progress;
-          // Tighten letter spacing as you scroll
-          nameRef.current.style.letterSpacing = `${-0.04 + (progress * -0.02)}em`;
-        }
-      });
-
     });
 
     return () => ctx.revert();
   }, []);
-
-  // Split text into characters for animation
-  const splitText = (text) => {
-    return text.split('').map((char, i) => (
-      <span
-        key={i}
-        className="char inline-block"
-        style={{ transformOrigin: 'bottom' }}
-      >
-        {char === ' ' ? '\u00A0' : char}
-      </span>
-    ));
-  };
 
   return (
     <section
@@ -116,27 +75,53 @@ const Hero = () => {
       style={{ backgroundColor: 'var(--bg-primary)' }}
     >
       <div className="section-container-wide w-full">
-        {/* Oversized name - viewport breaking */}
-        <div className="relative">
-          <h1
-            ref={nameRef}
-            className="text-hero font-extralight text-center"
-            style={{
-              color: 'var(--fg-primary)',
-              perspective: '1000px',
-              transformStyle: 'preserve-3d'
-            }}
-          >
-            {splitText('KINGSLEY')}
-            <br />
-            {splitText('AREMU')}
-          </h1>
+        {/* Name with TextPressure effect - CENTERED */}
+        <div
+          ref={nameContainerRef}
+          className="relative flex flex-col items-center gap-8"
+        >
+          {/* First name */}
+          <div style={{ position: 'relative', height: '120px', width: '100%', maxWidth: '800px', margin: '0 auto', marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
+            <TextPressure
+              text="KINGSLEY"
+              fontFamily="Inter"
+              fontUrl="https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZNhiJ-Ek-_EeAmM.woff2"
+              width={false}
+              weight={true}
+              italic={false}
+              alpha={false}
+              flex={false}
+              stroke={false}
+              scale={false}
+              textColor="var(--fg-primary)"
+              minFontSize={56}
+            />
+          </div>
+
+
+          {/* Last name */}
+          <div style={{ position: 'relative', height: '120px', width: '100%', maxWidth: '600px', margin: '0 auto', display: 'flex', justifyContent: 'center' }}>
+            <TextPressure
+              text="AREMU"
+              fontFamily="Inter"
+              fontUrl="https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZNhiJ-Ek-_EeAmM.woff2"
+              width={false}
+              weight={true}
+              italic={false}
+              alpha={false}
+              flex={false}
+              stroke={false}
+              scale={false}
+              textColor="var(--fg-primary)"
+              minFontSize={56}
+            />
+          </div>
         </div>
 
         {/* Subtitle - editorial style */}
         <div
           ref={subtitleRef}
-          className="mt-12 text-center max-w-2xl mx-auto"
+          className="mt-24 text-center max-w-2xl mx-auto"
         >
           <p
             className="text-editorial font-light"
@@ -159,7 +144,7 @@ const Hero = () => {
       {/* Scroll indicator */}
       <div
         ref={scrollIndicatorRef}
-        className="absolute bottom-12 left-1/2 -translate-x-1/2"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2"
       >
         <div className="flex flex-col items-center gap-3">
           <span
@@ -175,7 +160,7 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Background texture (optional) */}
+      {/* Background texture */}
       <div
         className="absolute inset-0 pointer-events-none opacity-[0.02]"
         style={{
