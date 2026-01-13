@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/dist/ScrollTrigger";
-import Header from "@/components/Header/Header";
 import Hero from "@/components/Hero/Hero";
 import Philosophy from "@/components/Philosophy/Philosophy";
 import Skills from "@/components/Skills/Skills";
@@ -45,7 +44,6 @@ export default function Home() {
   return (
     <>
       <BackgroundShapes />
-      <Header />
       <ProgressIndicator />
 
       <main className="relative z-10">

@@ -21,7 +21,7 @@ const Profiles = () => {
   };
 
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-2 justify-start">
       {SOCIAL_LINKS &&
         SOCIAL_LINKS.map(({ name, url }) => (
           <a

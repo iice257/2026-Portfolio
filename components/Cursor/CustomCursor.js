@@ -6,6 +6,7 @@ import { gsap } from 'gsap';
 const CustomCursor = () => {
   const cursorRef = useRef(null);
   const textRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false); // Default hidden until mouse moves
   const { cursorText, cursorVariant } = useCursor();
   const { theme } = useTheme();
 
@@ -23,6 +24,9 @@ const CustomCursor = () => {
     const ySetText = gsap.quickSetter(textRef.current, "y", "px");
 
     const onMouseMove = (e) => {
+      // Ensure visible on movement
+      if (!isVisible) setIsVisible(true);
+
       if (xSet.current && ySet.current) {
         xSet.current(e.clientX);
         ySet.current(e.clientY);
@@ -33,43 +37,48 @@ const CustomCursor = () => {
       }
     };
 
+    const onMouseLeave = () => {
+      setIsVisible(false);
+    };
+
+    const onMouseEnter = () => {
+      setIsVisible(true);
+    };
+
     window.addEventListener('mousemove', onMouseMove);
-    return () => window.removeEventListener('mousemove', onMouseMove);
-  }, []);
+    document.addEventListener('mouseleave', onMouseLeave); // document leave covers window exit mostly
+    document.addEventListener('mouseenter', onMouseEnter);
+
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseleave', onMouseLeave);
+      document.removeEventListener('mouseenter', onMouseEnter);
+    };
+  }, [isVisible]);
 
   // Theme colors
   const isDark = theme === 'dark';
-  const strokeColor = isDark ? '#ffffff' : '#000000';
-  const glowFilter = isDark
-    ? 'drop-shadow(0 0 2px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 5px rgba(255, 255, 255, 0.3))'
-    : 'drop-shadow(0 0 1px rgba(0, 0, 0, 0.2))';
-
   const isProject = cursorVariant === 'project';
+  const isMenu = cursorVariant === 'menu';
 
   return (
     <>
       <div
         ref={cursorRef}
-        className="fixed top-0 left-0 pointer-events-none z-[9999]"
-        style={{ willChange: 'transform' }}
+        className={`fixed top-0 left-0 pointer-events-none z-[99999] transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+        style={{
+          willChange: 'transform',
+          mixBlendMode: 'difference' // Inverts cursor color based on background
+        }}
       >
-        {/* Cursor Container - handles rotation or scaling if needed */}
+        {/* Cursor Container */}
         <div
           className="relative transition-all duration-300 ease-out"
           style={{
-            transform: isProject ? 'scale(0)' : 'scale(1)', // Hide pointer when expanding to project overlay? Or keep it? 
-            // User said "behave exactly like normal", usually text cursors replace the pointer. 
-            // But let's keep the pointer for precision and maybe just show text next to it.
-            // Actually, standard circle cursors often expand. 
-            // For an arrow, expanding into a circle is weird.
-            // Let's decide: When hovering project, maybe we keep the arrow but just show the text?
-            // Let's hide the arrow and show a "Click" indicator if it's a project, 
-            // OR just keep the arrow and show text. 
-            // Let's keep the arrow visible for now as requested "cursor throughout the site".
-            filter: glowFilter,
+            transform: isProject ? 'scale(0)' : (isMenu ? 'scale(1.2)' : 'scale(1)'),
           }}
         >
-          {/* Hollow Arrow SVG */}
+          {/* Hollow Arrow SVG - White stroke allows difference mode to invert it */}
           <svg
             width="32"
             height="32"
@@ -80,7 +89,7 @@ const CustomCursor = () => {
           >
             <path
               d="M5.5 3L11.5 26.5L16.2 17.8L25.5 17.8L5.5 3Z"
-              stroke={strokeColor}
+              stroke="#ffffff"
               strokeWidth="1.5"
               strokeLinejoin="round"
               fill="transparent"
@@ -89,25 +98,25 @@ const CustomCursor = () => {
         </div>
       </div>
 
-      {/* Floating Text - Only visible when cursorVariant is 'project' */}
-      <div
-        ref={textRef}
-        className="fixed top-0 left-0 pointer-events-none z-[9999] flex items-center justify-center overflow-visible"
-        style={{ willChange: 'transform' }}
-      >
-        {cursorText && (
+      {/* Floating Text - Glass Pill Style */}
+      {cursorText && (
+        <div
+          ref={textRef}
+          className={`fixed top-0 left-0 pointer-events-none z-[9999] flex items-center justify-center overflow-visible transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+          style={{ willChange: 'transform' }}
+        >
           <div
             className="absolute left-8 top-8 bg-black/80 text-white backdrop-blur-sm px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-widest whitespace-nowrap"
             style={{
-              backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.8)',
-              color: isDark ? '#fff' : '#fff',
-              border: isDark ? '1px solid rgba(255,255,255,0.2)' : 'none'
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              color: '#fff',
+              border: '1px solid rgba(255,255,255,0.2)'
             }}
           >
             {cursorText}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <style jsx global>{`
         body, a, button, input, textarea {

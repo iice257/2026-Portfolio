@@ -1,4 +1,7 @@
-import { useState, useEffect } from 'react';
+import Link from "next/link";
+import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
+import { useCursor } from '../../context/CursorContext';
 
 /**
  * StaggeredMenu - Full-screen navigation menu with staggered animations
@@ -16,19 +19,29 @@ const StaggeredMenu = ({
   onItemClick,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { setCursorVariant } = useCursor();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
   const toggleMenu = () => {
     if (isOpen) {
       setIsOpen(false);
+      setCursorVariant('default');
       onMenuClose?.();
     } else {
       setIsOpen(true);
+      setCursorVariant('menu');
       onMenuOpen?.();
     }
   };
 
   const handleItemClick = (item, index) => {
     setIsOpen(false);
+    setCursorVariant('default');
     onMenuClose?.();
     onItemClick?.(item, index);
   };
@@ -46,6 +59,86 @@ const StaggeredMenu = ({
   }, [isOpen]);
 
   const buttonColor = isOpen && changeMenuColorOnOpen ? openMenuButtonColor : menuButtonColor;
+
+  const MenuOverlay = (
+    <div
+      className={`fixed inset-0 z-[99999] flex flex-col justify-center items-start transition-transform duration-500 ease-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      style={{ backgroundColor: '#000000' }}
+    >
+      {/* Navigation Items - LEFT ALIGNED */}
+      <nav className="pl-6 md:pl-16 lg:pl-32 flex flex-col items-start w-full">
+        {items.map((item, index) => (
+          <div key={index} className="border-b border-white/20 w-auto max-w-4xl">
+            <Link
+              href={item.link}
+              className={`group relative flex items-center gap-8 py-8 text-white transition-all duration-500 cursor-none ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                }`}
+              style={{
+                transitionDelay: isOpen ? `${0.1 + index * 0.05}s` : '0s',
+                fontSize: 'clamp(3rem, 5vw, 4.5rem)',
+                fontWeight: 300, // Reduced weight for elegance
+                cursor: 'none'
+              }}
+              aria-label={item.ariaLabel || item.label}
+              onClick={(e) => {
+                // Remove e.preventDefault() to allow Link to navigate/scroll
+                handleItemClick(item, index);
+              }}
+            >
+              {/* Number */}
+              {displayItemNumbering && (
+                <span
+                  className="text-base md:text-lg font-light w-12 opacity-50 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{ color: '#ffffff' }}
+                >
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+              )}
+
+              {/* Label Container */}
+              <span className="relative overflow-hidden block h-[1.2em]">
+                <span className="block transition-transform duration-500 ease-in-out group-hover:-translate-y-full">
+                  {item.label}
+                </span>
+                <span className="absolute top-0 left-0 block translate-y-full transition-transform duration-500 ease-in-out group-hover:translate-y-0 text-white/50">
+                  {item.label}
+                </span>
+              </span>
+
+              {/* Underline line - absolute to the link container */}
+              <span
+                className="absolute bottom-6 left-20 right-0 h-[2px] bg-white transform origin-left scale-x-0 transition-transform duration-500 ease-out group-hover:scale-x-100"
+                style={{ bottom: '2rem' }} // Adjust based on padding
+              />
+            </Link>
+          </div>
+        ))}
+      </nav>
+
+      {/* Social Links */}
+      {displaySocials && socialItems.length > 0 && (
+        <div className="absolute bottom-12 left-6 md:left-16 lg:left-32 flex gap-8">
+          {socialItems.map((social, index) => (
+            <a
+              key={index}
+              href={social.link}
+              className={`relative text-sm md:text-base text-white transition-all duration-500 cursor-none group ${isOpen ? 'opacity-60 translate-y-0' : 'opacity-0 translate-y-4'
+                }`}
+              style={{ transitionDelay: isOpen ? `${0.3 + index * 0.05}s` : '0s', cursor: 'none' }}
+              target="_blank"
+              rel="noopener noreferrer"
+              onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+              onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
+            >
+              {social.label}
+              <span className="absolute left-0 bottom-0 w-full h-[1px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <>
@@ -76,73 +169,8 @@ const StaggeredMenu = ({
         </div>
       </button>
 
-      {/* Menu Overlay */}
-      <div
-        className={`fixed inset-0 z-[90] flex flex-col justify-center transition-transform duration-500 ease-out ${isOpen ? 'translate-x-0' : 'translate-x-full'
-          }`}
-        style={{ backgroundColor: '#000000' }}
-      >
-        {/* Navigation Items - LEFT ALIGNED */}
-        <nav className="pl-6 md:pl-16 lg:pl-32">
-          {items.map((item, index) => (
-            <div key={index} className="border-b border-white/10 max-w-4xl">
-              <a
-                href={item.link}
-                className={`flex items-center gap-8 py-6 text-white transition-all duration-300 cursor-none ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                  }`}
-                style={{
-                  transitionDelay: isOpen ? `${0.1 + index * 0.05}s` : '0s',
-                  fontSize: 'clamp(3rem, 6vw, 5rem)', // Bigger font
-                  fontWeight: 300,
-                  cursor: 'none'
-                }}
-                aria-label={item.ariaLabel || item.label}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleItemClick(item, index);
-                  window.location.href = item.link;
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.fontWeight = '700';
-                  e.currentTarget.style.paddingLeft = '20px'; // Slight indent on hover
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.fontWeight = '300';
-                  e.currentTarget.style.paddingLeft = '0px';
-                }}
-              >
-                {displayItemNumbering && (
-                  <span className="text-base md:text-lg font-light w-12 opacity-80" style={{ color: '#e5e5e5' }}>
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                )}
-                <span className="transition-[font-weight,padding] duration-300">{item.label}</span>
-              </a>
-            </div>
-          ))}
-        </nav>
-
-        {/* Social Links */}
-        {displaySocials && socialItems.length > 0 && (
-          <div className="absolute bottom-12 left-6 md:left-16 lg:left-32 flex gap-8">
-            {socialItems.map((social, index) => (
-              <a
-                key={index}
-                href={social.link}
-                className={`text-sm md:text-base text-white transition-all duration-300 cursor-none ${isOpen ? 'opacity-60 translate-y-0' : 'opacity-0 translate-y-5'
-                  }`}
-                style={{ transitionDelay: isOpen ? `${0.3 + index * 0.05}s` : '0s', cursor: 'none' }}
-                target="_blank"
-                rel="noopener noreferrer"
-                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
-              >
-                {social.label}
-              </a>
-            ))}
-          </div>
-        )}
-      </div>
+      {/* Render Menu Overlay via Portal */}
+      {mounted && createPortal(MenuOverlay, document.body)}
     </>
   );
 };

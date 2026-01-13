@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/router";
 import ThemeToggle from "../ThemeToggle/ThemeToggle";
@@ -7,42 +8,58 @@ import { MENULINKS, SOCIAL_LINKS } from "../../constants";
 
 const Header = () => {
   const router = useRouter();
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const headerRef = useRef(null);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Refs for direct DOM manipulation (performance)
+  const kaRef = useRef(null);
+  const nameRef = useRef(null);
+  const progressBarRef = useRef(null);
 
   useEffect(() => {
-    let ticking = false;
-
     const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const currentScrollY = window.scrollY;
-          const progress = Math.min(currentScrollY / 200, 1);
-          setScrollProgress(progress);
-          ticking = false;
-        });
-        ticking = true;
+      const scrollY = window.scrollY;
+      const winHeight = window.innerHeight;
+      const docHeight = document.documentElement.scrollHeight;
+
+      // 1. Binary State for Header Style (OK to re-render)
+      setIsScrolled(scrollY > 50);
+
+      // 2. Direct DOM updates for continuous animations (No re-renders)
+
+      // Logo Fade Logic (0 to 1 over first 200px)
+      const logoProgress = Math.min(scrollY / 200, 1);
+
+      if (kaRef.current) {
+        kaRef.current.style.opacity = 1 - logoProgress;
+      }
+      if (nameRef.current) {
+        nameRef.current.style.opacity = logoProgress;
+      }
+
+      // Progress Bar Logic (0 to 1 across entire page)
+      const totalScroll = docHeight - winHeight;
+      if (progressBarRef.current && totalScroll > 0) {
+        const progress = Math.min(scrollY / totalScroll, 1);
+        progressBarRef.current.style.width = `${progress * 100}%`;
       }
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
+    // Initial check
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleLogoClick = (e) => {
-    e.preventDefault();
-
-    if (router.pathname !== '/') {
-      router.push('/');
-    } else {
+    // If on home, scroll to top instead of navigating
+    if (router.pathname === '/') {
+      e.preventDefault();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
-  // Handle menu item navigation
   const handleNavClick = (item) => {
     const ref = item.link.replace('/#', '');
-
     if (router.pathname !== '/') {
       router.push(item.link);
     } else {
@@ -53,8 +70,6 @@ const Header = () => {
     }
   };
 
-  const isScrolled = scrollProgress > 0.1;
-
   // Menu items for StaggeredMenu
   const menuItems = MENULINKS.map((link) => ({
     label: link.name,
@@ -62,7 +77,6 @@ const Header = () => {
     link: `/#${link.ref}`
   }));
 
-  // Social items for StaggeredMenu
   const socialItems = SOCIAL_LINKS.map((social) => ({
     label: social.name.charAt(0).toUpperCase() + social.name.slice(1),
     link: social.url
@@ -70,54 +84,36 @@ const Header = () => {
 
   return (
     <header
-      ref={headerRef}
-      className="fixed top-0 left-0 right-0 z-50"
-      style={{
-        padding: isScrolled ? '12px 0' : '24px 0',
-        backgroundColor: isScrolled ? 'var(--bg-primary)' : 'transparent',
-        borderBottom: isScrolled ? '1px solid var(--border)' : 'none',
-        backdropFilter: isScrolled ? 'blur(10px)' : 'none',
-        transition: 'padding 0.3s ease, background-color 0.3s ease, border-bottom 0.3s ease',
-        willChange: 'padding, background-color'
-      }}
+      className={`fixed top-0 left-0 w-full z-[9999] transition-all duration-300 ease-in-out ${isScrolled ? 'bg-[var(--bg-primary)] border-b border-[var(--border)]' : 'bg-transparent'} py-6`}
     >
       <div className="section-container flex justify-between items-center">
-        {/* Logo with FADE effect on scroll */}
-        <a
+        {/* Logo */}
+        <Link
           href="/"
           onClick={handleLogoClick}
-          className="relative block"
-          style={{
-            color: 'var(--fg-primary)',
-            minWidth: '140px',
-            height: '24px',
-            cursor: 'none'
-          }}
+          className="relative block h-6 min-w-[140px] cursor-none"
+          style={{ color: 'var(--fg-primary)' }}
         >
-          {/* KA - fades out on scroll */}
+          {/* KA - fades out */}
           <span
-            className="text-body-sm font-semibold tracking-wide absolute left-0 top-0 transition-opacity duration-500 block"
-            style={{
-              opacity: 1 - scrollProgress,
-              pointerEvents: 'none'
-            }}
+            ref={kaRef}
+            className="absolute left-0 top-0 text-body-sm font-semibold tracking-wide transition-opacity duration-300"
+            style={{ opacity: 1 }}
           >
             KA
           </span>
-          {/* Full name - fades in on scroll */}
+          {/* Full Name - fades in */}
           <span
-            className="text-body-sm font-medium tracking-wide whitespace-nowrap absolute left-0 top-0 transition-opacity duration-500 block"
-            style={{
-              opacity: scrollProgress,
-              pointerEvents: 'none'
-            }}
+            ref={nameRef}
+            className="absolute left-0 top-0 text-body-sm font-medium tracking-wide whitespace-nowrap transition-opacity duration-300"
+            style={{ opacity: 0 }}
           >
             Kingsley Aremu
           </span>
-        </a>
+        </Link>
 
-        {/* Right side controls */}
-        <div className="flex items-center gap-3 relative z-50">
+        {/* Controls */}
+        <div className="flex items-center gap-4">
           <ThemeToggle />
           <SnowToggle />
           <StaggeredMenu
@@ -128,11 +124,17 @@ const Header = () => {
             menuButtonColor="var(--fg-primary)"
             openMenuButtonColor="#ffffff"
             changeMenuColorOnOpen={true}
-            colors={['#000000', '#000000']}
             onItemClick={handleNavClick}
           />
         </div>
       </div>
+
+      {/* Scroll Progress Bar */}
+      <div
+        ref={progressBarRef}
+        className="absolute bottom-0 left-0 h-[2px] bg-[var(--fg-primary)] transition-all duration-100 ease-out z-50"
+        style={{ width: '0%' }}
+      />
     </header>
   );
 };

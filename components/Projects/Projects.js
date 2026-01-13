@@ -55,12 +55,59 @@ const Projects = ({ isDesktop }) => {
     return () => ctx.revert();
   }, [isDesktop]);
 
+  // Track mouse position ref for scroll detection
+  const mousePos = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const onMouseMove = (e) => {
+      mousePos.current = { x: e.clientX, y: e.clientY };
+    };
+    window.addEventListener('mousemove', onMouseMove);
+    return () => window.removeEventListener('mousemove', onMouseMove);
+  }, []);
+
+  // Handle cursor update on scroll (check if mouse is still over a project)
+  useEffect(() => {
+    const handleScroll = () => {
+      // Use elementFromPoint for robust detection during scroll without mouse movement
+      const el = document.elementFromPoint(mousePos.current.x, mousePos.current.y);
+      if (!el) return;
+
+      const panel = el.closest('.project-panel');
+
+      if (panel) {
+        setCursorText("Click for more details");
+        setCursorVariant("project");
+      } else {
+        setCursorText("");
+        setCursorVariant("default");
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [setCursorText, setCursorVariant]);
+
   const handleMouseEnter = () => {
     setCursorText("Click for more details");
     setCursorVariant("project");
   };
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = (e) => {
+    // Check if we moved to a child element (which fires mouseleave on parent in React sometimes if not careful, though usually bubbling handles it. 
+    // The issue might be moving to the 'view all' button or gaps.
+    // Robust check: Is the new target (relatedTarget) still inside a project panel?
+    const relatedTarget = e.relatedTarget;
+    if (relatedTarget && relatedTarget.closest('.project-panel')) {
+      return;
+    }
+
+    // Also check our scroll tracker for fallback safety
+    const el = document.elementFromPoint(mousePos.current.x, mousePos.current.y);
+    if (el && el.closest('.project-panel')) {
+      return;
+    }
+
     setCursorText("");
     setCursorVariant("default");
   };
@@ -99,7 +146,7 @@ const Projects = ({ isDesktop }) => {
               <div
                 className={`relative min-h-[50vh] lg:min-h-screen ${isEven ? 'order-2 lg:order-2' : 'order-2 lg:order-1'}`}
               >
-                <div className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-105">
+                <div className="absolute inset-0 transition-transform duration-700 ease-out">
                   <Image
                     src={project.image}
                     alt={project.name}
@@ -165,24 +212,39 @@ const Projects = ({ isDesktop }) => {
         })}
       </div>
 
-      {/* View All Projects - Centered, Unbold, Increased Size */}
-      <div
-        className="py-32 md:py-48 flex justify-center"
-        style={{ backgroundColor: 'var(--bg-primary)' }}
+      {/* View All Projects - Full Screen Width Rectangle Button */}
+      <a
+        href="/projects"
+        className="block w-full mt-8 py-10 md:py-14 border-y border-[var(--border)] group relative overflow-hidden text-center cursor-none"
+        style={{
+          backgroundColor: 'var(--bg-primary)',
+          textDecoration: 'none'
+        }}
       >
-        <a
-          href="/projects"
-          className="relative text-giant font-light group inline-block" // Changed to text-giant and font-light (unbold)
-          style={{ color: 'var(--fg-primary)' }}
-        >
-          View All Projects
+        {/* Hover Background Fill */}
+        <div className="absolute inset-0 bg-[var(--fg-primary)] transform translate-y-full transition-transform duration-500 ease-in-out group-hover:translate-y-0" />
 
-          {/* Animated underline */}
+        {/* Text Container - Ensure z-index is above background */}
+        <div className="relative z-10 flex flex-col items-center justify-center h-full pointer-events-none">
           <span
-            className="absolute left-0 bottom-2 h-[3px] w-full bg-current transform scale-x-0 transition-transform duration-500 ease-out group-hover:scale-x-100 origin-left"
-          />
-        </a>
-      </div>
+            className="text-display-xl font-light uppercase tracking-tight transition-colors duration-500"
+            style={{
+              // Dynamic color handled here to ensure it overrides GSAP or other styles
+              // Use CSS variable for swap
+              color: 'var(--fg-primary)'
+            }}
+          >
+            {/* Use a span internal to swap color via CSS class for reliability */}
+            <span className="group-hover:text-[var(--bg-primary)] transition-colors duration-500">View All Projects</span>
+          </span>
+          <span
+            className="mt-2 text-body-sm tracking-widest uppercase transition-colors duration-500 opacity-60"
+            style={{ color: 'var(--fg-muted)' }}
+          >
+            <span className="group-hover:text-[var(--bg-primary)] transition-colors duration-500">Explore Full Archive</span>
+          </span>
+        </div>
+      </a>
     </section>
   );
 };

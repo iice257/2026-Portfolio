@@ -148,19 +148,26 @@ const Skills = () => {
                         {category.description}
                       </p>
 
-                      {/* Skills - LEFT ALIGNED, grouped together */}
-                      <div className="flex flex-wrap gap-x-2 gap-y-1">
+                      {/* Skills - LEFT ALIGNED, flow naturally like text */}
+                      <div className="block leading-relaxed">
                         {category.skills.map((skill, i) => (
-                          <span key={skill} className="inline-flex items-center">
-                            <span
-                              className="text-body-md font-bold"
-                              style={{ color: 'var(--fg-primary)' }}
-                            >
-                              {skill}
+                          <span key={skill} className="inline-block mr-2 mb-1">
+                            <span className="inline-flex items-center">
+                              <span
+                                className="text-body-md font-bold"
+                                style={{ color: 'var(--fg-primary)' }}
+                              >
+                                {skill}
+                              </span>
+                              {/* Dot separator always shown unless it's the very last item? 
+                                  User said "separated by those dots like they currently are".
+                                  Current code showed dot if not last. 
+                                  I will keep it inside the inline-flex.
+                               */ }
+                              {i < category.skills.length - 1 && (
+                                <span className="ml-2" style={{ color: 'var(--fg-muted)' }}>•</span>
+                              )}
                             </span>
-                            {i < category.skills.length - 1 && (
-                              <span className="ml-2" style={{ color: 'var(--fg-muted)' }}>•</span>
-                            )}
                           </span>
                         ))}
                       </div>

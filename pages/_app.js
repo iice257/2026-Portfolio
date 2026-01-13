@@ -6,6 +6,7 @@ import { SnowProvider, useSnow } from "../context/SnowContext";
 import { TooltipProvider } from "../context/TooltipContext";
 import { CursorProvider } from "../context/CursorContext";
 import CustomCursor from "../components/Cursor/CustomCursor";
+import Header from "../components/Header/Header";
 import Snowfall from "react-snowfall";
 import "../styles/globals.scss";
 // React Bits component styles
@@ -34,6 +35,7 @@ const AppContent = ({ Component, pageProps }) => {
   return (
     <>
       <CustomCursor />
+      <Header />
 
       {/* Page wrapper with blur-in animation */}
       <div

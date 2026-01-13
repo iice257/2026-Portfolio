@@ -103,10 +103,11 @@ const Work = () => {
       <div className="section-container">
         {/* Section header */}
         <div className="mb-16 md:mb-24">
-          <div className="flex flex-col items-start">
+          <div className="flex flex-col items-start overflow-hidden">
+            {/* Added overflow-hidden to prevent bleed */}
             <h2
               ref={titleRef}
-              className="text-massive font-extralight leading-none ml-[-0.05em]"
+              className="text-massive font-extralight leading-none ml-[-0.05em] whitespace-nowrap"
               style={{ color: 'var(--fg-primary)' }}
             >
               <ShuffleText text="Experience" duration={0.6} shuffleTimes={4} />
