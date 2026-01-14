@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/router";
 import { MENULINKS, PROJECTS } from "../../constants";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
@@ -7,6 +9,7 @@ import { useCursor } from "../../context/CursorContext";
 import ShuffleText from "../ReactBits/ShuffleText";
 
 const Projects = ({ isDesktop }) => {
+  const router = useRouter();
   const sectionRef = useRef(null);
   const titleRef = useRef(null);
   const projectsContainerRef = useRef(null);
@@ -140,7 +143,7 @@ const Projects = ({ isDesktop }) => {
               className="project-panel min-h-screen grid grid-cols-1 lg:grid-cols-2 group cursor-none"
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
-              onClick={() => window.location.href = `/projects/${project.slug}`}
+              onClick={() => router.push(`/projects/${project.slug}`)}
             >
               {/* Image Side - Full height image */}
               <div
@@ -213,7 +216,7 @@ const Projects = ({ isDesktop }) => {
       </div>
 
       {/* View All Projects - Full Screen Width Rectangle Button */}
-      <a
+      <Link
         href="/projects"
         className="block w-full mt-8 py-10 md:py-14 border-y border-[var(--border)] group relative overflow-hidden text-center cursor-none"
         style={{
@@ -229,12 +232,9 @@ const Projects = ({ isDesktop }) => {
           <span
             className="text-display-xl font-light uppercase tracking-tight transition-colors duration-500"
             style={{
-              // Dynamic color handled here to ensure it overrides GSAP or other styles
-              // Use CSS variable for swap
               color: 'var(--fg-primary)'
             }}
           >
-            {/* Use a span internal to swap color via CSS class for reliability */}
             <span className="group-hover:text-[var(--bg-primary)] transition-colors duration-500">View All Projects</span>
           </span>
           <span
@@ -244,7 +244,7 @@ const Projects = ({ isDesktop }) => {
             <span className="group-hover:text-[var(--bg-primary)] transition-colors duration-500">Explore Full Archive</span>
           </span>
         </div>
-      </a>
+      </Link>
     </section>
   );
 };
