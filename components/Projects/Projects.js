@@ -96,21 +96,7 @@ const Projects = ({ isDesktop }) => {
     setCursorVariant("project");
   };
 
-  const handleMouseLeave = (e) => {
-    // Check if we moved to a child element (which fires mouseleave on parent in React sometimes if not careful, though usually bubbling handles it. 
-    // The issue might be moving to the 'view all' button or gaps.
-    // Robust check: Is the new target (relatedTarget) still inside a project panel?
-    const relatedTarget = e.relatedTarget;
-    if (relatedTarget && relatedTarget.closest('.project-panel')) {
-      return;
-    }
-
-    // Also check our scroll tracker for fallback safety
-    const el = document.elementFromPoint(mousePos.current.x, mousePos.current.y);
-    if (el && el.closest('.project-panel')) {
-      return;
-    }
-
+  const handleMouseLeave = () => {
     setCursorText("");
     setCursorVariant("default");
   };
@@ -123,12 +109,18 @@ const Projects = ({ isDesktop }) => {
     >
       {/* Section header */}
       <div className="section-container py-24 md:py-32">
+        <p
+          className="text-micro mb-6"
+          style={{ color: 'var(--fg-muted)' }}
+        >
+          PROJECTS
+        </p>
         <h2
           ref={titleRef}
           className="text-massive font-extralight"
           style={{ color: 'var(--fg-primary)', whiteSpace: 'nowrap' }}
         >
-          <ShuffleText text="Projects" duration={0.6} shuffleTimes={4} />
+          <ShuffleText text="What I do" duration={0.6} shuffleTimes={4} />
         </h2>
       </div>
 

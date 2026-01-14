@@ -144,7 +144,7 @@ const StaggeredMenu = ({
     <>
       {/* Menu Toggle Button - Fixed hamburger icon */}
       <button
-        className="w-10 h-10 relative z-[100] flex items-center justify-center cursor-none"
+        className="w-10 h-10 relative z-[100000] flex items-center justify-center cursor-none"
         onClick={toggleMenu}
         aria-label={isOpen ? 'Close menu' : 'Open menu'}
         style={{ cursor: 'none' }}

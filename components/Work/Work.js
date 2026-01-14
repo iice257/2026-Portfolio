@@ -102,23 +102,20 @@ const Work = () => {
     >
       <div className="section-container">
         {/* Section header */}
-        <div className="mb-16 md:mb-24">
-          <div className="flex flex-col items-start overflow-hidden">
-            {/* Added overflow-hidden to prevent bleed */}
-            <h2
-              ref={titleRef}
-              className="text-massive font-extralight leading-none ml-[-0.05em] whitespace-nowrap"
-              style={{ color: 'var(--fg-primary)' }}
-            >
-              <ShuffleText text="Experience" duration={0.6} shuffleTimes={4} />
-            </h2>
-            <p
-              className="text-display-sm font-light mt-4"
-              style={{ color: 'var(--fg-secondary)' }}
-            >
-              Where I've worked
-            </p>
-          </div>
+        <div className="mb-16 md:py-32">
+          <p
+            className="text-micro mb-6"
+            style={{ color: 'var(--fg-muted)' }}
+          >
+            EXPERIENCE
+          </p>
+          <h2
+            ref={titleRef}
+            className="text-massive font-extralight"
+            style={{ color: 'var(--fg-primary)', whiteSpace: 'nowrap' }}
+          >
+            <ShuffleText text="What I do" duration={0.6} shuffleTimes={4} />
+          </h2>
         </div>
 
         {/* Experience list */}

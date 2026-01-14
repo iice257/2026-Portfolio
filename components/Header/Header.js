@@ -84,7 +84,7 @@ const Header = () => {
 
   return (
     <header
-      className={`fixed top-0 left-0 w-full z-[9999] transition-all duration-300 ease-in-out ${isScrolled ? 'bg-[var(--bg-primary)] border-b border-[var(--border)]' : 'bg-transparent'} py-6`}
+      className={`fixed top-0 left-0 w-full z-[9999] transition-all duration-300 ease-in-out ${isScrolled ? 'bg-[var(--bg-primary)]' : 'bg-transparent'} py-6`}
     >
       <div className="section-container flex justify-between items-center">
         {/* Logo */}
