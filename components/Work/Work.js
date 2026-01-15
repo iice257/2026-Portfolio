@@ -114,7 +114,7 @@ const Work = () => {
             className="text-massive font-extralight"
             style={{ color: 'var(--fg-primary)', whiteSpace: 'nowrap' }}
           >
-            <ShuffleText text="What I do" duration={0.6} shuffleTimes={4} />
+            <ShuffleText text="Where I've worked" duration={0.6} shuffleTimes={4} />
           </h2>
         </div>
 

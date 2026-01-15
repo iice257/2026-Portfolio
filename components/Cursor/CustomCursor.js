@@ -65,7 +65,7 @@ const CustomCursor = () => {
     <>
       <div
         ref={cursorRef}
-        className={`fixed top-0 left-0 pointer-events-none z-[99999] transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+        className={`fixed top-0 left-0 pointer-events-none z-[999999] transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
         style={{
           willChange: 'transform',
           mixBlendMode: 'difference' // Inverts cursor color based on background
@@ -102,7 +102,7 @@ const CustomCursor = () => {
       {cursorText && (
         <div
           ref={textRef}
-          className={`fixed top-0 left-0 pointer-events-none z-[99999] flex items-center justify-center overflow-visible transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+          className={`fixed top-0 left-0 pointer-events-none z-[999999] flex items-center justify-center overflow-visible transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
           style={{ willChange: 'transform' }}
         >
           <div

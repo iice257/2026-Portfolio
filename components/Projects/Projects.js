@@ -120,7 +120,7 @@ const Projects = ({ isDesktop }) => {
           className="text-massive font-extralight"
           style={{ color: 'var(--fg-primary)', whiteSpace: 'nowrap' }}
         >
-          <ShuffleText text="What I do" duration={0.6} shuffleTimes={4} />
+          <ShuffleText text="What I've done" duration={0.6} shuffleTimes={4} />
         </h2>
       </div>
 
