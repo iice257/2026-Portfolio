@@ -4,7 +4,7 @@ import { useTooltip } from '../../context/TooltipContext';
 import { useTheme } from '../../context/ThemeContext';
 
 const SnowToggle = () => {
-  const { isSnowing, setIsSnowing } = useSnow();
+  const { isSnowing, toggleSnow } = useSnow();
   const { theme } = useTheme();
   const {
     showSnowTooltip,
@@ -41,7 +41,7 @@ const SnowToggle = () => {
   }, [theme, snowTooltipWasShown, setShowSnowTooltip, setSnowTooltipWasShown]);
 
   const handleToggle = () => {
-    setIsSnowing(!isSnowing);
+    toggleSnow();
 
     // If we're toggling ON, show "Nice!"
     if (!isSnowing) {

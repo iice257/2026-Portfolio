@@ -70,7 +70,7 @@ const StaggeredMenu = ({
         type="button"
         onClick={toggleMenu}
         aria-label="Close menu"
-        className={`absolute top-6 right-6 md:top-8 md:right-8 z-[100001] h-12 w-12 rounded-full border border-white/60 bg-white/10 flex items-center justify-center transition-all duration-300 cursor-none ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'
+        className={`absolute top-6 right-6 md:top-8 md:right-8 z-[100001] h-12 w-12 flex items-center justify-center transition-all duration-300 cursor-none ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'
           }`}
         style={{ cursor: 'none' }}
       >
