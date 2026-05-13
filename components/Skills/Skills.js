@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { MENULINKS } from "../../constants";
@@ -10,7 +10,7 @@ const Skills = () => {
   const titleRef = useRef(null);
   const [expandedCategory, setExpandedCategory] = useState(null);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.fromTo(
         titleRef.current,

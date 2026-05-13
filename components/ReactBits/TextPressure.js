@@ -226,38 +226,40 @@ const TextPressure = ({
   }, [width, weight, italic, alpha, calculateSpans]);
 
   const styleElement = useMemo(() => {
+    const css = `
+      @font-face {
+        font-family: '${fontFamily}';
+        src: url('${fontUrl}');
+        font-style: normal;
+      }
+
+      .flex {
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .stroke span {
+        position: relative;
+        color: ${textColor};
+      }
+      .stroke span::after {
+        content: attr(data-char);
+        position: absolute;
+        left: 0;
+        top: 0;
+        color: transparent;
+        z-index: -1;
+        -webkit-text-stroke-width: 3px;
+        -webkit-text-stroke-color: ${strokeColor};
+      }
+
+      .text-pressure-title {
+        color: ${textColor};
+      }
+    `;
+
     return (
-      <style>{`
-        @font-face {
-          font-family: '${fontFamily}';
-          src: url('${fontUrl}');
-          font-style: normal;
-        }
-
-        .flex {
-          display: flex;
-          justify-content: space-between;
-        }
-
-        .stroke span {
-          position: relative;
-          color: ${textColor};
-        }
-        .stroke span::after {
-          content: attr(data-char);
-          position: absolute;
-          left: 0;
-          top: 0;
-          color: transparent;
-          z-index: -1;
-          -webkit-text-stroke-width: 3px;
-          -webkit-text-stroke-color: ${strokeColor};
-        }
-
-        .text-pressure-title {
-          color: ${textColor};
-        }
-      `}</style>
+      <style dangerouslySetInnerHTML={{ __html: css }} />
     );
   }, [fontFamily, fontUrl, textColor, strokeColor]);
 

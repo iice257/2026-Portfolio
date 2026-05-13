@@ -1,85 +1,96 @@
-import { useSnow } from "../../context/SnowContext";
-import { useTheme } from "../../context/ThemeContext";
-import { useTooltip } from "../../context/TooltipContext";
-import { useEffect } from "react";
+import { useEffect, useState } from 'react';
+import { useSnow } from '../../context/SnowContext';
+import { useTooltip } from '../../context/TooltipContext';
+import { useTheme } from '../../context/ThemeContext';
 
-/**
- * SnowToggle - Simple snowflake icon button that toggles the snow effect
- */
 const SnowToggle = () => {
   const { isSnowing, toggleSnow } = useSnow();
   const { theme } = useTheme();
-  const { showSnowTooltip, setShowSnowTooltip, setSnowTooltipWasShown, setShowNiceTooltip, showNiceTooltip } = useTooltip();
+  const {
+    showSnowTooltip,
+    setShowSnowTooltip,
+    showNiceTooltip,
+    setShowNiceTooltip,
+    snowTooltipWasShown,
+    setSnowTooltipWasShown
+  } = useTooltip();
 
-  const handleClick = () => {
+  // Show tooltip after 3 seconds if not shown before
+  useEffect(() => {
+    // If it was already shown in history, do nothing.
+    if (snowTooltipWasShown) return;
+
+    // Wait for everything to load
+    const timer = setTimeout(() => {
+      // Logic: Only show if light mode (per original design) or just show it?
+      // Original said "Works better in dark mode" -> implies we are in light mode
+      // Let's assume we show it if we are in light mode.
+      if (theme === 'light') {
+        setShowSnowTooltip(true);
+        // Mark as shown so it doesn't show again this session
+        setSnowTooltipWasShown(true);
+
+        // Hide after 4 seconds
+        setTimeout(() => {
+          setShowSnowTooltip(false);
+        }, 4000);
+      }
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [theme, snowTooltipWasShown, setShowSnowTooltip, setSnowTooltipWasShown]);
+
+  const handleToggle = () => {
     toggleSnow();
 
-    // Show tooltip in light mode when activating snow
-    if (!isSnowing && theme === 'light') {
-      setShowNiceTooltip(false); // Hide "Nice!" tooltip if visible
-      setShowSnowTooltip(true);
-      setSnowTooltipWasShown(true);
+    // If we're toggling ON, show "Nice!"
+    if (!isSnowing) {
+      // Hide the suggestion tooltip if it's there
+      setShowSnowTooltip(false);
+
+      setShowNiceTooltip(true);
+      setTimeout(() => setShowNiceTooltip(false), 2000);
     }
   };
 
-  // Hide tooltip after 3 seconds
-  useEffect(() => {
-    if (showSnowTooltip) {
-      const timer = setTimeout(() => setShowSnowTooltip(false), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [showSnowTooltip, setShowSnowTooltip]);
-
   return (
-    <div className="relative">
+    <div className="relative z-[60]">
       <button
-        onClick={handleClick}
-        className="w-10 h-10 border transition-colors duration-200"
-        style={{
-          borderColor: 'var(--border)',
-          borderRadius: 0,
-          backgroundColor: isSnowing ? 'var(--fg-primary)' : 'transparent',
-          color: isSnowing ? 'var(--bg-primary)' : 'var(--fg-muted)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: 0,
-        }}
-        aria-label={isSnowing ? "Stop snow" : "Make it snow"}
+        onClick={handleToggle}
+        className="relative group p-2 hover:bg-[var(--fg-secondary)]/10 rounded-full transition-colors duration-300"
+        aria-label="Toggle snow effect"
+        style={{ color: 'var(--fg-primary)' }}
       >
         <svg
-          width="18"
-          height="18"
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.5"
+          strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          style={{ display: 'block', flexShrink: 0 }}
+          className={`transition-all duration-300 ${isSnowing ? 'opacity-100' : 'opacity-40 group-hover:opacity-100'}`}
         >
-          <line x1="12" y1="2" x2="12" y2="22" />
           <line x1="2" y1="12" x2="22" y2="12" />
-          <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
-          <line x1="19.07" y1="4.93" x2="4.93" y2="19.07" />
-          <line x1="12" y1="2" x2="9" y2="5" />
-          <line x1="12" y1="2" x2="15" y2="5" />
-          <line x1="12" y1="22" x2="9" y2="19" />
-          <line x1="12" y1="22" x2="15" y2="19" />
-          <line x1="2" y1="12" x2="5" y2="9" />
-          <line x1="2" y1="12" x2="5" y2="15" />
-          <line x1="22" y1="12" x2="19" y2="9" />
-          <line x1="22" y1="12" x2="19" y2="15" />
+          <line x1="12" y1="2" x2="12" y2="22" />
+          <path d="m20 20-4.75-4.75" />
+          <path d="m4 4 4.75 4.75" />
+          <path d="m4 20 4.75-4.75" />
+          <path d="m20 4-4.75 4.75" />
         </svg>
       </button>
 
-      {/* Tooltip for light mode */}
+      {/* Tooltip for light mode: "Works better in dark mode" */}
       {showSnowTooltip && (
         <div
-          className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-2 text-xs whitespace-nowrap z-50"
+          className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-2 text-xs whitespace-nowrap z-[100001]"
           style={{
             backgroundColor: 'var(--fg-primary)',
             color: 'var(--bg-primary)',
+            borderRadius: '4px',
+            pointerEvents: 'none',
           }}
         >
           Works better in dark mode
@@ -90,13 +101,15 @@ const SnowToggle = () => {
         </div>
       )}
 
-      {/* Nice! tooltip - now shown on Snow button */}
+      {/* Nice! tooltip */}
       {showNiceTooltip && (
         <div
-          className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-2 text-xs whitespace-nowrap z-50"
+          className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-2 text-xs whitespace-nowrap z-[100001]"
           style={{
             backgroundColor: 'var(--fg-primary)',
             color: 'var(--bg-primary)',
+            borderRadius: '4px',
+            pointerEvents: 'none',
           }}
         >
           Nice!

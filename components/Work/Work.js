@@ -1,14 +1,16 @@
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { MENULINKS } from "../../constants";
 import ShuffleText from "../ReactBits/ShuffleText";
+import { AnimatePresence, motion } from "framer-motion";
 
 const Work = () => {
   const sectionRef = useRef(null);
   const titleRef = useRef(null);
+  const [openExperience, setOpenExperience] = useState(0);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const ctx = gsap.context(() => {
       // Title animation with clip path reveal
       gsap.fromTo(
@@ -93,6 +95,10 @@ const Work = () => {
     }
   ];
 
+  const toggleExperience = (index) => {
+    setOpenExperience((current) => (current === index ? null : index));
+  };
+
   return (
     <section
       ref={sectionRef}
@@ -102,23 +108,20 @@ const Work = () => {
     >
       <div className="section-container">
         {/* Section header */}
-        <div className="mb-16 md:mb-24">
-          <div className="flex flex-col items-start overflow-hidden">
-            {/* Added overflow-hidden to prevent bleed */}
-            <h2
-              ref={titleRef}
-              className="text-massive font-extralight leading-none ml-[-0.05em] whitespace-nowrap"
-              style={{ color: 'var(--fg-primary)' }}
-            >
-              <ShuffleText text="Experience" duration={0.6} shuffleTimes={4} />
-            </h2>
-            <p
-              className="text-display-sm font-light mt-4"
-              style={{ color: 'var(--fg-secondary)' }}
-            >
-              Where I've worked
-            </p>
-          </div>
+        <div className="mb-16 md:py-32">
+          <p
+            className="text-micro mb-6"
+            style={{ color: 'var(--fg-muted)' }}
+          >
+            EXPERIENCE
+          </p>
+          <h2
+            ref={titleRef}
+            className="text-massive font-extralight"
+            style={{ color: 'var(--fg-primary)', whiteSpace: 'nowrap' }}
+          >
+            <ShuffleText text="Where I've worked" duration={0.6} shuffleTimes={4} />
+          </h2>
         </div>
 
         {/* Experience list */}
@@ -126,48 +129,86 @@ const Work = () => {
           {experiences.map((exp, i) => (
             <article
               key={exp.company}
-              className="work-item mb-16 last:mb-0"
+              className={`work-item mb-10 last:mb-0 ${exp.company === "NestlÃ©" ? "hidden" : ""}`}
+              onMouseEnter={() => setOpenExperience(i)}
             >
               {/* Top line */}
               <div
-                className="work-line h-px w-full mb-8"
+                className="work-line h-px w-full mb-0"
                 style={{ backgroundColor: 'var(--border)' }}
               />
 
-              <div className="work-content grid md:grid-cols-12 gap-6 md:gap-12">
-                {/* Left - Period */}
-                <div className="md:col-span-3">
-                  <p
-                    className="text-body-sm font-medium"
-                    style={{ color: 'var(--fg-muted)' }}
-                  >
-                    {exp.period}
-                  </p>
-                </div>
-
-                {/* Right - Content */}
-                <div className="md:col-span-9">
-                  <div className="flex flex-col md:flex-row md:items-baseline md:justify-between gap-2 mb-4">
-                    <h3
-                      className="text-body-xl font-medium"
-                      style={{ color: 'var(--fg-primary)' }}
+              <div className="work-content">
+                <button
+                  type="button"
+                  aria-expanded={openExperience === i}
+                  aria-controls={`work-panel-${i}`}
+                  onClick={() => toggleExperience(i)}
+                  onFocus={() => setOpenExperience(i)}
+                  className="w-full grid md:grid-cols-12 gap-6 md:gap-12 py-8 text-left group"
+                >
+                  <div className="md:col-span-3">
+                    <p
+                      className="text-body-sm font-medium"
+                      style={{ color: 'var(--fg-muted)' }}
                     >
-                      {exp.role}
-                    </h3>
-                    <span
-                      className="text-body-md"
-                      style={{ color: 'var(--fg-secondary)' }}
-                    >
-                      {exp.company}
-                    </span>
+                      {exp.period}
+                    </p>
                   </div>
-                  <p
-                    className="text-editorial font-light leading-relaxed"
-                    style={{ color: 'var(--fg-muted)' }}
-                  >
-                    {exp.description}
-                  </p>
-                </div>
+
+                  <div className="md:col-span-9">
+                    <div className="flex flex-col md:flex-row md:items-baseline md:justify-between gap-4">
+                      <div>
+                        <h3
+                          className="text-body-xl font-medium transition-opacity duration-300 group-hover:opacity-75"
+                          style={{ color: 'var(--fg-primary)' }}
+                        >
+                          {exp.role}
+                        </h3>
+                        <span
+                          className="text-body-md"
+                          style={{ color: 'var(--fg-secondary)' }}
+                        >
+                          {exp.company}
+                        </span>
+                      </div>
+
+                      <span
+                        className={`text-body-xl leading-none transition-transform duration-300 ${openExperience === i ? 'rotate-45' : ''
+                          }`}
+                        style={{ color: 'var(--fg-primary)' }}
+                        aria-hidden="true"
+                      >
+                        +
+                      </span>
+                    </div>
+                  </div>
+                </button>
+
+                <AnimatePresence initial={false}>
+                  {openExperience === i && (
+                    <motion.div
+                      id={`work-panel-${i}`}
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      style={{ overflow: 'hidden' }}
+                    >
+                      <div className="grid md:grid-cols-12 gap-6 md:gap-12 pb-10">
+                        <div className="hidden md:block md:col-span-3" />
+                        <div className="md:col-span-9">
+                          <p
+                            className="text-editorial font-light leading-relaxed"
+                            style={{ color: 'var(--fg-muted)' }}
+                          >
+                            {exp.description}
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </article>
           ))}
