@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { MENULINKS, PROJECTS } from "../../constants";
+import { MENULINKS } from "../../constants";
+import { featuredProjects } from "../../data/projects";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import Image from "next/image";
@@ -126,7 +127,7 @@ const Projects = ({ isDesktop }) => {
 
       {/* Fullscreen Project Panels */}
       <div ref={projectsContainerRef}>
-        {PROJECTS.slice(0, 4).map((project, index) => {
+        {featuredProjects.map((project, index) => {
           const isEven = index % 2 === 0;
 
           return (
@@ -143,7 +144,7 @@ const Projects = ({ isDesktop }) => {
               >
                 <div className="absolute inset-0 transition-transform duration-700 ease-out">
                   <Image
-                    src={project.image}
+                    src={project.image || "/project-bg.svg"}
                     alt={project.name}
                     fill
                     className="object-cover"
