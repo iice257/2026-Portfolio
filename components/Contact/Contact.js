@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { MENULINKS } from "../../constants";
@@ -6,7 +6,7 @@ import { MENULINKS } from "../../constants";
 const Contact = () => {
   const sectionRef = useRef(null);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const ctx = gsap.context(() => {
       const elements = sectionRef.current.querySelectorAll(".contact-reveal");
 

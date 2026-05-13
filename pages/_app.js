@@ -15,7 +15,7 @@ import "../components/ReactBits/TextPressure.css";
 import "../components/ReactBits/CardSwap.css";
 import "../components/ReactBits/FlowingMenu.css";
 import "../components/ReactBits/StaggeredMenu.css";
-import { GTAG } from "constants";
+import { GTAG } from "../constants";
 
 // Inner component to access snow and theme context
 const AppContent = ({ Component, pageProps }) => {

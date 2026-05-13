@@ -1,4 +1,4 @@
-import { useEffect, useRef, useLayoutEffect } from "react";
+import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { MENULINKS } from "../../constants";
@@ -10,7 +10,7 @@ const Hero = () => {
   const subtitleRef = useRef(null);
   const scrollIndicatorRef = useRef(null);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const ctx = gsap.context(() => {
       // Initial load animation
       const tl = gsap.timeline({

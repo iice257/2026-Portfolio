@@ -66,6 +66,18 @@ const StaggeredMenu = ({
         }`}
       style={{ backgroundColor: '#000000' }}
     >
+      <button
+        type="button"
+        onClick={toggleMenu}
+        aria-label="Close menu"
+        className={`absolute top-6 right-6 md:top-8 md:right-8 z-[100001] h-12 w-12 rounded-full border border-white/60 bg-white/10 flex items-center justify-center transition-all duration-300 cursor-none ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'
+          }`}
+        style={{ cursor: 'none' }}
+      >
+        <span className="absolute h-[2px] w-6 rotate-45 bg-white" />
+        <span className="absolute h-[2px] w-6 -rotate-45 bg-white" />
+      </button>
+
       {/* Navigation Items - LEFT ALIGNED */}
       <nav className="pl-6 md:pl-16 lg:pl-32 flex flex-col items-start w-full">
         {items.map((item, index) => (
@@ -144,9 +156,11 @@ const StaggeredMenu = ({
     <>
       {/* Menu Toggle Button - Fixed hamburger icon */}
       <button
-        className="w-10 h-10 relative z-[100000] flex items-center justify-center cursor-none"
+        className={`w-10 h-10 relative z-[100000] flex items-center justify-center cursor-none transition-opacity duration-300 ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          }`}
         onClick={toggleMenu}
-        aria-label={isOpen ? 'Close menu' : 'Open menu'}
+        aria-label="Open menu"
+        aria-hidden={isOpen}
         style={{ cursor: 'none' }}
       >
         <div className="w-6 h-4 relative flex flex-col justify-between pointer-events-none">

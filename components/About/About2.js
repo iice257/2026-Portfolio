@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 
@@ -6,7 +6,7 @@ const About2 = ({ clientHeight }) => {
   const sectionRef = useRef(null);
   const quoteRef = useRef(null);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const ctx = gsap.context(() => {
       const tl = gsap
         .timeline({
