@@ -22,6 +22,8 @@ const AppContent = ({ Component, pageProps }) => {
   const { isSnowing } = useSnow();
   const { theme } = useTheme();
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isFinePointer, setIsFinePointer] = useState(true);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
 
   // Page blur-in effect on load
   useEffect(() => {
@@ -29,12 +31,32 @@ const AppContent = ({ Component, pageProps }) => {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    const pointerQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const mobileQuery = window.matchMedia("(max-width: 767px)");
+
+    const updateCapabilities = () => {
+      setIsFinePointer(pointerQuery.matches);
+      setIsMobileViewport(mobileQuery.matches);
+    };
+
+    updateCapabilities();
+    pointerQuery.addEventListener("change", updateCapabilities);
+    mobileQuery.addEventListener("change", updateCapabilities);
+
+    return () => {
+      pointerQuery.removeEventListener("change", updateCapabilities);
+      mobileQuery.removeEventListener("change", updateCapabilities);
+    };
+  }, []);
+
   // Different snow colors for different themes
   const snowColor = theme === 'dark' ? '#ffffff' : '#888888';
+  const snowflakeCount = isMobileViewport ? 90 : 150;
 
   return (
     <>
-      <CustomCursor />
+      {isFinePointer && <CustomCursor />}
       <Header />
 
       {/* Page wrapper with blur-in animation */}
@@ -51,7 +73,7 @@ const AppContent = ({ Component, pageProps }) => {
       {isSnowing && (
         <Snowfall
           color={snowColor}
-          snowflakeCount={150}
+          snowflakeCount={snowflakeCount}
           speed={[1.5, 4.0]}
           wind={[-0.5, 2.0]}
           radius={[0.5, 2.5]}

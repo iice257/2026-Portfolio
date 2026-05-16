@@ -1,14 +1,32 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { MENULINKS } from "../../constants";
+import { useTheme } from "../../context/ThemeContext";
 import TextPressure from "../ReactBits/TextPressure";
 
+const ASCIIText = dynamic(() => import("../ReactBits/ASCIIText"), {
+  ssr: false,
+});
+
 const Hero = () => {
+  const { theme } = useTheme();
+  const [showMobileAscii, setShowMobileAscii] = useState(false);
   const sectionRef = useRef(null);
   const nameContainerRef = useRef(null);
   const subtitleRef = useRef(null);
   const scrollIndicatorRef = useRef(null);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+    const updateMobileAscii = () => setShowMobileAscii(mediaQuery.matches);
+
+    updateMobileAscii();
+    mediaQuery.addEventListener("change", updateMobileAscii);
+
+    return () => mediaQuery.removeEventListener("change", updateMobileAscii);
+  }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -46,10 +64,13 @@ const Hero = () => {
         scrub: 1,
         onUpdate: (self) => {
           const progress = self.progress;
+          const isMobile = window.matchMedia("(max-width: 767px)").matches;
 
           gsap.set(nameContainerRef.current, {
-            y: progress * 150,
-            opacity: 1 - progress * 1.2,
+            y: isMobile ? progress * 72 : progress * 150,
+            scale: isMobile ? 1 - progress * 0.18 : 1,
+            filter: isMobile ? `blur(${progress * 8}px)` : "blur(0px)",
+            opacity: isMobile ? 1 - progress * 0.55 : 1 - progress * 1.2,
           });
 
           gsap.set(subtitleRef.current, {
@@ -71,7 +92,7 @@ const Hero = () => {
     <section
       ref={sectionRef}
       id={MENULINKS[0].ref}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      className="relative min-h-[112svh] md:min-h-screen flex items-center justify-center overflow-hidden"
       style={{ backgroundColor: 'var(--bg-primary)' }}
     >
       <div className="section-container-wide w-full">
@@ -80,6 +101,20 @@ const Hero = () => {
           ref={nameContainerRef}
           className="relative flex flex-col items-center gap-8"
         >
+          <div className="md:hidden relative w-full h-[34vh] min-h-[18rem] max-h-[24rem]" aria-label="Kingsley Aremu">
+            {showMobileAscii && (
+              <ASCIIText
+                text="Kingsley_Aremu"
+                enableWaves={true}
+                asciiFontSize={7}
+                textFontSize={130}
+                planeBaseHeight={8}
+                textColor={theme === "dark" ? "#fdf9f3" : "#0a0a0a"}
+              />
+            )}
+          </div>
+
+          <div className="hidden md:flex w-full flex-col items-center gap-8">
           {/* First name */}
           <div style={{ position: 'relative', height: '120px', width: '100%', maxWidth: '800px', margin: '0 auto', marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
             <TextPressure
@@ -116,12 +151,13 @@ const Hero = () => {
               minFontSize={56}
             />
           </div>
+          </div>
         </div>
 
         {/* Subtitle - editorial style */}
         <div
           ref={subtitleRef}
-          className="mt-24 text-center max-w-2xl mx-auto"
+          className="hidden md:block mt-24 text-center max-w-2xl mx-auto"
         >
           <p
             className="text-editorial font-light"

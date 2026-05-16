@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { MENULINKS } from "../../constants";
@@ -14,6 +14,8 @@ const Projects = ({ isDesktop }) => {
   const sectionRef = useRef(null);
   const titleRef = useRef(null);
   const projectsContainerRef = useRef(null);
+  const lastPointerRef = useRef({ x: null, y: null });
+  const projectCursorActiveRef = useRef(false);
   const { setCursorText, setCursorVariant } = useCursor();
 
   useEffect(() => {
@@ -59,48 +61,84 @@ const Projects = ({ isDesktop }) => {
     return () => ctx.revert();
   }, [isDesktop]);
 
-  // Track mouse position ref for scroll detection
-  const mousePos = useRef({ x: 0, y: 0 });
+  const canUseHoverCursor = useCallback(() => (
+    typeof window !== "undefined" &&
+    window.matchMedia("(hover: hover) and (pointer: fine)").matches
+  ), []);
 
-  useEffect(() => {
-    const onMouseMove = (e) => {
-      mousePos.current = { x: e.clientX, y: e.clientY };
-    };
-    window.addEventListener('mousemove', onMouseMove);
-    return () => window.removeEventListener('mousemove', onMouseMove);
-  }, []);
-
-  // Handle cursor update on scroll (check if mouse is still over a project)
-  useEffect(() => {
-    const handleScroll = () => {
-      // Use elementFromPoint for robust detection during scroll without mouse movement
-      const el = document.elementFromPoint(mousePos.current.x, mousePos.current.y);
-      if (!el) return;
-
-      const panel = el.closest('.project-panel');
-
-      if (panel) {
-        setCursorText("Click for more details");
-        setCursorVariant("project");
-      } else {
-        setCursorText("");
-        setCursorVariant("default");
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [setCursorText, setCursorVariant]);
-
-  const handleMouseEnter = () => {
-    setCursorText("Click for more details");
-    setCursorVariant("project");
-  };
-
-  const handleMouseLeave = () => {
+  const clearProjectCursor = useCallback(() => {
+    if (!projectCursorActiveRef.current) return;
+    projectCursorActiveRef.current = false;
     setCursorText("");
     setCursorVariant("default");
-  };
+  }, [setCursorText, setCursorVariant]);
+
+  const setProjectCursor = useCallback(() => {
+    if (projectCursorActiveRef.current) return;
+    projectCursorActiveRef.current = true;
+    setCursorText("Click for more details");
+    setCursorVariant("project");
+  }, [setCursorText, setCursorVariant]);
+
+  const updateProjectCursorFromPointer = useCallback(() => {
+    if (!canUseHoverCursor()) {
+      clearProjectCursor();
+      return;
+    }
+
+    const { x, y } = lastPointerRef.current;
+    if (x === null || y === null) {
+      clearProjectCursor();
+      return;
+    }
+
+    const panels = projectsContainerRef.current?.querySelectorAll(".project-panel");
+    const isOverProject = Array.from(panels || []).some((panel) => {
+      const rect = panel.getBoundingClientRect();
+      return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+    });
+
+    if (isOverProject) {
+      setProjectCursor();
+    } else {
+      clearProjectCursor();
+    }
+  }, [canUseHoverCursor, clearProjectCursor, setProjectCursor]);
+
+  useEffect(() => {
+    const handlePointerMove = (event) => {
+      lastPointerRef.current = { x: event.clientX, y: event.clientY };
+      updateProjectCursorFromPointer();
+    };
+
+    const handleScrollOrResize = () => {
+      updateProjectCursorFromPointer();
+    };
+
+    const handlePointerLeave = () => {
+      lastPointerRef.current = { x: null, y: null };
+      clearProjectCursor();
+    };
+
+    const handleRouteStart = () => {
+      clearProjectCursor();
+    };
+
+    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    window.addEventListener("scroll", handleScrollOrResize, { passive: true });
+    window.addEventListener("resize", handleScrollOrResize);
+    document.addEventListener("pointerleave", handlePointerLeave);
+    router.events.on("routeChangeStart", handleRouteStart);
+
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("scroll", handleScrollOrResize);
+      window.removeEventListener("resize", handleScrollOrResize);
+      document.removeEventListener("pointerleave", handlePointerLeave);
+      router.events.off("routeChangeStart", handleRouteStart);
+      clearProjectCursor();
+    };
+  }, [clearProjectCursor, router.events, updateProjectCursorFromPointer]);
 
   return (
     <section
@@ -134,9 +172,10 @@ const Projects = ({ isDesktop }) => {
             <div
               key={project.name}
               className="project-panel min-h-screen grid grid-cols-1 lg:grid-cols-2 group cursor-none"
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-              onClick={() => router.push(`/projects/${project.slug}`)}
+              onClick={() => {
+                clearProjectCursor();
+                router.push(`/projects/${project.slug}`);
+              }}
             >
               {/* Image Side - Full height image */}
               <div
@@ -147,7 +186,7 @@ const Projects = ({ isDesktop }) => {
                     src={project.image || "/project-bg.svg"}
                     alt={project.name}
                     fill
-                    className="object-cover"
+                    className="project-panel-visual object-cover"
                     sizes="(max-width: 1024px) 100vw, 50vw"
                     priority={index === 0}
                   />
@@ -156,11 +195,11 @@ const Projects = ({ isDesktop }) => {
 
               {/* Info Side - Simple text details details - CENTERED SQUARE */}
               <div
-                className={`relative min-h-[50vh] lg:min-h-screen flex items-center justify-center p-8 md:p-12 lg:p-16 ${isEven ? 'order-1 lg:order-1' : 'order-1 lg:order-2'
+                className={`relative min-h-[52vh] lg:min-h-screen grid place-items-center p-8 py-16 md:p-12 lg:p-16 ${isEven ? 'order-1 lg:order-1' : 'order-1 lg:order-2'
                   }`}
                 style={{ backgroundColor: 'var(--bg-primary)' }}
               >
-                <div className="w-full max-w-lg flex flex-col items-center text-center">
+                <div className="w-full max-w-[34rem] min-h-[min(56vh,38rem)] flex flex-col items-center justify-center text-center mx-auto">
 
                   {/* Project Number (top-right of content?) or keep at bottom? User said "bring them to the center into a square" */}
                   {/* I'll put project name on top, then desc, then tags. */}
@@ -186,7 +225,7 @@ const Projects = ({ isDesktop }) => {
                   </p>
 
                   {/* Tech Stack */}
-                  <div className="flex flex-wrap justify-center gap-x-3 gap-y-2">
+                  <div className="w-full flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
                     {project.tech.map((tech, i) => (
                       <span key={tech} className="inline-flex items-center">
                         <span

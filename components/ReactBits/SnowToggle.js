@@ -1,56 +1,76 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSnow } from '../../context/SnowContext';
-import { useTooltip } from '../../context/TooltipContext';
 import { useTheme } from '../../context/ThemeContext';
+
+const TooltipBubble = ({ children }) => (
+  <div
+    className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-2 text-xs whitespace-nowrap z-[100001]"
+    style={{
+      backgroundColor: 'var(--fg-primary)',
+      color: 'var(--bg-primary)',
+      borderRadius: '4px',
+      pointerEvents: 'none',
+    }}
+  >
+    {children}
+    <div
+      className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45"
+      style={{ backgroundColor: 'var(--fg-primary)' }}
+    />
+  </div>
+);
 
 const SnowToggle = () => {
   const { isSnowing, toggleSnow } = useSnow();
   const { theme } = useTheme();
-  const {
-    showSnowTooltip,
-    setShowSnowTooltip,
-    showNiceTooltip,
-    setShowNiceTooltip,
-    snowTooltipWasShown,
-    setSnowTooltipWasShown
-  } = useTooltip();
+  const [tooltipText, setTooltipText] = useState("click for snow");
+  const [isTooltipVisible, setIsTooltipVisible] = useState(false);
+  const hideTooltipTimerRef = useRef(null);
+  const clickedSnowInLightRef = useRef(false);
 
-  // Show tooltip after 3 seconds if not shown before
+  const clearTooltipTimer = useCallback(() => {
+    window.clearTimeout(hideTooltipTimerRef.current);
+    hideTooltipTimerRef.current = null;
+  }, []);
+
+  const showTooltip = useCallback((text, duration) => {
+    clearTooltipTimer();
+    setTooltipText(text);
+    setIsTooltipVisible(true);
+
+    hideTooltipTimerRef.current = window.setTimeout(() => {
+      setIsTooltipVisible(false);
+      hideTooltipTimerRef.current = null;
+    }, duration);
+  }, [clearTooltipTimer]);
+
   useEffect(() => {
-    // If it was already shown in history, do nothing.
-    if (snowTooltipWasShown) return;
+    const isTouch = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+    showTooltip(isTouch ? "tap for snow" : "click for snow", 5000);
 
-    // Wait for everything to load
-    const timer = setTimeout(() => {
-      // Logic: Only show if light mode (per original design) or just show it?
-      // Original said "Works better in dark mode" -> implies we are in light mode
-      // Let's assume we show it if we are in light mode.
-      if (theme === 'light') {
-        setShowSnowTooltip(true);
-        // Mark as shown so it doesn't show again this session
-        setSnowTooltipWasShown(true);
+    return () => {
+      clearTooltipTimer();
+    };
+  }, [clearTooltipTimer, showTooltip]);
 
-        // Hide after 4 seconds
-        setTimeout(() => {
-          setShowSnowTooltip(false);
-        }, 4000);
-      }
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, [theme, snowTooltipWasShown, setShowSnowTooltip, setSnowTooltipWasShown]);
+  useEffect(() => {
+    if (theme === "dark" && clickedSnowInLightRef.current) {
+      clickedSnowInLightRef.current = false;
+      showTooltip("nice!", 3000);
+    }
+  }, [showTooltip, theme]);
 
   const handleToggle = () => {
     toggleSnow();
 
-    // If we're toggling ON, show "Nice!"
-    if (!isSnowing) {
-      // Hide the suggestion tooltip if it's there
-      setShowSnowTooltip(false);
-
-      setShowNiceTooltip(true);
-      setTimeout(() => setShowNiceTooltip(false), 2000);
+    if (theme === "dark") {
+      clickedSnowInLightRef.current = false;
+      showTooltip("nice!", 3000);
+      return;
     }
+
+    clickedSnowInLightRef.current = true;
+    showTooltip("looks better in light mode", 3000);
   };
 
   return (
@@ -82,42 +102,8 @@ const SnowToggle = () => {
         </svg>
       </button>
 
-      {/* Tooltip for light mode: "Works better in dark mode" */}
-      {showSnowTooltip && (
-        <div
-          className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-2 text-xs whitespace-nowrap z-[100001]"
-          style={{
-            backgroundColor: 'var(--fg-primary)',
-            color: 'var(--bg-primary)',
-            borderRadius: '4px',
-            pointerEvents: 'none',
-          }}
-        >
-          Works better in dark mode
-          <div
-            className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45"
-            style={{ backgroundColor: 'var(--fg-primary)' }}
-          />
-        </div>
-      )}
-
-      {/* Nice! tooltip */}
-      {showNiceTooltip && (
-        <div
-          className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-2 text-xs whitespace-nowrap z-[100001]"
-          style={{
-            backgroundColor: 'var(--fg-primary)',
-            color: 'var(--bg-primary)',
-            borderRadius: '4px',
-            pointerEvents: 'none',
-          }}
-        >
-          Nice!
-          <div
-            className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45"
-            style={{ backgroundColor: 'var(--fg-primary)' }}
-          />
-        </div>
+      {isTooltipVisible && (
+        <TooltipBubble>{tooltipText}</TooltipBubble>
       )}
     </div>
   );

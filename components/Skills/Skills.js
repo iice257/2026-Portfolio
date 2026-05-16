@@ -49,6 +49,11 @@ const Skills = () => {
       description: "Managing databases and data structures for efficient storage and retrieval."
     },
     {
+      name: "AI and Agents",
+      skills: ["AI Agents", "Prompt Workflows", "Automation", "Tool Calling", "Research Systems"],
+      description: "Designing practical AI workflows, agent tools, and automation systems that support real users."
+    },
+    {
       name: "Practices",
       skills: ["Performance Optimization", "Responsive Design", "UI/UX Awareness", "System Maintenance"],
       description: "Applying industry best practices for maintainable, high-quality code."
@@ -57,6 +62,22 @@ const Skills = () => {
 
   const handleCategoryClick = (categoryName) => {
     setExpandedCategory(expandedCategory === categoryName ? null : categoryName);
+  };
+
+  const renderDescription = (description) => {
+    const [before, after] = description.split("high-quality");
+
+    if (!after) {
+      return description;
+    }
+
+    return (
+      <>
+        {before}
+        <span className="whitespace-nowrap">high-quality</span>
+        {after}
+      </>
+    );
   };
 
   return (
@@ -102,7 +123,7 @@ const Skills = () => {
                     {String(index + 1).padStart(2, '0')}
                   </span>
                   <span
-                    className="text-display-sm font-light group-hover:font-normal transition-all duration-300"
+                    className="text-display-sm font-light group-hover:font-black transition-all duration-300"
                     style={{ color: 'var(--fg-primary)' }}
                   >
                     {category.name}
@@ -145,7 +166,7 @@ const Skills = () => {
                         className="text-editorial font-light mb-6 max-w-2xl"
                         style={{ color: 'var(--fg-secondary)' }}
                       >
-                        {category.description}
+                        {renderDescription(category.description)}
                       </p>
 
                       {/* Skills - LEFT ALIGNED, flow naturally like text */}

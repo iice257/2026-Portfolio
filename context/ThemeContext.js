@@ -12,22 +12,35 @@ export const ThemeProvider = ({ children }) => {
   useEffect(() => {
     setMounted(true);
     const stored = localStorage.getItem("theme");
-    if (stored) {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    if (stored === "dark" || stored === "light") {
       setTheme(stored);
-    } else if (window.matchMedia("(prefers-color-scheme: light)").matches) {
-      setTheme("light");
+      return undefined;
     }
+
+    const syncSystemTheme = (event) => {
+      setTheme(event.matches ? "dark" : "light");
+    };
+
+    setTheme(mediaQuery.matches ? "dark" : "light");
+    mediaQuery.addEventListener("change", syncSystemTheme);
+
+    return () => mediaQuery.removeEventListener("change", syncSystemTheme);
   }, []);
 
   useEffect(() => {
     if (mounted) {
       document.documentElement.setAttribute("data-theme", theme);
-      localStorage.setItem("theme", theme);
     }
   }, [theme, mounted]);
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+    setTheme((prev) => {
+      const nextTheme = prev === "dark" ? "light" : "dark";
+      localStorage.setItem("theme", nextTheme);
+      return nextTheme;
+    });
   };
 
   return (
