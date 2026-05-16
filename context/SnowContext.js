@@ -11,9 +11,12 @@ export const SnowProvider = ({ children }) => {
   // Persist snow preference in sessionStorage (not localStorage - only for current session)
   useEffect(() => {
     const saved = sessionStorage.getItem("isSnowing");
-    if (saved === "true") {
-      setIsSnowing(true);
+    if (saved !== null) {
+      setIsSnowing(saved === "true");
+      return;
     }
+
+    setIsSnowing(window.matchMedia("(max-width: 767px)").matches);
   }, []);
 
   useEffect(() => {

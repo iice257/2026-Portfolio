@@ -1,56 +1,140 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSnow } from '../../context/SnowContext';
-import { useTooltip } from '../../context/TooltipContext';
 import { useTheme } from '../../context/ThemeContext';
+
+const TOOLTIP_EXIT_MS = 180;
+const SNOW_OFF_EXIT_MS = 400;
+
+const TooltipBubble = ({ children, phase, exitDuration = TOOLTIP_EXIT_MS }) => (
+  <div
+    className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-2 text-xs whitespace-nowrap z-[100001]"
+    style={{
+      backgroundColor: 'var(--fg-primary)',
+      color: 'var(--bg-primary)',
+      borderRadius: '4px',
+      pointerEvents: 'none',
+      opacity: phase === 'visible' ? 1 : 0,
+      transform: `translateX(-50%) scale(${phase === 'visible' ? 1 : 0.94})`,
+      transformOrigin: 'top center',
+      transition: `opacity ${exitDuration}ms ease, transform ${exitDuration}ms cubic-bezier(0.16, 1, 0.3, 1)`,
+    }}
+  >
+    {children}
+    <div
+      className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45"
+      style={{ backgroundColor: 'var(--fg-primary)' }}
+    />
+  </div>
+);
 
 const SnowToggle = () => {
   const { isSnowing, toggleSnow } = useSnow();
   const { theme } = useTheme();
-  const {
-    showSnowTooltip,
-    setShowSnowTooltip,
-    showNiceTooltip,
-    setShowNiceTooltip,
-    snowTooltipWasShown,
-    setSnowTooltipWasShown
-  } = useTooltip();
+  const [tooltipText, setTooltipText] = useState("click for snow");
+  const [isTooltipMounted, setIsTooltipMounted] = useState(false);
+  const [tooltipPhase, setTooltipPhase] = useState("hidden");
+  const [tooltipExitDuration, setTooltipExitDuration] = useState(TOOLTIP_EXIT_MS);
+  const hideTooltipTimerRef = useRef(null);
+  const unmountTooltipTimerRef = useRef(null);
+  const enterFrameRef = useRef(null);
+  const tooltipMountedRef = useRef(false);
+  const tooltipPhaseRef = useRef("hidden");
+  const clickedSnowInLightRef = useRef(false);
 
-  // Show tooltip after 3 seconds if not shown before
+  const clearTooltipTimer = useCallback(() => {
+    window.clearTimeout(hideTooltipTimerRef.current);
+    hideTooltipTimerRef.current = null;
+    window.clearTimeout(unmountTooltipTimerRef.current);
+    unmountTooltipTimerRef.current = null;
+    window.cancelAnimationFrame(enterFrameRef.current);
+    enterFrameRef.current = null;
+  }, []);
+
+  const hideTooltip = useCallback((exitDuration = TOOLTIP_EXIT_MS) => {
+    window.clearTimeout(hideTooltipTimerRef.current);
+    hideTooltipTimerRef.current = null;
+    window.clearTimeout(unmountTooltipTimerRef.current);
+    unmountTooltipTimerRef.current = null;
+    window.cancelAnimationFrame(enterFrameRef.current);
+    enterFrameRef.current = null;
+
+    if (!tooltipMountedRef.current) return;
+
+    setTooltipExitDuration(exitDuration);
+    tooltipPhaseRef.current = "exit";
+    setTooltipPhase("exit");
+    unmountTooltipTimerRef.current = window.setTimeout(() => {
+      tooltipMountedRef.current = false;
+      tooltipPhaseRef.current = "hidden";
+      setIsTooltipMounted(false);
+      setTooltipPhase("hidden");
+      unmountTooltipTimerRef.current = null;
+    }, exitDuration);
+  }, []);
+
+  const showTooltip = useCallback((text, duration) => {
+    clearTooltipTimer();
+    const shouldAnimateIn = !tooltipMountedRef.current || tooltipPhaseRef.current === "hidden";
+
+    setTooltipText(text);
+    setTooltipExitDuration(TOOLTIP_EXIT_MS);
+
+    if (shouldAnimateIn) {
+      tooltipMountedRef.current = true;
+      tooltipPhaseRef.current = "enter";
+      setIsTooltipMounted(true);
+      setTooltipPhase("enter");
+
+      enterFrameRef.current = window.requestAnimationFrame(() => {
+        tooltipPhaseRef.current = "visible";
+        setTooltipPhase("visible");
+        enterFrameRef.current = null;
+      });
+    } else {
+      tooltipPhaseRef.current = "visible";
+      setTooltipPhase("visible");
+    }
+
+    hideTooltipTimerRef.current = window.setTimeout(() => {
+      hideTooltip();
+      hideTooltipTimerRef.current = null;
+    }, duration);
+  }, [clearTooltipTimer, hideTooltip]);
+
   useEffect(() => {
-    // If it was already shown in history, do nothing.
-    if (snowTooltipWasShown) return;
+    const isTouch = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+    showTooltip(isTouch ? "tap for snow" : "click for snow", 5000);
 
-    // Wait for everything to load
-    const timer = setTimeout(() => {
-      // Logic: Only show if light mode (per original design) or just show it?
-      // Original said "Works better in dark mode" -> implies we are in light mode
-      // Let's assume we show it if we are in light mode.
-      if (theme === 'light') {
-        setShowSnowTooltip(true);
-        // Mark as shown so it doesn't show again this session
-        setSnowTooltipWasShown(true);
+    return () => {
+      clearTooltipTimer();
+    };
+  }, [clearTooltipTimer, showTooltip]);
 
-        // Hide after 4 seconds
-        setTimeout(() => {
-          setShowSnowTooltip(false);
-        }, 4000);
-      }
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, [theme, snowTooltipWasShown, setShowSnowTooltip, setSnowTooltipWasShown]);
+  useEffect(() => {
+    if (theme === "dark" && clickedSnowInLightRef.current) {
+      clickedSnowInLightRef.current = false;
+      showTooltip("nice!", 3000);
+    }
+  }, [showTooltip, theme]);
 
   const handleToggle = () => {
+    const isTurningOff = isSnowing;
     toggleSnow();
 
-    // If we're toggling ON, show "Nice!"
-    if (!isSnowing) {
-      // Hide the suggestion tooltip if it's there
-      setShowSnowTooltip(false);
-
-      setShowNiceTooltip(true);
-      setTimeout(() => setShowNiceTooltip(false), 2000);
+    if (isTurningOff) {
+      clickedSnowInLightRef.current = false;
+      hideTooltip(SNOW_OFF_EXIT_MS);
+      return;
     }
+
+    if (theme === "dark") {
+      clickedSnowInLightRef.current = false;
+      showTooltip("nice!", 3000);
+      return;
+    }
+
+    clickedSnowInLightRef.current = true;
+    showTooltip("looks better in light mode", 3000);
   };
 
   return (
@@ -82,42 +166,10 @@ const SnowToggle = () => {
         </svg>
       </button>
 
-      {/* Tooltip for light mode: "Works better in dark mode" */}
-      {showSnowTooltip && (
-        <div
-          className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-2 text-xs whitespace-nowrap z-[100001]"
-          style={{
-            backgroundColor: 'var(--fg-primary)',
-            color: 'var(--bg-primary)',
-            borderRadius: '4px',
-            pointerEvents: 'none',
-          }}
-        >
-          Works better in dark mode
-          <div
-            className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45"
-            style={{ backgroundColor: 'var(--fg-primary)' }}
-          />
-        </div>
-      )}
-
-      {/* Nice! tooltip */}
-      {showNiceTooltip && (
-        <div
-          className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-2 text-xs whitespace-nowrap z-[100001]"
-          style={{
-            backgroundColor: 'var(--fg-primary)',
-            color: 'var(--bg-primary)',
-            borderRadius: '4px',
-            pointerEvents: 'none',
-          }}
-        >
-          Nice!
-          <div
-            className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45"
-            style={{ backgroundColor: 'var(--fg-primary)' }}
-          />
-        </div>
+      {isTooltipMounted && (
+        <TooltipBubble phase={tooltipPhase} exitDuration={tooltipExitDuration}>
+          {tooltipText}
+        </TooltipBubble>
       )}
     </div>
   );

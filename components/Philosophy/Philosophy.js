@@ -42,12 +42,12 @@ const Philosophy = () => {
   return (
     <section
       ref={sectionRef}
-      className="min-h-[200vh] flex items-start justify-center pt-[30vh]"
+      className="relative z-20 -mt-[18vh] md:mt-0 min-h-[220vh] md:min-h-[200vh] flex items-start justify-center pt-[18vh] md:pt-[30vh]"
       style={{ backgroundColor: 'var(--bg-primary)' }}
     >
-      <div className="section-container text-center sticky top-[30vh]">
+      <div className="section-container text-center sticky top-[18vh] md:top-[30vh]">
         <h2
-          className="text-display-xl md:text-giant font-extralight max-w-5xl mx-auto leading-[1.2]"
+          className="text-[clamp(3.25rem,16vw,6rem)] md:text-giant font-extralight max-w-5xl mx-auto leading-[1.05] md:leading-[1.2]"
           style={{ color: 'var(--fg-primary)' }}
         >
           {words.map((word, i) => (

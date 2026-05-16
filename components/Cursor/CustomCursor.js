@@ -13,27 +13,24 @@ const CustomCursor = () => {
   // Use GSAP's quickSetter for performance
   const xSet = useRef(null);
   const ySet = useRef(null);
+  const lastPointerRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     // Setup quickSetters
     xSet.current = gsap.quickSetter(cursorRef.current, "x", "px");
     ySet.current = gsap.quickSetter(cursorRef.current, "y", "px");
 
-    // Text ref setters
-    const xSetText = gsap.quickSetter(textRef.current, "x", "px");
-    const ySetText = gsap.quickSetter(textRef.current, "y", "px");
-
     const onMouseMove = (e) => {
       // Ensure visible on movement
       if (!isVisible) setIsVisible(true);
+      lastPointerRef.current = { x: e.clientX, y: e.clientY };
 
       if (xSet.current && ySet.current) {
         xSet.current(e.clientX);
         ySet.current(e.clientY);
       }
       if (textRef.current) {
-        xSetText(e.clientX);
-        ySetText(e.clientY);
+        gsap.set(textRef.current, { x: e.clientX, y: e.clientY });
       }
     };
 
@@ -55,6 +52,15 @@ const CustomCursor = () => {
       document.removeEventListener('mouseenter', onMouseEnter);
     };
   }, [isVisible]);
+
+  useEffect(() => {
+    if (!cursorText || !textRef.current) return;
+
+    gsap.set(textRef.current, {
+      x: lastPointerRef.current.x,
+      y: lastPointerRef.current.y,
+    });
+  }, [cursorText]);
 
   // Theme colors
   const isDark = theme === 'dark';
