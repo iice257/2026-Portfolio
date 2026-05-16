@@ -101,7 +101,7 @@ const StaggeredMenu = ({
               {/* Number */}
               {displayItemNumbering && (
                 <span
-                  className="text-base md:text-lg font-light w-12 opacity-50 group-hover:opacity-100 transition-opacity duration-300"
+                  className="relative z-10 text-base md:text-lg font-light w-12 opacity-50 group-hover:opacity-100 transition-opacity duration-300"
                   style={{ color: '#ffffff' }}
                 >
                   {String(index + 1).padStart(2, '0')}
@@ -109,7 +109,7 @@ const StaggeredMenu = ({
               )}
 
               {/* Label Container */}
-              <span className="relative overflow-hidden block h-[1.2em]">
+              <span className="relative z-10 overflow-hidden block h-[1.2em]">
                 <span className="block transition-transform duration-500 ease-in-out group-hover:-translate-y-full">
                   {item.label}
                 </span>
@@ -120,7 +120,7 @@ const StaggeredMenu = ({
 
               {/* Underline line - absolute to the link container */}
               <span
-                className="absolute left-20 right-0 h-[2px] bg-white transform origin-left scale-x-0 transition-transform duration-500 ease-out group-hover:scale-x-100"
+                className="absolute z-0 left-20 right-0 h-[2px] bg-white transform origin-left scale-x-0 transition-transform duration-500 ease-out group-hover:scale-x-100"
                 style={{ bottom: '1.35rem' }} // Adjust based on padding
               />
             </Link>
