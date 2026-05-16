@@ -2,7 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSnow } from '../../context/SnowContext';
 import { useTheme } from '../../context/ThemeContext';
 
-const TooltipBubble = ({ children }) => (
+const TOOLTIP_EXIT_MS = 180;
+const SNOW_OFF_EXIT_MS = 400;
+
+const TooltipBubble = ({ children, phase, exitDuration = TOOLTIP_EXIT_MS }) => (
   <div
     className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-2 text-xs whitespace-nowrap z-[100001]"
     style={{
@@ -10,6 +13,10 @@ const TooltipBubble = ({ children }) => (
       color: 'var(--bg-primary)',
       borderRadius: '4px',
       pointerEvents: 'none',
+      opacity: phase === 'visible' ? 1 : 0,
+      transform: `translateX(-50%) scale(${phase === 'visible' ? 1 : 0.94})`,
+      transformOrigin: 'top center',
+      transition: `opacity ${exitDuration}ms ease, transform ${exitDuration}ms cubic-bezier(0.16, 1, 0.3, 1)`,
     }}
   >
     {children}
@@ -24,25 +31,75 @@ const SnowToggle = () => {
   const { isSnowing, toggleSnow } = useSnow();
   const { theme } = useTheme();
   const [tooltipText, setTooltipText] = useState("click for snow");
-  const [isTooltipVisible, setIsTooltipVisible] = useState(false);
+  const [isTooltipMounted, setIsTooltipMounted] = useState(false);
+  const [tooltipPhase, setTooltipPhase] = useState("hidden");
+  const [tooltipExitDuration, setTooltipExitDuration] = useState(TOOLTIP_EXIT_MS);
   const hideTooltipTimerRef = useRef(null);
+  const unmountTooltipTimerRef = useRef(null);
+  const enterFrameRef = useRef(null);
+  const tooltipMountedRef = useRef(false);
+  const tooltipPhaseRef = useRef("hidden");
   const clickedSnowInLightRef = useRef(false);
 
   const clearTooltipTimer = useCallback(() => {
     window.clearTimeout(hideTooltipTimerRef.current);
     hideTooltipTimerRef.current = null;
+    window.clearTimeout(unmountTooltipTimerRef.current);
+    unmountTooltipTimerRef.current = null;
+    window.cancelAnimationFrame(enterFrameRef.current);
+    enterFrameRef.current = null;
+  }, []);
+
+  const hideTooltip = useCallback((exitDuration = TOOLTIP_EXIT_MS) => {
+    window.clearTimeout(hideTooltipTimerRef.current);
+    hideTooltipTimerRef.current = null;
+    window.clearTimeout(unmountTooltipTimerRef.current);
+    unmountTooltipTimerRef.current = null;
+    window.cancelAnimationFrame(enterFrameRef.current);
+    enterFrameRef.current = null;
+
+    if (!tooltipMountedRef.current) return;
+
+    setTooltipExitDuration(exitDuration);
+    tooltipPhaseRef.current = "exit";
+    setTooltipPhase("exit");
+    unmountTooltipTimerRef.current = window.setTimeout(() => {
+      tooltipMountedRef.current = false;
+      tooltipPhaseRef.current = "hidden";
+      setIsTooltipMounted(false);
+      setTooltipPhase("hidden");
+      unmountTooltipTimerRef.current = null;
+    }, exitDuration);
   }, []);
 
   const showTooltip = useCallback((text, duration) => {
     clearTooltipTimer();
+    const shouldAnimateIn = !tooltipMountedRef.current || tooltipPhaseRef.current === "hidden";
+
     setTooltipText(text);
-    setIsTooltipVisible(true);
+    setTooltipExitDuration(TOOLTIP_EXIT_MS);
+
+    if (shouldAnimateIn) {
+      tooltipMountedRef.current = true;
+      tooltipPhaseRef.current = "enter";
+      setIsTooltipMounted(true);
+      setTooltipPhase("enter");
+
+      enterFrameRef.current = window.requestAnimationFrame(() => {
+        tooltipPhaseRef.current = "visible";
+        setTooltipPhase("visible");
+        enterFrameRef.current = null;
+      });
+    } else {
+      tooltipPhaseRef.current = "visible";
+      setTooltipPhase("visible");
+    }
 
     hideTooltipTimerRef.current = window.setTimeout(() => {
-      setIsTooltipVisible(false);
+      hideTooltip();
       hideTooltipTimerRef.current = null;
     }, duration);
-  }, [clearTooltipTimer]);
+  }, [clearTooltipTimer, hideTooltip]);
 
   useEffect(() => {
     const isTouch = window.matchMedia("(hover: none), (pointer: coarse)").matches;
@@ -61,7 +118,14 @@ const SnowToggle = () => {
   }, [showTooltip, theme]);
 
   const handleToggle = () => {
+    const isTurningOff = isSnowing;
     toggleSnow();
+
+    if (isTurningOff) {
+      clickedSnowInLightRef.current = false;
+      hideTooltip(SNOW_OFF_EXIT_MS);
+      return;
+    }
 
     if (theme === "dark") {
       clickedSnowInLightRef.current = false;
@@ -102,8 +166,10 @@ const SnowToggle = () => {
         </svg>
       </button>
 
-      {isTooltipVisible && (
-        <TooltipBubble>{tooltipText}</TooltipBubble>
+      {isTooltipMounted && (
+        <TooltipBubble phase={tooltipPhase} exitDuration={tooltipExitDuration}>
+          {tooltipText}
+        </TooltipBubble>
       )}
     </div>
   );
