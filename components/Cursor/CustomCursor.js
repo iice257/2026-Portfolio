@@ -3,7 +3,8 @@ import { useCursor } from '../../context/CursorContext';
 import { gsap } from 'gsap';
 
 const DEFAULT_CURSOR_PATH = "M5.5 3 C5.5 3 5.5 3 5.5 3 L11.5 26.5 C11.5 26.5 11.5 26.5 11.5 26.5 L16.2 17.8 C16.2 17.8 16.2 17.8 16.2 17.8 L25.5 17.8 C25.5 17.8 25.5 17.8 25.5 17.8 L5.5 3 Z";
-const CLICKABLE_CURSOR_PATH = "M5.5 3 C5.95 3.3 6.2 3.45 6.55 3.72 L24.65 17.05 C25.65 17.8 25.2 18.55 23.95 18.55 L16.75 18.55 C16.2 18.55 15.9 18.8 15.65 19.25 L12.2 25.65 C11.65 26.65 10.95 26.35 10.65 25.15 L5.5 3 Z";
+const CLICKABLE_CURSOR_PATH = "M5.5 3 C6.25 3.45 6.85 3.9 7.45 4.38 L23.85 16.45 C25.55 17.7 25 19.05 22.9 19.05 L17.35 19.05 C16.45 19.05 15.95 19.45 15.55 20.22 L12.9 25.12 C11.8 27.15 10.42 26.7 9.88 24.48 L5.5 3 Z";
+const CURSOR_SIZE = 32;
 
 const CustomCursor = () => {
   const cursorRef = useRef(null);
@@ -117,6 +118,8 @@ const CustomCursor = () => {
         className={`fixed top-0 left-0 pointer-events-none z-[999999] transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
         style={{
           willChange: 'transform',
+          width: `${CURSOR_SIZE}px`,
+          height: `${CURSOR_SIZE}px`,
           mixBlendMode: 'difference' // Inverts cursor color based on background
         }}
       >
@@ -124,16 +127,29 @@ const CustomCursor = () => {
         <div
           className="relative transition-all duration-300 ease-out"
           style={{
+            width: `${CURSOR_SIZE}px`,
+            height: `${CURSOR_SIZE}px`,
+            transformOrigin: "0 0",
             transform: isProject ? 'scale(0)' : (isMenu ? 'scale(1.2)' : 'scale(1)'),
           }}
         >
           <svg
-            width="32"
-            height="32"
+            width={CURSOR_SIZE}
+            height={CURSOR_SIZE}
             viewBox="0 0 32 32"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            style={{ overflow: 'visible' }}
+            style={{
+              display: 'block',
+              width: `${CURSOR_SIZE}px`,
+              height: `${CURSOR_SIZE}px`,
+              minWidth: `${CURSOR_SIZE}px`,
+              minHeight: `${CURSOR_SIZE}px`,
+              maxWidth: `${CURSOR_SIZE}px`,
+              maxHeight: `${CURSOR_SIZE}px`,
+              overflow: 'visible',
+            }}
+            vectorEffect="non-scaling-stroke"
           >
             <defs>
               <clipPath id="custom-cursor-fill">
@@ -154,6 +170,7 @@ const CustomCursor = () => {
               strokeWidth="1.5"
               strokeLinecap="round"
               strokeLinejoin="round"
+              vectorEffect="non-scaling-stroke"
               fill="transparent"
             />
           </svg>
