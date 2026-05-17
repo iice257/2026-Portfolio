@@ -75,22 +75,9 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-16 md:mt-24 py-10 md:py-14 border-y" style={{ borderColor: "var(--border)" }}>
-          <p
-            className="font-extralight uppercase leading-none select-none"
-            style={{
-              color: "var(--fg-primary)",
-              fontSize: "clamp(3rem, 6rem, 7rem)",
-              letterSpacing: 0,
-            }}
-          >
-            Kingsley Aremu
-          </p>
-        </div>
-
-        <div className="pt-7 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="mt-16 md:mt-24 pt-7 border-t flex flex-col md:flex-row md:items-center justify-between gap-4" style={{ borderColor: "var(--border)" }}>
           <p className="text-body-sm" style={{ color: "var(--fg-muted)" }}>
-            &copy; {currentYear} {METADATA.author}
+            &copy; {currentYear} KA
           </p>
           <p className="text-body-sm" style={{ color: "var(--fg-muted)" }}>
             Full-Stack Developer based in {METADATA.location}.

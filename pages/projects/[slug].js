@@ -41,10 +41,54 @@ const DetailBlock = ({ label, title, children }) => (
   </article>
 );
 
+const ProjectNumberCarousel = ({ projects, currentIndex }) => {
+  const currentProject = projects[currentIndex];
+  const carouselItems = [
+    ...projects.filter((_, index) => index !== currentIndex),
+    currentProject,
+  ];
+
+  return (
+    <div
+      className="project-number-carousel mb-4"
+      tabIndex={0}
+      aria-label={`Project ${String(currentIndex + 1).padStart(2, "0")}: ${currentProject.name}`}
+    >
+      <span
+        className="project-number-current text-display-2xl font-thin"
+        aria-hidden="true"
+      >
+        {String(currentIndex + 1).padStart(2, "0")}
+      </span>
+      <div className="project-number-track" aria-hidden="true">
+        {carouselItems.map((item) => {
+          const itemIndex = projects.findIndex((projectItem) => projectItem.slug === item.slug);
+          const isCurrent = itemIndex === currentIndex;
+
+          return (
+            <div key={item.slug} className="project-number-item">
+              <span className={`block text-display-sm leading-none ${isCurrent ? "font-black" : "font-thin"}`}>
+                {String(itemIndex + 1).padStart(2, "0")}
+              </span>
+              <span className={`mt-2 block text-micro normal-case tracking-normal ${isCurrent ? "font-black" : "font-light"}`}>
+                {item.name}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 export default function ProjectDetail({ project, projectIndex, prevProject, nextProject }) {
   if (!project) return null;
 
   const canonicalUrl = `${METADATA.siteUrl.replace(/\/$/, "")}/projects/${project.slug}`;
+  const projectActions = [
+    project.url !== "#" ? { label: "View on GitHub", href: project.url } : null,
+    project.liveUrl ? { label: "View website", href: project.liveUrl } : null,
+  ].filter(Boolean);
   const projectJsonLd = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "CreativeWork",
@@ -93,14 +137,9 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
             <span>All projects</span>
           </Link>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-end">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
             <div className="lg:col-span-8">
-              <span
-                className="text-display-2xl font-thin block mb-4"
-                style={{ color: "var(--fg-primary)", opacity: 0.1 }}
-              >
-                {String(projectIndex + 1).padStart(2, "0")}
-              </span>
+              <ProjectNumberCarousel projects={featuredProjects} currentIndex={projectIndex} />
               <p className="text-micro mb-5" style={{ color: "var(--fg-muted)" }}>
                 {project.category}
               </p>
@@ -111,21 +150,19 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
                 {project.longDescription}
               </p>
             </div>
-            <div className="lg:col-span-4">
-              <div className="border p-6" style={{ borderColor: "var(--border)" }}>
-                <p className="text-micro mb-3" style={{ color: "var(--fg-muted)" }}>
-                  Current status
-                </p>
-                <p className="text-body-lg mb-6" style={{ color: "var(--fg-primary)" }}>
-                  {project.currentStatus}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {project.tech.map((tag) => (
-                    <span key={tag} className="tag">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+            <div className="lg:col-span-4 lg:pt-[6.4rem]">
+              <div className="flex flex-wrap justify-start lg:justify-end gap-3">
+                {projectActions.map((action) => (
+                  <a
+                    key={action.label}
+                    href={action.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="project-action-link"
+                  >
+                    <span>{action.label}</span>
+                  </a>
+                ))}
               </div>
             </div>
           </div>
@@ -151,28 +188,6 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
                     </p>
                   ))}
                 </div>
-                <div className="mt-8 flex flex-col items-start gap-3">
-                  {project.url !== "#" && (
-                    <a
-                      href={project.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="project-action-link"
-                    >
-                      <span>View on GitHub</span>
-                    </a>
-                  )}
-                  {project.liveUrl && (
-                    <a
-                      href={project.liveUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="project-action-link"
-                    >
-                      <span>View website</span>
-                    </a>
-                  )}
-                </div>
               </div>
             </aside>
 
@@ -196,15 +211,19 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
         <section className="section-container py-16" style={{ borderTop: "1px solid var(--border)" }}>
           <div className="flex justify-between items-center gap-8">
             {prevProject ? (
-              <Link href={`/projects/${prevProject.slug}`} className="group">
-                <span className="text-micro block mb-2" style={{ color: "var(--fg-muted)" }}>
+              <Link href={`/projects/${prevProject.slug}`} className="project-nav-link group items-center gap-4 min-w-[13rem]">
+                <span className="text-display-sm leading-none" aria-hidden="true">
+                  ←
+                </span>
+                <span>
+                <span className="text-micro block mb-2 opacity-60">
                   Previous
                 </span>
                 <span
                   className="text-body-xl font-light group-hover:translate-x-[-8px] transition-transform duration-300 inline-block"
-                  style={{ color: "var(--fg-primary)" }}
                 >
                   {prevProject.name}
+                </span>
                 </span>
               </Link>
             ) : (
@@ -212,15 +231,19 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
             )}
 
             {nextProject ? (
-              <Link href={`/projects/${nextProject.slug}`} className="group text-right">
-                <span className="text-micro block mb-2" style={{ color: "var(--fg-muted)" }}>
+              <Link href={`/projects/${nextProject.slug}`} className="project-nav-link group items-center justify-end gap-4 min-w-[13rem] text-right">
+                <span>
+                <span className="text-micro block mb-2 opacity-60">
                   Next
                 </span>
                 <span
                   className="text-body-xl font-light group-hover:translate-x-2 transition-transform duration-300 inline-block"
-                  style={{ color: "var(--fg-primary)" }}
                 >
                   {nextProject.name}
+                </span>
+                </span>
+                <span className="text-display-sm leading-none" aria-hidden="true">
+                  →
                 </span>
               </Link>
             ) : (

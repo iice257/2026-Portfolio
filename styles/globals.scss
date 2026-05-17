@@ -473,6 +473,135 @@ a {
   }
 }
 
+.project-number-carousel {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 7rem;
+  min-height: 5.8rem;
+  overflow: hidden;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--fg-primary);
+  transition: width 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &:hover,
+  &:focus-visible {
+    width: min(100%, 38rem);
+    border-color: var(--fg-primary);
+    background: var(--fg-primary);
+    color: var(--bg-primary);
+  }
+}
+
+.project-number-current {
+  position: absolute;
+  left: 0;
+  opacity: 0.1;
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.project-number-carousel:hover .project-number-current,
+.project-number-carousel:focus-visible .project-number-current {
+  opacity: 0;
+  transform: translateX(-1rem) scale(0.92);
+}
+
+.project-number-track {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  opacity: 0;
+  transform: translateX(-1.25rem);
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.project-number-carousel:hover .project-number-track,
+.project-number-carousel:focus-visible .project-number-track {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.project-number-item {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0.85rem 0.95rem;
+  border-right: 1px solid color-mix(in srgb, var(--bg-primary) 22%, transparent);
+  transform: scale(0.96);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &:last-child {
+    border-right: 0;
+  }
+}
+
+.project-number-carousel:hover .project-number-item,
+.project-number-carousel:focus-visible .project-number-item {
+  transform: scale(1);
+}
+
+.project-number-carousel:hover .project-number-item:hover,
+.project-number-carousel:focus-visible .project-number-item:focus-visible {
+  background: color-mix(in srgb, var(--bg-primary) 14%, transparent);
+  transform: scale(1.06);
+}
+
+.project-nav-link {
+  position: relative;
+  display: flex;
+  min-height: 5.5rem;
+  padding: 1rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  color: var(--fg-primary);
+  transition: border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: var(--fg-primary);
+    transform: translateY(100%);
+    transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--fg-primary);
+    color: var(--bg-primary);
+  }
+
+  &:hover::before,
+  &:focus-visible::before {
+    transform: translateY(0);
+  }
+}
+
+.mockup-shell {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--fg-primary) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(color-mix(in srgb, var(--fg-primary) 6%, transparent) 1px, transparent 1px),
+    var(--bg-secondary);
+  background-size: 22px 22px;
+}
+
 /* ===========================================
    BUTTON STYLES
    =========================================== */

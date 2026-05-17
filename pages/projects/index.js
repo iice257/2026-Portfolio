@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import Head from "next/head";
 import { METADATA } from "../../constants";
@@ -11,6 +11,7 @@ import {
 } from "../../data/projects";
 import Footer from "@/components/Footer/Footer";
 import ProjectVisual from "@/components/Projects/ProjectVisual";
+import { useCursor } from "../../context/CursorContext";
 
 const TagList = ({ tags = [] }) => (
   <div className="flex flex-wrap gap-2">
@@ -22,10 +23,117 @@ const TagList = ({ tags = [] }) => (
   </div>
 );
 
-const MajorProjectCard = ({ project, index, flipped, onFlip }) => (
+const MockupPair = ({ project }) => (
+  <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_0.7fr] gap-6">
+    <div className="mockup-shell aspect-[16/10] p-5">
+      <div className="mb-5 flex items-center justify-between">
+        <span className="text-micro" style={{ color: "var(--fg-muted)" }}>
+          Desktop
+        </span>
+        <span className="h-2 w-2" style={{ backgroundColor: project.visual?.accent || "var(--fg-primary)" }} />
+      </div>
+      <div className="grid h-[calc(100%-2.5rem)] grid-cols-12 gap-3">
+        <div className="col-span-4 border" style={{ borderColor: "var(--border)" }} />
+        <div className="col-span-8 space-y-3">
+          <div className="h-8 w-3/4" style={{ backgroundColor: "var(--fg-primary)", opacity: 0.12 }} />
+          <div className="h-3 w-full" style={{ backgroundColor: "var(--fg-primary)", opacity: 0.1 }} />
+          <div className="h-3 w-4/5" style={{ backgroundColor: "var(--fg-primary)", opacity: 0.1 }} />
+          <div className="mt-8 grid grid-cols-2 gap-3">
+            <div className="h-24 border" style={{ borderColor: "var(--border)" }} />
+            <div className="h-24 border" style={{ borderColor: "var(--border)" }} />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div className="mockup-shell mx-auto aspect-[9/16] w-full max-w-[15rem] p-4">
+      <div className="mb-4 h-2 w-16 mx-auto" style={{ backgroundColor: "var(--fg-primary)", opacity: 0.12 }} />
+      <div className="space-y-3">
+        <div className="h-20 border" style={{ borderColor: "var(--border)" }} />
+        <div className="h-3 w-full" style={{ backgroundColor: "var(--fg-primary)", opacity: 0.12 }} />
+        <div className="h-3 w-2/3" style={{ backgroundColor: "var(--fg-primary)", opacity: 0.12 }} />
+        <div className="grid grid-cols-2 gap-2 pt-4">
+          <div className="h-16 border" style={{ borderColor: "var(--border)" }} />
+          <div className="h-16 border" style={{ borderColor: "var(--border)" }} />
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const MajorProjectCard = ({ project, index, flipped, onFlip, onHover, onLeave, hidden }) => {
+  if (hidden) return null;
+
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onFlip();
+    }
+  };
+
+  if (flipped) {
+    return (
+      <article
+        role="button"
+        tabIndex={0}
+        aria-expanded="true"
+        aria-label={`Collapse details for ${project.name}`}
+        onClick={onFlip}
+        onKeyDown={handleKeyDown}
+        onMouseEnter={() => onHover("Click to collapse")}
+        onMouseLeave={onLeave}
+        className="group relative md:col-span-2 outline outline-1 outline-[var(--border)] cursor-none"
+        style={{ backgroundColor: "var(--bg-primary)" }}
+      >
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 p-6 md:p-8 lg:p-10">
+          <div className="xl:col-span-4 flex flex-col justify-between gap-10">
+            <div>
+              <span className="text-micro mb-5 block" style={{ color: "var(--fg-muted)" }}>
+                {String(index + 5).padStart(2, "0")} / Expanded
+              </span>
+              <h3 className="text-display-md font-light mb-5" style={{ color: "var(--fg-primary)" }}>
+                {project.name}
+              </h3>
+              <p className="text-body-lg mb-6" style={{ color: "var(--fg-secondary)" }}>
+                {project.description}
+              </p>
+              <div className="space-y-4 text-body-sm" style={{ color: "var(--fg-muted)" }}>
+                <p>{project.notes}</p>
+                <p>
+                  <span style={{ color: "var(--fg-secondary)" }}>Status: </span>
+                  {project.status}
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <TagList tags={project.tech} />
+              {project.url !== "#" && (
+                <a
+                  href={project.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="project-action-link"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  <span>View on GitHub</span>
+                </a>
+              )}
+            </div>
+          </div>
+          <div className="xl:col-span-8">
+            <MockupPair project={project} />
+          </div>
+        </div>
+      </article>
+    );
+  }
+
+  return (
   <article
     className="group relative min-h-[31rem] outline outline-1 outline-[var(--border)]"
     style={{ perspective: "1200px" }}
+    onMouseEnter={() => onHover("Click to expand")}
+    onMouseLeave={onLeave}
   >
     <button
       type="button"
@@ -106,15 +214,31 @@ const MajorProjectCard = ({ project, index, flipped, onFlip }) => (
       </a>
     )}
   </article>
-);
+  );
+};
 
 export default function ProjectsIndex() {
   const [flippedCards, setFlippedCards] = useState({});
   const [openProject, setOpenProject] = useState(remainingProjects[0]?.slug);
+  const { setCursorText, setCursorVariant } = useCursor();
 
   const toggleFlip = (slug) => {
-    setFlippedCards((current) => ({ ...current, [slug]: !current[slug] }));
+    setFlippedCards((current) => {
+      const isOpen = Boolean(current[slug]);
+      return isOpen ? {} : { [slug]: true };
+    });
   };
+
+  const setProjectCursor = useCallback((text) => {
+    if (typeof window !== "undefined" && !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    setCursorText(text);
+    setCursorVariant("project");
+  }, [setCursorText, setCursorVariant]);
+
+  const clearProjectCursor = useCallback(() => {
+    setCursorText("");
+    setCursorVariant("default");
+  }, [setCursorText, setCursorVariant]);
 
   return (
     <>
@@ -188,7 +312,14 @@ export default function ProjectsIndex() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
             {featuredProjects.map((project, index) => (
-              <Link key={project.slug} href={`/projects/${project.slug}`} className="group block">
+              <Link
+                key={project.slug}
+                href={`/projects/${project.slug}`}
+                className="group block cursor-none"
+                onMouseEnter={() => setProjectCursor("Click for more details")}
+                onMouseLeave={clearProjectCursor}
+                onClick={clearProjectCursor}
+              >
                 <article className="relative">
                   <div className="relative aspect-[16/11] overflow-hidden mb-6 outline outline-1 outline-[var(--border)]">
                     <ProjectVisual project={project} priority={index === 0} />
@@ -226,15 +357,29 @@ export default function ProjectsIndex() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {majorProjects.map((project, index) => (
-              <MajorProjectCard
-                key={project.slug}
-                project={project}
-                index={index}
-                flipped={Boolean(flippedCards[project.slug])}
-                onFlip={() => toggleFlip(project.slug)}
-              />
-            ))}
+            {majorProjects.map((project, index) => {
+              const expandedSlug = Object.keys(flippedCards).find((slug) => flippedCards[slug]);
+              const expandedIndex = expandedSlug ? majorProjects.findIndex((item) => item.slug === expandedSlug) : -1;
+              const expandedRow = expandedIndex >= 0 ? Math.floor(expandedIndex / 2) : null;
+              const row = Math.floor(index / 2);
+              const isHiddenSibling = expandedRow === row && expandedSlug !== project.slug;
+
+              return (
+                <MajorProjectCard
+                  key={project.slug}
+                  project={project}
+                  index={index}
+                  flipped={Boolean(flippedCards[project.slug])}
+                  hidden={isHiddenSibling}
+                  onFlip={() => {
+                    toggleFlip(project.slug);
+                    setProjectCursor(flippedCards[project.slug] ? "Click to expand" : "Click to collapse");
+                  }}
+                  onHover={setProjectCursor}
+                  onLeave={clearProjectCursor}
+                />
+              );
+            })}
           </div>
         </section>
 
@@ -259,8 +404,13 @@ export default function ProjectsIndex() {
                 <article key={project.slug} className="border-b" style={{ borderColor: "var(--border)" }}>
                   <button
                     type="button"
-                    className="w-full py-6 grid grid-cols-1 md:grid-cols-12 gap-4 text-left group"
-                    onClick={() => setOpenProject(isOpen ? null : project.slug)}
+                    className="w-full py-6 grid grid-cols-1 md:grid-cols-12 gap-4 text-left group cursor-none"
+                    onClick={() => {
+                      setOpenProject(isOpen ? null : project.slug);
+                      setProjectCursor(isOpen ? "Click to expand" : "Click to collapse");
+                    }}
+                    onMouseEnter={() => setProjectCursor(isOpen ? "Click to collapse" : "Click to expand")}
+                    onMouseLeave={clearProjectCursor}
                     aria-expanded={isOpen}
                     aria-controls={`archive-${project.slug}`}
                   >
