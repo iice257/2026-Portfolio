@@ -46,8 +46,8 @@ const CustomCursor = () => {
       }
 
       if (xSet.current && ySet.current) {
-        xSet.current(e.clientX);
-        ySet.current(e.clientY);
+        xSet.current(e.clientX - CURSOR_SIZE / 2);
+        ySet.current(e.clientY - CURSOR_SIZE / 2);
       }
       if (textRef.current) {
         gsap.set(textRef.current, { x: e.clientX, y: e.clientY });
@@ -181,15 +181,16 @@ const CustomCursor = () => {
       {cursorText && (
         <div
           ref={textRef}
-          className={`fixed top-0 left-0 pointer-events-none z-[999999] flex items-center justify-center overflow-visible transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+          className={`fixed top-0 left-0 pointer-events-none z-[999999] overflow-visible transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
           style={{ willChange: 'transform' }}
         >
           <div
-            className="absolute left-8 top-8 bg-black/80 text-white backdrop-blur-sm px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-widest whitespace-nowrap"
+            className="absolute left-0 top-0 bg-black/80 text-white backdrop-blur-sm px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-widest whitespace-nowrap"
             style={{
               backgroundColor: 'rgba(0,0,0,0.8)',
               color: '#fff',
-              border: '1px solid rgba(255,255,255,0.2)'
+              border: '1px solid rgba(255,255,255,0.2)',
+              transform: 'translate(-50%, -50%)',
             }}
           >
             {cursorText}

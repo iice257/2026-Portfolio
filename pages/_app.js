@@ -1,6 +1,8 @@
 import { GoogleAnalytics } from "@next/third-parties/google";
 import dynamic from "next/dynamic";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import { AnimatePresence, motion } from "framer-motion";
 import Meta from "@/components/Meta/Meta";
 import { ThemeProvider, useTheme } from "../context/ThemeContext";
 import { SnowProvider, useSnow } from "../context/SnowContext";
@@ -26,6 +28,7 @@ const Snowfall = dynamic(() => import("react-snowfall"), {
 const AppContent = ({ Component, pageProps }) => {
   const { isSnowing } = useSnow();
   const { theme } = useTheme();
+  const router = useRouter();
   const [isLoaded, setIsLoaded] = useState(false);
   const [isFinePointer, setIsFinePointer] = useState(true);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
@@ -73,14 +76,24 @@ const AppContent = ({ Component, pageProps }) => {
       <Header />
 
       {/* Page wrapper with blur-in animation */}
-      <div
+      <motion.div
         style={{
           opacity: isLoaded ? 1 : 0,
           transition: 'opacity 220ms ease-out',
         }}
       >
-        <Component {...pageProps} />
-      </div>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={router.asPath}
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <Component {...pageProps} />
+          </motion.div>
+        </AnimatePresence>
+      </motion.div>
 
       {isSnowing && allowMotion && (
         <Snowfall

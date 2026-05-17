@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CONTACT_LINKS, MENULINKS, METADATA } from "../../constants";
+import ShuffleText from "../ReactBits/ShuffleText";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -28,7 +29,7 @@ const Footer = () => {
               className="text-display-lg md:text-display-xl font-light leading-none max-w-4xl"
               style={{ color: "var(--fg-primary)" }}
             >
-              Let&apos;s ship something useful.
+              <ShuffleText text="Let's ship something useful." duration={0.45} shuffleTimes={4} />
             </h2>
           </div>
 
