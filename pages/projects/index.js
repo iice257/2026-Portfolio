@@ -99,11 +99,10 @@ const MajorProjectCard = ({ project, index, flipped, onFlip }) => (
         href={project.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="absolute bottom-6 right-6 z-10 text-micro link-underline"
-        style={{ color: flipped ? "var(--bg-primary)" : "var(--fg-primary)" }}
+        className="project-action-link absolute bottom-6 right-6 z-10"
         onClick={(event) => event.stopPropagation()}
       >
-        Repo
+        <span>View on GitHub</span>
       </a>
     )}
   </article>
@@ -138,10 +137,9 @@ export default function ProjectsIndex() {
         <section className="section-container pt-40 pb-24">
           <Link
             href="/#projects"
-            className="text-micro mb-8 inline-block link-underline"
-            style={{ color: "var(--fg-muted)" }}
+            className="project-action-link mb-8"
           >
-            Back home
+            <span>Back home</span>
           </Link>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-end">
             <div className="lg:col-span-8">
@@ -295,8 +293,8 @@ export default function ProjectsIndex() {
                         <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 text-body-sm" style={{ color: "var(--fg-muted)" }}>
                           <p>{project.notes}</p>
                           {project.url !== "#" && (
-                            <a href={project.url} target="_blank" rel="noopener noreferrer" className="link-underline md:text-right">
-                              Open GitHub repo
+                            <a href={project.url} target="_blank" rel="noopener noreferrer" className="project-action-link justify-self-start md:justify-self-end">
+                              <span>View on GitHub</span>
                             </a>
                           )}
                         </div>

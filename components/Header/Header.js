@@ -96,7 +96,7 @@ const Header = () => {
   }));
 
   const socialItems = SOCIAL_LINKS.map((social) => ({
-    label: social.name.charAt(0).toUpperCase() + social.name.slice(1),
+    label: social.label || social.name.charAt(0).toUpperCase() + social.name.slice(1),
     link: social.url
   }));
 

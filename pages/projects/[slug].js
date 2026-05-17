@@ -88,10 +88,9 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
         <section className="section-container pt-40 pb-16">
           <Link
             href="/projects"
-            className="text-micro mb-8 inline-block link-underline"
-            style={{ color: "var(--fg-muted)" }}
+            className="project-action-link mb-8"
           >
-            All projects
+            <span>All projects</span>
           </Link>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-end">
@@ -152,28 +151,28 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
                     </p>
                   ))}
                 </div>
-                {project.url !== "#" && (
-                  <a
-                    href={project.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-micro mt-8 inline-block link-underline"
-                    style={{ color: "var(--fg-muted)" }}
-                  >
-                    Open GitHub repo
-                  </a>
-                )}
-                {project.liveUrl && (
-                  <a
-                    href={project.liveUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-micro mt-4 inline-block link-underline"
-                    style={{ color: "var(--fg-muted)" }}
-                  >
-                    Open live project
-                  </a>
-                )}
+                <div className="mt-8 flex flex-col items-start gap-3">
+                  {project.url !== "#" && (
+                    <a
+                      href={project.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="project-action-link"
+                    >
+                      <span>View on GitHub</span>
+                    </a>
+                  )}
+                  {project.liveUrl && (
+                    <a
+                      href={project.liveUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="project-action-link"
+                    >
+                      <span>View website</span>
+                    </a>
+                  )}
+                </div>
               </div>
             </aside>
 

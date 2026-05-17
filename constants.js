@@ -71,6 +71,11 @@ export const SOCIAL_LINKS = [
     label: "GitHub",
     url: "https://github.com/kingsleyaremu",
   },
+  {
+    name: "twitter",
+    label: "X",
+    url: "https://x.com/iice257",
+  },
 ];
 
 export const CONTACT_LINKS = SOCIAL_LINKS;

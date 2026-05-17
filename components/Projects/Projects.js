@@ -197,7 +197,7 @@ const Projects = ({ isDesktop }) => {
                   }`}
                 style={{ backgroundColor: 'var(--bg-primary)' }}
               >
-                <div className="w-full max-w-[34rem] min-h-[min(56vh,38rem)] flex flex-col items-center justify-center text-center mx-auto">
+                <div className="w-full max-w-[40rem] min-h-[min(56vh,38rem)] flex flex-col items-center justify-center text-center mx-auto">
 
                   {/* Project Number (top-right of content?) or keep at bottom? User said "bring them to the center into a square" */}
                   {/* I'll put project name on top, then desc, then tags. */}
@@ -223,9 +223,9 @@ const Projects = ({ isDesktop }) => {
                   </p>
 
                   {/* Tech Stack */}
-                  <div className="w-full flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+                  <div className="w-full flex flex-wrap md:flex-nowrap items-center justify-center gap-x-2 gap-y-2">
                     {project.tech.map((tech, i) => (
-                      <span key={tech} className="inline-flex items-center">
+                      <span key={tech} className="inline-flex items-center whitespace-nowrap">
                         <span
                           className="text-body-md font-bold uppercase tracking-wide"
                           style={{ color: 'var(--fg-primary)' }}

@@ -142,7 +142,7 @@ const SnowToggle = () => {
     stickyTooltipRef.current = true;
     setShowSnowTooltip(true);
     setSnowTooltipWasShown(true);
-    showTooltip("looks better in light mode", 3000);
+    showTooltip("looks better in dark mode", 3000);
   };
 
   const handleHint = () => {

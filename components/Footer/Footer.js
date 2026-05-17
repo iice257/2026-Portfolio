@@ -4,11 +4,6 @@ import { CONTACT_LINKS, MENULINKS, METADATA } from "../../constants";
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const navLinks = MENULINKS.filter((link) => link.ref !== "home");
-  const availability = [
-    ["Focus", "AI tools, product UI, polished web apps"],
-    ["Location", METADATA.location],
-    ["Response", "Direct email or social DMs"],
-  ];
 
   return (
     <footer
@@ -80,20 +75,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-16 md:mt-24 grid grid-cols-1 md:grid-cols-3 border-y" style={{ borderColor: "var(--border)" }}>
-          {availability.map(([label, value]) => (
-            <div key={label} className="py-6 md:px-6 md:first:pl-0 md:border-r md:last:border-r-0" style={{ borderColor: "var(--border)" }}>
-              <p className="text-micro mb-3" style={{ color: "var(--fg-muted)" }}>
-                {label}
-              </p>
-              <p className="text-body-md" style={{ color: "var(--fg-primary)" }}>
-                {value}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        <div className="py-10 md:py-14 border-b" style={{ borderColor: "var(--border)" }}>
+        <div className="mt-16 md:mt-24 py-10 md:py-14 border-y" style={{ borderColor: "var(--border)" }}>
           <p
             className="font-extralight uppercase leading-none select-none"
             style={{
