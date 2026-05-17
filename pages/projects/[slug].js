@@ -44,14 +44,47 @@ const DetailBlock = ({ label, title, children }) => (
 export default function ProjectDetail({ project, projectIndex, prevProject, nextProject }) {
   if (!project) return null;
 
+  const canonicalUrl = `${METADATA.siteUrl.replace(/\/$/, "")}/projects/${project.slug}`;
+  const projectJsonLd = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "CreativeWork",
+    "@id": `${canonicalUrl}#project`,
+    name: project.name,
+    headline: project.subtitle,
+    description: project.longDescription,
+    url: canonicalUrl,
+    creator: {
+      "@type": "Person",
+      name: METADATA.author,
+      url: METADATA.siteUrl,
+    },
+    keywords: project.tech.join(", "),
+    sameAs: [project.url, project.liveUrl].filter((url) => url && url !== "#"),
+  }).replace(/</g, "\\u003c");
+
   return (
     <>
       <Head>
         <title>{`${project.name} | ${METADATA.author}`}</title>
         <meta name="description" content={project.longDescription} />
+        <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1" />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={`${project.name} | ${METADATA.author}`} />
+        <meta property="og:description" content={project.longDescription} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={METADATA.image} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${project.name} | ${METADATA.author}`} />
+        <meta name="twitter:description" content={project.longDescription} />
+        <meta name="twitter:image" content={METADATA.image} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: projectJsonLd }}
+        />
       </Head>
 
-      <main className="min-h-screen" style={{ backgroundColor: "var(--bg-primary)" }}>
+      <main id="main-content" className="min-h-screen" style={{ backgroundColor: "var(--bg-primary)" }}>
         <section className="section-container pt-40 pb-16">
           <Link
             href="/projects"
@@ -128,6 +161,17 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
                     style={{ color: "var(--fg-muted)" }}
                   >
                     Open GitHub repo
+                  </a>
+                )}
+                {project.liveUrl && (
+                  <a
+                    href={project.liveUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-micro mt-4 inline-block link-underline"
+                    style={{ color: "var(--fg-muted)" }}
+                  >
+                    Open live project
                   </a>
                 )}
               </div>

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-import { MENULINKS } from "../../constants";
+import { CONTACT_LINKS, MENULINKS } from "../../constants";
 
 const Contact = () => {
   const sectionRef = useRef(null);
@@ -23,7 +23,7 @@ const Contact = () => {
             start: "top 70%",
             end: "top 30%",
             scrub: 0.5,
-          }
+          },
         }
       );
     });
@@ -40,54 +40,48 @@ const Contact = () => {
       <div className="max-w-3xl mx-auto text-center">
         <p
           className="text-caption uppercase tracking-widest mb-4 contact-reveal"
-          style={{ color: 'var(--fg-muted)' }}
+          style={{ color: "var(--fg-muted)" }}
         >
           Get in Touch
         </p>
 
         <h2
           className="text-display-lg md:text-display-xl font-light mb-8 contact-reveal"
-          style={{ color: 'var(--fg-primary)' }}
+          style={{ color: "var(--fg-primary)" }}
         >
           Let&apos;s build something together
         </h2>
 
         <p
           className="text-body-xl mb-12 contact-reveal"
-          style={{ color: 'var(--fg-secondary)' }}
+          style={{ color: "var(--fg-secondary)" }}
         >
           I&apos;m always open to discussing new projects, creative ideas, or opportunities to be part of your vision.
         </p>
 
-        <a
-          href="mailto:kingsley.aremu@gmail.com"
-          className="btn btn-primary contact-reveal"
-        >
+        <a href={CONTACT_LINKS[0].url} className="btn btn-primary contact-reveal">
           Send an Email
         </a>
 
         <p
           className="text-body-sm mt-8 contact-reveal"
-          style={{ color: 'var(--fg-muted)' }}
+          style={{ color: "var(--fg-muted)" }}
         >
           or reach out on{" "}
-          <a
-            href="https://linkedin.com/in/kingsley-aremu"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="link-underline"
-            style={{ color: 'var(--fg-primary)' }}
-          >
-            LinkedIn
-          </a>
-          {" "}·{" "}
-          <a
-            href="tel:+2348168367367"
-            className="link-underline"
-            style={{ color: 'var(--fg-primary)' }}
-          >
-            +234-816-836-7367
-          </a>
+          {CONTACT_LINKS.slice(1).map((link, index) => (
+            <span key={link.name}>
+              <a
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link-underline"
+                style={{ color: "var(--fg-primary)" }}
+              >
+                {link.label}
+              </a>
+              {index < CONTACT_LINKS.length - 2 ? " / " : ""}
+            </span>
+          ))}
         </p>
       </div>
     </section>

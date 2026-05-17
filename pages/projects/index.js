@@ -125,9 +125,16 @@ export default function ProjectsIndex() {
           name="description"
           content="A structured project archive by Kingsley Afolabi Aremu, including featured work, major projects, and the complete GitHub project list."
         />
+        <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1" />
+        <link rel="canonical" href={`${METADATA.siteUrl.replace(/\/$/, "")}/projects`} />
+        <meta property="og:title" content={`Projects | ${METADATA.author}`} />
+        <meta property="og:description" content="A structured project archive by Kingsley Afolabi Aremu, including featured work, major projects, and the complete GitHub project list." />
+        <meta property="og:url" content={`${METADATA.siteUrl.replace(/\/$/, "")}/projects`} />
+        <meta property="og:image" content={METADATA.image} />
+        <meta name="twitter:card" content="summary_large_image" />
       </Head>
 
-      <main className="min-h-screen" style={{ backgroundColor: "var(--bg-primary)" }}>
+      <main id="main-content" className="min-h-screen" style={{ backgroundColor: "var(--bg-primary)" }}>
         <section className="section-container pt-40 pb-24">
           <Link
             href="/#projects"

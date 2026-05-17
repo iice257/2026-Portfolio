@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSnow } from '../../context/SnowContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useTooltip } from '../../context/TooltipContext';
 
 const TOOLTIP_EXIT_MS = 180;
 const SNOW_OFF_EXIT_MS = 400;
@@ -30,6 +31,12 @@ const TooltipBubble = ({ children, phase, exitDuration = TOOLTIP_EXIT_MS }) => (
 const SnowToggle = () => {
   const { isSnowing, toggleSnow } = useSnow();
   const { theme } = useTheme();
+  const {
+    showNiceTooltip,
+    setShowNiceTooltip,
+    setShowSnowTooltip,
+    setSnowTooltipWasShown,
+  } = useTooltip();
   const [tooltipText, setTooltipText] = useState("click for snow");
   const [isTooltipMounted, setIsTooltipMounted] = useState(false);
   const [tooltipPhase, setTooltipPhase] = useState("hidden");
@@ -39,7 +46,7 @@ const SnowToggle = () => {
   const enterFrameRef = useRef(null);
   const tooltipMountedRef = useRef(false);
   const tooltipPhaseRef = useRef("hidden");
-  const clickedSnowInLightRef = useRef(false);
+  const stickyTooltipRef = useRef(false);
 
   const clearTooltipTimer = useCallback(() => {
     window.clearTimeout(hideTooltipTimerRef.current);
@@ -101,46 +108,54 @@ const SnowToggle = () => {
     }, duration);
   }, [clearTooltipTimer, hideTooltip]);
 
-  useEffect(() => {
-    const isTouch = window.matchMedia("(hover: none), (pointer: coarse)").matches;
-    showTooltip(isTouch ? "tap for snow" : "click for snow", 5000);
-
-    return () => {
-      clearTooltipTimer();
-    };
-  }, [clearTooltipTimer, showTooltip]);
+  useEffect(() => () => clearTooltipTimer(), [clearTooltipTimer]);
 
   useEffect(() => {
-    if (theme === "dark" && clickedSnowInLightRef.current) {
-      clickedSnowInLightRef.current = false;
+    if (showNiceTooltip) {
+      stickyTooltipRef.current = true;
       showTooltip("nice!", 3000);
+      setShowNiceTooltip(false);
+      setSnowTooltipWasShown(false);
     }
-  }, [showTooltip, theme]);
+  }, [setShowNiceTooltip, setSnowTooltipWasShown, showNiceTooltip, showTooltip]);
 
   const handleToggle = () => {
     const isTurningOff = isSnowing;
     toggleSnow();
 
     if (isTurningOff) {
-      clickedSnowInLightRef.current = false;
+      stickyTooltipRef.current = false;
+      setShowSnowTooltip(false);
+      setSnowTooltipWasShown(false);
       hideTooltip(SNOW_OFF_EXIT_MS);
       return;
     }
 
     if (theme === "dark") {
-      clickedSnowInLightRef.current = false;
+      stickyTooltipRef.current = true;
+      setShowSnowTooltip(false);
+      setSnowTooltipWasShown(false);
       showTooltip("nice!", 3000);
       return;
     }
 
-    clickedSnowInLightRef.current = true;
+    stickyTooltipRef.current = true;
+    setShowSnowTooltip(true);
+    setSnowTooltipWasShown(true);
     showTooltip("looks better in light mode", 3000);
+  };
+
+  const handleHint = () => {
+    if (isSnowing || stickyTooltipRef.current) return;
+    showTooltip("click for snow", 1600);
   };
 
   return (
     <div className="relative z-[60]">
       <button
         onClick={handleToggle}
+        onMouseEnter={handleHint}
+        onFocus={handleHint}
         className="relative group p-2 hover:bg-[var(--fg-secondary)]/10 rounded-full transition-colors duration-300"
         aria-label="Toggle snow effect"
         style={{ color: 'var(--fg-primary)' }}

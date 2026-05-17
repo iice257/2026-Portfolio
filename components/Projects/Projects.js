@@ -169,13 +169,11 @@ const Projects = ({ isDesktop }) => {
           const isEven = index % 2 === 0;
 
           return (
-            <div
+            <Link
               key={project.name}
+              href={`/projects/${project.slug}`}
               className="project-panel min-h-screen grid grid-cols-1 lg:grid-cols-2 group cursor-none"
-              onClick={() => {
-                clearProjectCursor();
-                router.push(`/projects/${project.slug}`);
-              }}
+              onClick={clearProjectCursor}
             >
               {/* Image Side - Full height image */}
               <div
@@ -242,7 +240,7 @@ const Projects = ({ isDesktop }) => {
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>

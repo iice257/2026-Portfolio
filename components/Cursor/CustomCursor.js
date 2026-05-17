@@ -7,6 +7,7 @@ const CustomCursor = () => {
   const cursorRef = useRef(null);
   const textRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false); // Default hidden until mouse moves
+  const isVisibleRef = useRef(false);
   const { cursorText, cursorVariant } = useCursor();
   const { theme } = useTheme();
 
@@ -22,7 +23,10 @@ const CustomCursor = () => {
 
     const onMouseMove = (e) => {
       // Ensure visible on movement
-      if (!isVisible) setIsVisible(true);
+      if (!isVisibleRef.current) {
+        isVisibleRef.current = true;
+        setIsVisible(true);
+      }
       lastPointerRef.current = { x: e.clientX, y: e.clientY };
 
       if (xSet.current && ySet.current) {
@@ -35,10 +39,12 @@ const CustomCursor = () => {
     };
 
     const onMouseLeave = () => {
+      isVisibleRef.current = false;
       setIsVisible(false);
     };
 
     const onMouseEnter = () => {
+      isVisibleRef.current = true;
       setIsVisible(true);
     };
 
@@ -51,7 +57,7 @@ const CustomCursor = () => {
       document.removeEventListener('mouseleave', onMouseLeave);
       document.removeEventListener('mouseenter', onMouseEnter);
     };
-  }, [isVisible]);
+  }, []);
 
   useEffect(() => {
     if (!cursorText || !textRef.current) return;

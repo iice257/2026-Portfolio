@@ -1,9 +1,11 @@
 import { useTheme } from "../../context/ThemeContext";
 import { useTooltip } from "../../context/TooltipContext";
+import { useSnow } from "../../context/SnowContext";
 import { useEffect } from "react";
 
 const ThemeToggle = () => {
   const { theme, toggleTheme } = useTheme();
+  const { isSnowing } = useSnow();
   const { snowTooltipWasShown, showNiceTooltip, setShowNiceTooltip, setSnowTooltipWasShown, setShowSnowTooltip } = useTooltip();
 
   const handleClick = () => {
@@ -11,7 +13,7 @@ const ThemeToggle = () => {
     setShowSnowTooltip(false);
 
     // Check if we should show "Nice!" tooltip (user saw snow tooltip and is switching to dark)
-    if (snowTooltipWasShown && theme === 'light') {
+    if (snowTooltipWasShown && isSnowing && theme === 'light') {
       toggleTheme();
       setShowNiceTooltip(true);
       setSnowTooltipWasShown(false); // Reset so it doesn't show again

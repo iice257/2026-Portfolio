@@ -27,7 +27,8 @@ export default function Home() {
 
     // Smooth scroll to anchor links
     const handleAnchorClick = (e) => {
-      const href = e.target.getAttribute("href");
+      const anchor = e.target.closest?.("a[href^='#']");
+      const href = anchor?.getAttribute("href");
       if (href?.startsWith("#")) {
         e.preventDefault();
         const element = document.querySelector(href);
@@ -46,7 +47,7 @@ export default function Home() {
       <BackgroundShapes />
       <ProgressIndicator />
 
-      <main className="relative z-10">
+      <main id="main-content" className="relative z-10">
         <Hero />
         <Philosophy />
         <Skills />

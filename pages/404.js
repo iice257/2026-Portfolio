@@ -62,7 +62,7 @@ const Custom404 = () => {
   return (
     <>
       <Cursor isDesktop={isDesktop} />
-      <div className="flex justify-center items-center flex-wrap h-screen">
+      <main id="main-content" className="flex justify-center items-center flex-wrap min-h-[100dvh]">
         <svg className="max-h-screen" viewBox="0 0 600 600">
           <g id="milk-spill" fill="#fff">
             <path
@@ -161,7 +161,7 @@ const Custom404 = () => {
             Back to Home
           </Button>
         </div>
-      </div>
+      </main>
     </>
   );
 };

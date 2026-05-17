@@ -1,69 +1,117 @@
-import Profiles from "../Profiles/Profiles";
-import { METADATA } from "../../constants";
+import Link from "next/link";
+import { CONTACT_LINKS, MENULINKS, METADATA } from "../../constants";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const navLinks = MENULINKS.filter((link) => link.ref !== "home");
+  const availability = [
+    ["Focus", "AI tools, product UI, polished web apps"],
+    ["Location", METADATA.location],
+    ["Response", "Direct email or social DMs"],
+  ];
 
   return (
     <footer
-      className="section-container py-16"
-      style={{ borderTop: '1px solid var(--border)' }}
+      className="relative overflow-hidden pt-20 md:pt-28 pb-8"
+      style={{
+        backgroundColor: "var(--bg-primary)",
+        borderTop: "1px solid var(--border)",
+      }}
     >
-      <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-12 mb-16">
-          {/* Left column */}
-          <div>
-            <p
-              className="text-body-lg mb-4"
-              style={{ color: 'var(--fg-primary)' }}
-            >
-              {METADATA.author}
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{ background: "linear-gradient(90deg, transparent, var(--fg-primary), transparent)" }}
+      />
+
+      <div className="section-container">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10">
+          <div className="lg:col-span-7">
+            <p className="text-micro mb-5" style={{ color: "var(--fg-muted)" }}>
+              Available for selected builds
             </p>
-            <p
-              className="text-body-md mb-6"
-              style={{ color: 'var(--fg-muted)' }}
+            <h2
+              className="text-display-lg md:text-display-xl font-light leading-none max-w-4xl"
+              style={{ color: "var(--fg-primary)" }}
             >
-              Full-Stack Developer based in Lagos, Nigeria.
-              <br />
-              Building products that matter.
-            </p>
-            <Profiles />
+              Let&apos;s ship something useful.
+            </h2>
           </div>
 
-          {/* Right column */}
-          <div className="md:text-right">
-            <p
-              className="text-body-sm mb-4"
-              style={{ color: 'var(--fg-muted)' }}
-            >
-              Currently available for new opportunities
-            </p>
-            <a
-              href="mailto:kingsley.aremu@gmail.com"
-              className="text-body-md link-underline"
-              style={{ color: 'var(--fg-primary)' }}
-            >
-              kingsley.aremu@gmail.com
-            </a>
+          <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 gap-10">
+            <nav aria-label="Footer navigation">
+              <p className="text-micro mb-5" style={{ color: "var(--fg-muted)" }}>
+                Index
+              </p>
+              <ul className="space-y-3">
+                {navLinks.map((link) => (
+                  <li key={link.ref}>
+                    <Link
+                      href={`/#${link.ref}`}
+                      className="text-body-lg link-underline"
+                      style={{ color: "var(--fg-primary)" }}
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            <div>
+              <p className="text-micro mb-5" style={{ color: "var(--fg-muted)" }}>
+                Direct
+              </p>
+              <ul className="space-y-3">
+                {CONTACT_LINKS.map((link) => (
+                  <li key={link.name}>
+                    <a
+                      href={link.url}
+                      target={link.url.startsWith("mailto:") ? undefined : "_blank"}
+                      rel={link.url.startsWith("mailto:") ? undefined : "noopener noreferrer"}
+                      className="text-body-lg link-underline"
+                      style={{ color: "var(--fg-primary)" }}
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
 
-        {/* Bottom */}
-        <div
-          className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pt-8"
-          style={{ borderTop: '1px solid var(--border)' }}
-        >
+        <div className="mt-16 md:mt-24 grid grid-cols-1 md:grid-cols-3 border-y" style={{ borderColor: "var(--border)" }}>
+          {availability.map(([label, value]) => (
+            <div key={label} className="py-6 md:px-6 md:first:pl-0 md:border-r md:last:border-r-0" style={{ borderColor: "var(--border)" }}>
+              <p className="text-micro mb-3" style={{ color: "var(--fg-muted)" }}>
+                {label}
+              </p>
+              <p className="text-body-md" style={{ color: "var(--fg-primary)" }}>
+                {value}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div className="py-10 md:py-14 border-b" style={{ borderColor: "var(--border)" }}>
           <p
-            className="text-body-sm"
-            style={{ color: 'var(--fg-muted)' }}
+            className="font-extralight uppercase leading-none select-none"
+            style={{
+              color: "var(--fg-primary)",
+              fontSize: "clamp(3rem, 6rem, 7rem)",
+              letterSpacing: 0,
+            }}
           >
-            © {currentYear} {METADATA.author}
+            Kingsley Aremu
           </p>
-          <p
-            className="text-body-sm"
-            style={{ color: 'var(--fg-muted)' }}
-          >
-            Designed & built with intention
+        </div>
+
+        <div className="pt-7 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <p className="text-body-sm" style={{ color: "var(--fg-muted)" }}>
+            &copy; {currentYear} {METADATA.author}
+          </p>
+          <p className="text-body-sm" style={{ color: "var(--fg-muted)" }}>
+            Full-Stack Developer based in {METADATA.location}.
           </p>
         </div>
       </div>

@@ -14,15 +14,22 @@ const Header = () => {
   const kaRef = useRef(null);
   const nameRef = useRef(null);
   const progressBarRef = useRef(null);
+  const isScrolledRef = useRef(false);
 
   useEffect(() => {
-    const handleScroll = () => {
+    let frameId = null;
+
+    const updateHeader = () => {
+      frameId = null;
       const scrollY = window.scrollY;
       const winHeight = window.innerHeight;
       const docHeight = document.documentElement.scrollHeight;
 
-      // 1. Binary State for Header Style (OK to re-render)
-      setIsScrolled(scrollY > 50);
+      const nextIsScrolled = scrollY > 50;
+      if (isScrolledRef.current !== nextIsScrolled) {
+        isScrolledRef.current = nextIsScrolled;
+        setIsScrolled(nextIsScrolled);
+      }
 
       // 2. Direct DOM updates for continuous animations (No re-renders)
 
@@ -44,10 +51,21 @@ const Header = () => {
       }
     };
 
+    const handleScroll = () => {
+      if (frameId === null) {
+        frameId = window.requestAnimationFrame(updateHeader);
+      }
+    };
+
     window.addEventListener("scroll", handleScroll, { passive: true });
-    // Initial check
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    updateHeader();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId);
+      }
+    };
   }, []);
 
   const handleLogoClick = (e) => {

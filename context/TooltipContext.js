@@ -5,11 +5,14 @@ const TooltipContext = createContext({
   setShowSnowTooltip: () => { },
   showNiceTooltip: false,
   setShowNiceTooltip: () => { },
+  snowTooltipWasShown: false,
+  setSnowTooltipWasShown: () => { },
 });
 
 export const TooltipProvider = ({ children }) => {
   const [showSnowTooltip, setShowSnowTooltip] = useState(false);
   const [showNiceTooltip, setShowNiceTooltip] = useState(false);
+  const [snowTooltipWasShown, setSnowTooltipWasShown] = useState(false);
 
   return (
     <TooltipContext.Provider value={{
@@ -17,6 +20,8 @@ export const TooltipProvider = ({ children }) => {
       setShowSnowTooltip,
       showNiceTooltip,
       setShowNiceTooltip,
+      snowTooltipWasShown,
+      setSnowTooltipWasShown,
     }}>
       {children}
     </TooltipContext.Provider>

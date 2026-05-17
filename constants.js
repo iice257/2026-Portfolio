@@ -7,8 +7,12 @@ export const METADATA = {
   twitterHandle: "",
   keywords: [
     "Kingsley Afolabi Aremu",
+    "Kingsley Aremu",
     "Full-Stack Developer",
+    "Creative Engineer",
     "React Native Developer",
+    "AI Agent Tooling",
+    "Frontend Engineer",
     "Software Engineer",
     "Portfolio",
     "Lagos",
@@ -17,7 +21,9 @@ export const METADATA = {
   image:
     "https://res.cloudinary.com/dywdhyojt/image/upload/v1721378510/social-preview.png",
   language: "English",
-  themeColor: "#000000",
+  themeColor: "#0a0a0a",
+  jobTitle: "Full-Stack Developer and Creative Engineer",
+  location: "Lagos, Nigeria",
 };
 
 export const MENULINKS = [
@@ -52,17 +58,26 @@ export const TYPED_STRINGS = [
 export const SOCIAL_LINKS = [
   {
     name: "mail",
+    label: "Email",
     url: "mailto:kingsley.aremu@gmail.com",
   },
   {
     name: "linkedin",
+    label: "LinkedIn",
     url: "https://linkedin.com/in/kingsley-aremu",
   },
   {
     name: "github",
+    label: "GitHub",
     url: "https://github.com/kingsleyaremu",
   },
 ];
+
+export const CONTACT_LINKS = SOCIAL_LINKS;
+
+export const PROFILE_LINKS = SOCIAL_LINKS
+  .filter((link) => link.url.startsWith("http"))
+  .map((link) => link.url);
 
 export const SKILLS = {
   languagesAndTools: [
