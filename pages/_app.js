@@ -77,32 +77,19 @@ const AppContent = ({ Component, pageProps }) => {
   }, []);
 
   useEffect(() => {
-    let fallbackTimer = null;
     const handleRouteStart = () => setIsRouteLoading(true);
     const handleRouteDone = () => {
-      window.clearTimeout(fallbackTimer);
       setIsRouteLoading(false);
-    };
-    const handleDocumentClick = (event) => {
-      const link = event.target?.closest?.("a[href], button[type='submit']");
-      if (!link) return;
-
-      setIsRouteLoading(true);
-      window.clearTimeout(fallbackTimer);
-      fallbackTimer = window.setTimeout(() => setIsRouteLoading(false), 1500);
     };
 
     router.events.on("routeChangeStart", handleRouteStart);
     router.events.on("routeChangeComplete", handleRouteDone);
     router.events.on("routeChangeError", handleRouteDone);
-    document.addEventListener("click", handleDocumentClick, true);
 
     return () => {
-      window.clearTimeout(fallbackTimer);
       router.events.off("routeChangeStart", handleRouteStart);
       router.events.off("routeChangeComplete", handleRouteDone);
       router.events.off("routeChangeError", handleRouteDone);
-      document.removeEventListener("click", handleDocumentClick, true);
     };
   }, [router.events, setIsRouteLoading]);
 

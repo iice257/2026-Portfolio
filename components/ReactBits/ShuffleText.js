@@ -27,12 +27,20 @@ const ShuffleText = ({
   respectReducedMotion = true,
   triggerOnHover = true,
   preserveWords = true,
+  clipDuringShuffle = true,
 }) => {
   const ref = useRef(null);
   const [ready, setReady] = useState(false);
+  const [isShuffling, setIsShuffling] = useState(false);
   const [displayChars, setDisplayChars] = useState([]);
   const animatingRef = useRef(false);
   const hasPlayedRef = useRef(false);
+  const timersRef = useRef([]);
+
+  const clearTimers = useCallback(() => {
+    timersRef.current.forEach((timer) => clearTimeout(timer));
+    timersRef.current = [];
+  }, []);
 
   // Split text into chars on mount
   useEffect(() => {
@@ -51,12 +59,16 @@ const ShuffleText = ({
     if (triggerOnce && hasPlayedRef.current) return;
     if (respectReducedMotion && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
       setReady(true);
+      setIsShuffling(false);
       onShuffleComplete?.();
       return;
     }
 
+    clearTimers();
     animatingRef.current = true;
     hasPlayedRef.current = true;
+    setReady(false);
+    setIsShuffling(true);
 
     const originalChars = text.split('');
     const rolls = Math.max(1, Math.floor(shuffleTimes));
@@ -75,6 +87,7 @@ const ShuffleText = ({
           isSpace: char === ' '
         })));
         setReady(true);
+        setIsShuffling(false);
         animatingRef.current = false;
         onShuffleComplete?.();
         return;
@@ -100,11 +113,14 @@ const ShuffleText = ({
       }));
 
       currentStep++;
-      setTimeout(step, stepDuration);
+      const timer = setTimeout(step, stepDuration);
+      timersRef.current.push(timer);
     };
 
     step();
-  }, [text, duration, shuffleTimes, scrambleCharset, triggerOnce, respectReducedMotion, onShuffleComplete]);
+  }, [clearTimers, text, duration, shuffleTimes, scrambleCharset, triggerOnce, respectReducedMotion, onShuffleComplete]);
+
+  useEffect(() => () => clearTimers(), [clearTimers]);
 
   // ScrollTrigger setup
   useEffect(() => {
@@ -138,7 +154,17 @@ const ShuffleText = ({
   }, [animate, triggerOnHover]);
 
   const commonStyle = useMemo(() => ({ textAlign, ...style }), [textAlign, style]);
-  const classes = useMemo(() => `shuffle-parent ${ready ? 'is-ready' : ''} ${className}`, [ready, className]);
+  const classes = useMemo(() => {
+    const states = [
+      'shuffle-parent',
+      ready ? 'is-ready' : '',
+      isShuffling ? 'is-shuffling' : '',
+      clipDuringShuffle ? 'clip-during-shuffle' : '',
+      className,
+    ];
+
+    return states.filter(Boolean).join(' ');
+  }, [clipDuringShuffle, isShuffling, ready, className]);
   const tokens = useMemo(() => {
     const result = [];
     let currentWord = [];

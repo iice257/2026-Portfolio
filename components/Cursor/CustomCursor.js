@@ -9,6 +9,7 @@ const CURSOR_SIZE = 32;
 const CustomCursor = () => {
   const cursorRef = useRef(null);
   const shapeRef = useRef(null);
+  const loadingMotionRef = useRef(null);
   const textRef = useRef(null);
   const outlinePathRef = useRef(null);
   const fillPathRef = useRef(null);
@@ -100,11 +101,11 @@ const CustomCursor = () => {
   }, [isClickable]);
 
   useEffect(() => {
-    if (!shapeRef.current) return undefined;
+    if (!loadingMotionRef.current) return undefined;
 
     if (!isRouteLoading) {
-      gsap.killTweensOf(shapeRef.current);
-      gsap.to(shapeRef.current, {
+      gsap.killTweensOf(loadingMotionRef.current);
+      gsap.to(loadingMotionRef.current, {
         rotate: 0,
         duration: 0.18,
         ease: "power2.out",
@@ -114,22 +115,22 @@ const CustomCursor = () => {
 
     const timeline = gsap.timeline({ repeat: -1 });
     timeline
-      .to(shapeRef.current, {
+      .to(loadingMotionRef.current, {
         rotate: 720,
         duration: 0.28,
         ease: "power4.in",
       })
-      .to(shapeRef.current, {
+      .to(loadingMotionRef.current, {
         rotate: 720,
         duration: 0.12,
         ease: "none",
       })
-      .to(shapeRef.current, {
+      .to(loadingMotionRef.current, {
         rotate: 1440,
         duration: 0.24,
         ease: "power4.in",
       })
-      .to(shapeRef.current, {
+      .to(loadingMotionRef.current, {
         rotate: 1440,
         duration: 0.16,
         ease: "none",
@@ -176,47 +177,56 @@ const CustomCursor = () => {
             transform: isProject ? 'scale(0)' : (isMenu ? 'scale(1.2)' : 'scale(1)'),
           }}
         >
-          <svg
-            width={CURSOR_SIZE}
-            height={CURSOR_SIZE}
-            viewBox="0 0 32 32"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+          <div
+            ref={loadingMotionRef}
             style={{
-              display: 'block',
               width: `${CURSOR_SIZE}px`,
               height: `${CURSOR_SIZE}px`,
-              minWidth: `${CURSOR_SIZE}px`,
-              minHeight: `${CURSOR_SIZE}px`,
-              maxWidth: `${CURSOR_SIZE}px`,
-              maxHeight: `${CURSOR_SIZE}px`,
-              overflow: 'visible',
+              transformOrigin: "50% 50%",
             }}
-            vectorEffect="non-scaling-stroke"
           >
-            <defs>
-              <clipPath id="custom-cursor-fill">
-                <rect ref={fillRectRef} x="0" y="32" width="32" height="0" />
-              </clipPath>
-            </defs>
-            <path
-              ref={fillPathRef}
-              d={DEFAULT_CURSOR_PATH}
-              fill="#ffffff"
-              stroke="none"
-              clipPath="url(#custom-cursor-fill)"
-            />
-            <path
-              ref={outlinePathRef}
-              d={DEFAULT_CURSOR_PATH}
-              stroke="#ffffff"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+            <svg
+              width={CURSOR_SIZE}
+              height={CURSOR_SIZE}
+              viewBox="0 0 32 32"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{
+                display: 'block',
+                width: `${CURSOR_SIZE}px`,
+                height: `${CURSOR_SIZE}px`,
+                minWidth: `${CURSOR_SIZE}px`,
+                minHeight: `${CURSOR_SIZE}px`,
+                maxWidth: `${CURSOR_SIZE}px`,
+                maxHeight: `${CURSOR_SIZE}px`,
+                overflow: 'visible',
+              }}
               vectorEffect="non-scaling-stroke"
-              fill="transparent"
-            />
-          </svg>
+            >
+              <defs>
+                <clipPath id="custom-cursor-fill">
+                  <rect ref={fillRectRef} x="0" y="32" width="32" height="0" />
+                </clipPath>
+              </defs>
+              <path
+                ref={fillPathRef}
+                d={DEFAULT_CURSOR_PATH}
+                fill="#ffffff"
+                stroke="none"
+                clipPath="url(#custom-cursor-fill)"
+              />
+              <path
+                ref={outlinePathRef}
+                d={DEFAULT_CURSOR_PATH}
+                stroke="#ffffff"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                vectorEffect="non-scaling-stroke"
+                fill="transparent"
+              />
+            </svg>
+          </div>
         </div>
       </div>
 

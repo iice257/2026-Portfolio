@@ -44,6 +44,7 @@ const TextPressure = ({
   const mouseRef = useRef({ x: 0, y: 0 });
   const cursorRef = useRef({ x: 0, y: 0 });
   const isVisibleRef = useRef(false);
+  const frameVisibilityRef = useRef(null);
 
   const [fontSize, setFontSize] = useState(minFontSize);
   const [scaleY, setScaleY] = useState(1);
@@ -226,16 +227,17 @@ const TextPressure = ({
     }
 
     const setVisibleState = (nextVisible) => {
-      if (isVisibleRef.current === nextVisible) return;
-      isVisibleRef.current = nextVisible;
-
       if (nextVisible) {
+        isVisibleRef.current = true;
         calculateSpans();
         startAnimation();
-      } else {
-        stopAnimation();
-        resetSpans();
+        return;
       }
+
+      if (!isVisibleRef.current) return;
+      isVisibleRef.current = false;
+      stopAnimation();
+      resetSpans();
     };
 
     const checkViewportVisibility = () => {
@@ -246,7 +248,11 @@ const TextPressure = ({
     };
 
     const handleScroll = () => {
-      window.requestAnimationFrame(checkViewportVisibility);
+      if (frameVisibilityRef.current !== null) return;
+      frameVisibilityRef.current = window.requestAnimationFrame(() => {
+        frameVisibilityRef.current = null;
+        checkViewportVisibility();
+      });
     };
 
     const observer = new IntersectionObserver(
@@ -266,6 +272,9 @@ const TextPressure = ({
 
     return () => {
       stopAnimation();
+      if (frameVisibilityRef.current !== null) {
+        window.cancelAnimationFrame(frameVisibilityRef.current);
+      }
       observer.disconnect();
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('touchmove', handleTouchMove);

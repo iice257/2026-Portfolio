@@ -1,9 +1,17 @@
 .shuffle-parent {
   display: inline-block;
+  max-width: 100%;
+  vertical-align: bottom;
 }
 
 .shuffle-parent.is-ready .shuffle-char {
   will-change: auto;
+}
+
+.shuffle-parent.clip-during-shuffle.is-shuffling {
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
 }
 
 .shuffle-char {
