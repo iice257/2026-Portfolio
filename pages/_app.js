@@ -7,7 +7,7 @@ import Meta from "@/components/Meta/Meta";
 import { ThemeProvider, useTheme } from "../context/ThemeContext";
 import { SnowProvider, useSnow } from "../context/SnowContext";
 import { TooltipProvider } from "../context/TooltipContext";
-import { CursorProvider } from "../context/CursorContext";
+import { CursorProvider, useCursor } from "../context/CursorContext";
 import Header from "../components/Header/Header";
 import "../styles/globals.scss";
 // React Bits component styles
@@ -28,6 +28,7 @@ const Snowfall = dynamic(() => import("react-snowfall"), {
 const AppContent = ({ Component, pageProps }) => {
   const { isSnowing } = useSnow();
   const { theme } = useTheme();
+  const { setIsRouteLoading } = useCursor();
   const router = useRouter();
   const [isLoaded, setIsLoaded] = useState(false);
   const [isFinePointer, setIsFinePointer] = useState(true);
@@ -74,6 +75,36 @@ const AppContent = ({ Component, pageProps }) => {
 
     return () => document.removeEventListener("visibilitychange", updatePageVisibility);
   }, []);
+
+  useEffect(() => {
+    let fallbackTimer = null;
+    const handleRouteStart = () => setIsRouteLoading(true);
+    const handleRouteDone = () => {
+      window.clearTimeout(fallbackTimer);
+      setIsRouteLoading(false);
+    };
+    const handleDocumentClick = (event) => {
+      const link = event.target?.closest?.("a[href], button[type='submit']");
+      if (!link) return;
+
+      setIsRouteLoading(true);
+      window.clearTimeout(fallbackTimer);
+      fallbackTimer = window.setTimeout(() => setIsRouteLoading(false), 1500);
+    };
+
+    router.events.on("routeChangeStart", handleRouteStart);
+    router.events.on("routeChangeComplete", handleRouteDone);
+    router.events.on("routeChangeError", handleRouteDone);
+    document.addEventListener("click", handleDocumentClick, true);
+
+    return () => {
+      window.clearTimeout(fallbackTimer);
+      router.events.off("routeChangeStart", handleRouteStart);
+      router.events.off("routeChangeComplete", handleRouteDone);
+      router.events.off("routeChangeError", handleRouteDone);
+      document.removeEventListener("click", handleDocumentClick, true);
+    };
+  }, [router.events, setIsRouteLoading]);
 
   // Different snow colors for different themes
   const snowColor = theme === 'dark' ? '#ffffff' : '#888888';

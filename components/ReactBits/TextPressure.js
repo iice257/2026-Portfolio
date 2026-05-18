@@ -78,6 +78,7 @@ const TextPressure = ({
   useEffect(() => {
     const debouncedSetSize = debounce(setSize, 100);
     debouncedSetSize();
+    document.fonts?.ready?.then(debouncedSetSize).catch(() => {});
     window.addEventListener('resize', debouncedSetSize);
     return () => window.removeEventListener('resize', debouncedSetSize);
   }, [setSize]);
@@ -224,24 +225,43 @@ const TextPressure = ({
       cursorRef.current.y = mouseRef.current.y;
     }
 
+    const setVisibleState = (nextVisible) => {
+      if (isVisibleRef.current === nextVisible) return;
+      isVisibleRef.current = nextVisible;
+
+      if (nextVisible) {
+        calculateSpans();
+        startAnimation();
+      } else {
+        stopAnimation();
+        resetSpans();
+      }
+    };
+
+    const checkViewportVisibility = () => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const margin = 160;
+      setVisibleState(rect.bottom >= -margin && rect.top <= window.innerHeight + margin);
+    };
+
+    const handleScroll = () => {
+      window.requestAnimationFrame(checkViewportVisibility);
+    };
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        isVisibleRef.current = entry.isIntersecting;
-        if (entry.isIntersecting) {
-          calculateSpans();
-          startAnimation();
-        } else {
-          stopAnimation();
-          resetSpans();
-        }
+        setVisibleState(entry.isIntersecting);
       },
       { rootMargin: '160px 0px', threshold: 0.01 }
     );
 
     if (containerRef.current) observer.observe(containerRef.current);
+    checkViewportVisibility();
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
@@ -249,6 +269,7 @@ const TextPressure = ({
       observer.disconnect();
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [width, weight, italic, alpha, calculateSpans]);

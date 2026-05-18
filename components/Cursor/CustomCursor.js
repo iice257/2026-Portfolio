@@ -8,6 +8,7 @@ const CURSOR_SIZE = 32;
 
 const CustomCursor = () => {
   const cursorRef = useRef(null);
+  const shapeRef = useRef(null);
   const textRef = useRef(null);
   const outlinePathRef = useRef(null);
   const fillPathRef = useRef(null);
@@ -16,7 +17,7 @@ const CustomCursor = () => {
   const [isClickable, setIsClickable] = useState(false);
   const isVisibleRef = useRef(false);
   const isClickableRef = useRef(false);
-  const { cursorText, cursorVariant } = useCursor();
+  const { cursorText, cursorVariant, isRouteLoading } = useCursor();
 
   // Use GSAP's quickSetter for performance
   const xSet = useRef(null);
@@ -99,6 +100,47 @@ const CustomCursor = () => {
   }, [isClickable]);
 
   useEffect(() => {
+    if (!shapeRef.current) return undefined;
+
+    if (!isRouteLoading) {
+      gsap.killTweensOf(shapeRef.current);
+      gsap.to(shapeRef.current, {
+        rotate: 0,
+        duration: 0.18,
+        ease: "power2.out",
+      });
+      return undefined;
+    }
+
+    const timeline = gsap.timeline({ repeat: -1 });
+    timeline
+      .to(shapeRef.current, {
+        rotate: 720,
+        duration: 0.28,
+        ease: "power4.in",
+      })
+      .to(shapeRef.current, {
+        rotate: 720,
+        duration: 0.12,
+        ease: "none",
+      })
+      .to(shapeRef.current, {
+        rotate: 1440,
+        duration: 0.24,
+        ease: "power4.in",
+      })
+      .to(shapeRef.current, {
+        rotate: 1440,
+        duration: 0.16,
+        ease: "none",
+      });
+
+    return () => {
+      timeline.kill();
+    };
+  }, [isRouteLoading]);
+
+  useEffect(() => {
     if (!cursorText || !textRef.current) return;
 
     gsap.set(textRef.current, {
@@ -125,11 +167,12 @@ const CustomCursor = () => {
       >
         {/* Cursor Container */}
         <div
+          ref={shapeRef}
           className="relative transition-all duration-300 ease-out"
           style={{
             width: `${CURSOR_SIZE}px`,
             height: `${CURSOR_SIZE}px`,
-            transformOrigin: "0 0",
+            transformOrigin: "50% 50%",
             transform: isProject ? 'scale(0)' : (isMenu ? 'scale(1.2)' : 'scale(1)'),
           }}
         >

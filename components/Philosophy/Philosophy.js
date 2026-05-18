@@ -42,6 +42,7 @@ const Philosophy = () => {
   return (
     <section
       ref={sectionRef}
+      data-normal-url="true"
       className="relative z-20 -mt-[18vh] md:mt-0 min-h-[220vh] md:min-h-[200vh] flex items-start justify-center pt-[18vh] md:pt-[30vh]"
       style={{ backgroundColor: 'var(--bg-primary)' }}
     >

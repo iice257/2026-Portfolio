@@ -41,7 +41,7 @@ export const MENULINKS = [
   },
   {
     name: "Work",
-    ref: "work",
+    ref: "experience",
   },
   {
     name: "Contact",

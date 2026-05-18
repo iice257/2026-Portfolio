@@ -41,6 +41,76 @@ export default function Home() {
     return () => document.removeEventListener("click", handleAnchorClick);
   }, []);
 
+  useEffect(() => {
+    const sectionHashes = new Map([
+      ["skills", "#skills"],
+      ["projects", "#projects"],
+      ["experience", "#experience"],
+      ["contact", "#contact"],
+    ]);
+
+    const normalSections = [
+      document.getElementById("home"),
+      document.querySelector("[data-normal-url='true']"),
+      document.querySelector("footer"),
+    ].filter(Boolean);
+
+    const observed = [
+      ...Array.from(sectionHashes.keys()).map((id) => document.getElementById(id)).filter(Boolean),
+      ...normalSections,
+    ];
+
+    if (!observed.length) return undefined;
+
+    const setUrlHash = (hash) => {
+      const nextUrl = hash ? `${window.location.pathname}${hash}` : window.location.pathname;
+      if (`${window.location.pathname}${window.location.hash}` !== nextUrl) {
+        window.history.replaceState(null, "", nextUrl);
+      }
+    };
+
+    let frameId = null;
+    const updateUrlFromViewport = () => {
+      window.cancelAnimationFrame(frameId);
+      frameId = window.requestAnimationFrame(() => {
+        const centerY = window.innerHeight * 0.45;
+        const ranked = observed
+          .map((section) => {
+            const rect = section.getBoundingClientRect();
+            return {
+              section,
+              distance: Math.abs((rect.top + rect.bottom) / 2 - centerY),
+              visible: rect.bottom > window.innerHeight * 0.18 && rect.top < window.innerHeight * 0.82,
+            };
+          })
+          .filter((item) => item.visible)
+          .sort((a, b) => a.distance - b.distance);
+
+        const active = ranked[0]?.section;
+        if (!active) return;
+
+        setUrlHash(sectionHashes.get(active.id) || "");
+      });
+    };
+
+    const observer = new IntersectionObserver(updateUrlFromViewport, {
+      rootMargin: "-18% 0px -18% 0px",
+      threshold: [0, 0.2, 0.45, 0.7],
+    });
+
+    observed.forEach((section) => observer.observe(section));
+    window.addEventListener("scroll", updateUrlFromViewport, { passive: true });
+    window.addEventListener("resize", updateUrlFromViewport);
+    updateUrlFromViewport();
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      observer.disconnect();
+      window.removeEventListener("scroll", updateUrlFromViewport);
+      window.removeEventListener("resize", updateUrlFromViewport);
+    };
+  }, []);
+
   return (
     <>
       <ProgressIndicator />

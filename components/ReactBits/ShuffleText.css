@@ -15,6 +15,11 @@
   white-space: nowrap;
 }
 
+.shuffle-space {
+  display: inline;
+  white-space: normal;
+}
+
 .shuffle-line {
   display: block;
 }

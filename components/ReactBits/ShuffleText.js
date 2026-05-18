@@ -25,7 +25,8 @@ const ShuffleText = ({
   scrambleCharset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
   triggerOnce = true,
   respectReducedMotion = true,
-  triggerOnHover = true
+  triggerOnHover = true,
+  preserveWords = true,
 }) => {
   const ref = useRef(null);
   const [ready, setReady] = useState(false);
@@ -138,23 +139,71 @@ const ShuffleText = ({
 
   const commonStyle = useMemo(() => ({ textAlign, ...style }), [textAlign, style]);
   const classes = useMemo(() => `shuffle-parent ${ready ? 'is-ready' : ''} ${className}`, [ready, className]);
+  const tokens = useMemo(() => {
+    const result = [];
+    let currentWord = [];
+
+    displayChars.forEach((char) => {
+      if (char.isSpace) {
+        if (currentWord.length > 0) {
+          result.push({ type: 'word', chars: currentWord });
+          currentWord = [];
+        }
+        result.push({ type: 'space', id: char.id });
+        return;
+      }
+
+      currentWord.push(char);
+    });
+
+    if (currentWord.length > 0) {
+      result.push({ type: 'word', chars: currentWord });
+    }
+
+    return result;
+  }, [displayChars]);
 
   const Tag = tag || 'span';
 
   return (
     <Tag ref={ref} className={classes} style={commonStyle}>
-      {displayChars.map((char) => (
-        <span
-          key={char.id}
-          className="shuffle-char"
-          style={{
-            display: 'inline-block',
-            willChange: ready ? 'auto' : 'contents',
-          }}
-        >
-          {char.isSpace ? '\u00A0' : char.current}
-        </span>
-      ))}
+      {preserveWords ? (
+        tokens.map((token, tokenIndex) => {
+          if (token.type === 'space') {
+            return <span key={`space-${token.id}`} className="shuffle-space"> </span>;
+          }
+
+          return (
+            <span key={`word-${tokenIndex}`} className="shuffle-word">
+              {token.chars.map((char) => (
+                <span
+                  key={char.id}
+                  className="shuffle-char"
+                  style={{
+                    display: 'inline-block',
+                    willChange: ready ? 'auto' : 'transform',
+                  }}
+                >
+                  {char.current}
+                </span>
+              ))}
+            </span>
+          );
+        })
+      ) : (
+        displayChars.map((char) => (
+          <span
+            key={char.id}
+            className="shuffle-char"
+            style={{
+              display: 'inline-block',
+              willChange: ready ? 'auto' : 'transform',
+            }}
+          >
+            {char.isSpace ? '\u00A0' : char.current}
+          </span>
+        ))
+      )}
     </Tag>
   );
 };
