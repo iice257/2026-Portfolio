@@ -115,7 +115,7 @@ const Work = () => {
           </p>
           <h2
             ref={titleRef}
-            className="text-massive font-extralight"
+            className="text-[clamp(4rem,8.35vw,8.25rem)] leading-[0.95] font-extralight"
             style={{ color: "var(--fg-primary)" }}
           >
             <ShuffleText text="Where I've worked" duration={0.6} shuffleTimes={4} />

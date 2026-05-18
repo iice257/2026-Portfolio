@@ -33,6 +33,7 @@ const AppContent = ({ Component, pageProps }) => {
   const [isFinePointer, setIsFinePointer] = useState(true);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
   const [allowMotion, setAllowMotion] = useState(true);
+  const [isPageVisible, setIsPageVisible] = useState(true);
 
   // Page blur-in effect on load
   useEffect(() => {
@@ -61,6 +62,17 @@ const AppContent = ({ Component, pageProps }) => {
       mobileQuery.removeEventListener("change", updateCapabilities);
       motionQuery.removeEventListener("change", updateCapabilities);
     };
+  }, []);
+
+  useEffect(() => {
+    const updatePageVisibility = () => {
+      setIsPageVisible(document.visibilityState !== "hidden");
+    };
+
+    updatePageVisibility();
+    document.addEventListener("visibilitychange", updatePageVisibility);
+
+    return () => document.removeEventListener("visibilitychange", updatePageVisibility);
   }, []);
 
   // Different snow colors for different themes
@@ -95,7 +107,7 @@ const AppContent = ({ Component, pageProps }) => {
         </AnimatePresence>
       </motion.div>
 
-      {isSnowing && allowMotion && (
+      {isSnowing && allowMotion && isPageVisible && (
         <Snowfall
           color={snowColor}
           snowflakeCount={snowflakeCount}

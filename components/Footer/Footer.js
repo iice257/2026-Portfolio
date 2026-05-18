@@ -29,7 +29,7 @@ const Footer = () => {
               className="text-display-lg md:text-display-xl font-light leading-none max-w-4xl"
               style={{ color: "var(--fg-primary)" }}
             >
-              <ShuffleText text="Let's ship something useful." duration={0.45} shuffleTimes={4} />
+              <ShuffleText text="Let's get busy." duration={0.45} shuffleTimes={4} />
             </h2>
           </div>
 

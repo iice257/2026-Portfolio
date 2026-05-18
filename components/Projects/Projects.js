@@ -15,6 +15,7 @@ const Projects = ({ isDesktop }) => {
   const titleRef = useRef(null);
   const projectsContainerRef = useRef(null);
   const lastPointerRef = useRef({ x: null, y: null });
+  const panelRectsRef = useRef([]);
   const projectCursorActiveRef = useRef(false);
   const { setCursorText, setCursorVariant } = useCursor();
 
@@ -80,6 +81,19 @@ const Projects = ({ isDesktop }) => {
     setCursorVariant("project");
   }, [setCursorText, setCursorVariant]);
 
+  const cacheProjectRects = useCallback(() => {
+    const panels = projectsContainerRef.current?.querySelectorAll(".project-panel");
+    panelRectsRef.current = Array.from(panels || []).map((panel) => {
+      const rect = panel.getBoundingClientRect();
+      return {
+        left: rect.left + window.scrollX,
+        right: rect.right + window.scrollX,
+        top: rect.top + window.scrollY,
+        bottom: rect.bottom + window.scrollY,
+      };
+    });
+  }, []);
+
   const updateProjectCursorFromPointer = useCallback(() => {
     if (!canUseHoverCursor()) {
       clearProjectCursor();
@@ -92,11 +106,9 @@ const Projects = ({ isDesktop }) => {
       return;
     }
 
-    const panels = projectsContainerRef.current?.querySelectorAll(".project-panel");
-    const isOverProject = Array.from(panels || []).some((panel) => {
-      const rect = panel.getBoundingClientRect();
-      return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
-    });
+    const isOverProject = panelRectsRef.current.some((rect) => (
+      x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
+    ));
 
     if (isOverProject) {
       setProjectCursor();
@@ -106,12 +118,20 @@ const Projects = ({ isDesktop }) => {
   }, [canUseHoverCursor, clearProjectCursor, setProjectCursor]);
 
   useEffect(() => {
+    let frameId = null;
+
+    const scheduleCacheProjectRects = () => {
+      window.cancelAnimationFrame(frameId);
+      frameId = window.requestAnimationFrame(cacheProjectRects);
+    };
+
     const handlePointerMove = (event) => {
-      lastPointerRef.current = { x: event.clientX, y: event.clientY };
+      lastPointerRef.current = { x: event.pageX, y: event.pageY };
       updateProjectCursorFromPointer();
     };
 
-    const handleScrollOrResize = () => {
+    const handleResize = () => {
+      scheduleCacheProjectRects();
       updateProjectCursorFromPointer();
     };
 
@@ -124,21 +144,28 @@ const Projects = ({ isDesktop }) => {
       clearProjectCursor();
     };
 
+    scheduleCacheProjectRects();
+
+    const resizeObserver = new ResizeObserver(scheduleCacheProjectRects);
+    if (projectsContainerRef.current) {
+      resizeObserver.observe(projectsContainerRef.current);
+    }
+
     window.addEventListener("pointermove", handlePointerMove, { passive: true });
-    window.addEventListener("scroll", handleScrollOrResize, { passive: true });
-    window.addEventListener("resize", handleScrollOrResize);
+    window.addEventListener("resize", handleResize);
     document.addEventListener("pointerleave", handlePointerLeave);
     router.events.on("routeChangeStart", handleRouteStart);
 
     return () => {
+      window.cancelAnimationFrame(frameId);
+      resizeObserver.disconnect();
       window.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("scroll", handleScrollOrResize);
-      window.removeEventListener("resize", handleScrollOrResize);
+      window.removeEventListener("resize", handleResize);
       document.removeEventListener("pointerleave", handlePointerLeave);
       router.events.off("routeChangeStart", handleRouteStart);
       clearProjectCursor();
     };
-  }, [clearProjectCursor, router.events, updateProjectCursorFromPointer]);
+  }, [cacheProjectRects, clearProjectCursor, router.events, updateProjectCursorFromPointer]);
 
   return (
     <section

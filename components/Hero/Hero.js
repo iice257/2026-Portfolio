@@ -12,21 +12,88 @@ const ASCIIText = dynamic(() => import("../ReactBits/ASCIIText"), {
 
 const Hero = () => {
   const { theme } = useTheme();
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
   const [showMobileAscii, setShowMobileAscii] = useState(false);
   const sectionRef = useRef(null);
   const nameContainerRef = useRef(null);
   const subtitleRef = useRef(null);
   const scrollIndicatorRef = useRef(null);
+  const isMobileRef = useRef(false);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 767px)");
-    const updateMobileAscii = () => setShowMobileAscii(mediaQuery.matches);
+    const updateMobileViewport = () => {
+      isMobileRef.current = mediaQuery.matches;
+      setIsMobileViewport(mediaQuery.matches);
+    };
 
-    updateMobileAscii();
-    mediaQuery.addEventListener("change", updateMobileAscii);
+    updateMobileViewport();
+    mediaQuery.addEventListener("change", updateMobileViewport);
 
-    return () => mediaQuery.removeEventListener("change", updateMobileAscii);
+    return () => mediaQuery.removeEventListener("change", updateMobileViewport);
   }, []);
+
+  useEffect(() => {
+    if (!isMobileViewport || !sectionRef.current) {
+      setShowMobileAscii(false);
+      return undefined;
+    }
+
+    let idleId = null;
+    let timeoutId = null;
+    let isHeroInView = false;
+
+    const clearMountTimers = () => {
+      if (typeof window.cancelIdleCallback === "function" && idleId !== null) {
+        window.cancelIdleCallback(idleId);
+      }
+      window.clearTimeout(timeoutId);
+      idleId = null;
+      timeoutId = null;
+    };
+
+    const deferAsciiMount = () => {
+      clearMountTimers();
+      const mount = () => setShowMobileAscii(true);
+      if (typeof window.requestIdleCallback === "function") {
+        idleId = window.requestIdleCallback(mount, { timeout: 900 });
+      } else {
+        timeoutId = window.setTimeout(mount, 450);
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isHeroInView = entry.isIntersecting;
+        if (entry.isIntersecting && !document.hidden) {
+          deferAsciiMount();
+          return;
+        }
+
+        clearMountTimers();
+        setShowMobileAscii(false);
+      },
+      { rootMargin: "120px 0px", threshold: 0.01 }
+    );
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        clearMountTimers();
+        setShowMobileAscii(false);
+      } else if (isHeroInView) {
+        deferAsciiMount();
+      }
+    };
+
+    observer.observe(sectionRef.current);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      clearMountTimers();
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [isMobileViewport]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -64,7 +131,7 @@ const Hero = () => {
         scrub: 1,
         onUpdate: (self) => {
           const progress = self.progress;
-          const isMobile = window.matchMedia("(max-width: 767px)").matches;
+          const isMobile = isMobileRef.current;
 
           gsap.set(nameContainerRef.current, {
             y: isMobile ? progress * 72 : progress * 150,
