@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { safeStorage } from "../utils/storage";
 
 const ThemeContext = createContext({
   theme: "dark",
@@ -11,7 +12,7 @@ export const ThemeProvider = ({ children }) => {
 
   useEffect(() => {
     setMounted(true);
-    const stored = localStorage.getItem("theme");
+    const stored = safeStorage.get(window.localStorage, "theme");
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
     if (stored === "dark" || stored === "light") {
@@ -38,7 +39,7 @@ export const ThemeProvider = ({ children }) => {
   const toggleTheme = () => {
     setTheme((prev) => {
       const nextTheme = prev === "dark" ? "light" : "dark";
-      localStorage.setItem("theme", nextTheme);
+      safeStorage.set(window.localStorage, "theme", nextTheme);
       return nextTheme;
     });
   };

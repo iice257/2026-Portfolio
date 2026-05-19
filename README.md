@@ -4,7 +4,7 @@ I build web and mobile applications with a focus on usability, performance, and 
 
 I prefer solving practical problems with software that feels intuitive and purposeful. MVPs and iterative improvement drive my process: ship, learn, refine.
 
-View my portfolio via this link: [kingsleyaremu.vercel.app](kingsleyaremu.vercel.app)
+View my portfolio via this link: [kingsleyaremu.vercel.app](https://kingsleyaremu.vercel.app)
 
 ---
 

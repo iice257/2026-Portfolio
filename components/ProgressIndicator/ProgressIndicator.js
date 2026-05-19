@@ -8,7 +8,7 @@ const ProgressIndicator = () => {
   useEffect(() => {
     const progress = progressRef.current;
 
-    ScrollTrigger.create({
+    const trigger = ScrollTrigger.create({
       start: "top top",
       end: "bottom bottom",
       onUpdate: (self) => {
@@ -17,6 +17,8 @@ const ProgressIndicator = () => {
         });
       },
     });
+
+    return () => trigger.kill();
   }, []);
 
   return (

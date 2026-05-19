@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { safeStorage } from "../utils/storage";
 
 const SnowContext = createContext({
   isSnowing: false,
@@ -11,7 +12,7 @@ export const SnowProvider = ({ children }) => {
 
   // Persist snow preference in sessionStorage (not localStorage - only for current session)
   useEffect(() => {
-    const saved = sessionStorage.getItem("isSnowing");
+    const saved = safeStorage.get(window.sessionStorage, "isSnowing");
     if (saved !== null) {
       setIsSnowing(saved === "true");
       setHasLoadedSnowPreference(true);
@@ -25,7 +26,7 @@ export const SnowProvider = ({ children }) => {
   useEffect(() => {
     if (!hasLoadedSnowPreference) return;
 
-    sessionStorage.setItem("isSnowing", isSnowing);
+    safeStorage.set(window.sessionStorage, "isSnowing", isSnowing);
   }, [hasLoadedSnowPreference, isSnowing]);
 
   const toggleSnow = () => setIsSnowing((prev) => !prev);

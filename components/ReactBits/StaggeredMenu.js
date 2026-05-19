@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useCursor } from '../../context/CursorContext';
 
@@ -21,6 +21,8 @@ const StaggeredMenu = ({
   const [isOpen, setIsOpen] = useState(false);
   const { setCursorVariant } = useCursor();
   const [mounted, setMounted] = useState(false);
+  const closeButtonRef = useRef(null);
+  const overlayId = "site-menu-overlay";
 
   useEffect(() => {
     setMounted(true);
@@ -52,6 +54,7 @@ const StaggeredMenu = ({
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      closeButtonRef.current?.focus();
     } else {
       document.body.style.overflow = '';
     }
@@ -77,14 +80,21 @@ const StaggeredMenu = ({
 
   const MenuOverlay = (
     <div
+      id={overlayId}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Site navigation"
+      aria-hidden={!isOpen}
       className={`fixed inset-0 z-[99999] flex flex-col items-start overflow-y-auto py-16 md:py-20 transition-transform duration-500 ease-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       style={{ backgroundColor: '#000000' }}
     >
       <button
+        ref={closeButtonRef}
         type="button"
         onClick={toggleMenu}
         aria-label="Close menu"
+        tabIndex={isOpen ? 0 : -1}
         className={`homepage-menu-close fixed z-[100001] h-10 w-10 flex items-center justify-center transition-all duration-300 cursor-none ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'
           }`}
         style={{ cursor: 'none' }}
@@ -94,7 +104,7 @@ const StaggeredMenu = ({
       </button>
 
       {/* Navigation Items - LEFT ALIGNED */}
-      <nav className="min-h-[calc(100svh-8rem)] md:min-h-full pl-6 md:pl-16 lg:pl-32 pr-6 pb-24 md:pb-16 flex flex-col justify-center items-start w-full">
+      <nav aria-label="Primary navigation" className="min-h-[calc(100svh-8rem)] md:min-h-full pl-6 md:pl-16 lg:pl-32 pr-6 pb-24 md:pb-16 flex flex-col justify-center items-start w-full">
         {items.map((item, index) => {
           const renderLabelContent = () => (
             <>
@@ -111,9 +121,10 @@ const StaggeredMenu = ({
           );
 
           return (
-          <div key={index} className="border-b border-white/20 w-auto max-w-4xl">
+          <div key={item.label} className="border-b border-white/20 w-auto max-w-4xl">
             <Link
               href={item.link}
+              tabIndex={isOpen ? 0 : -1}
               className={`group relative flex items-center gap-5 md:gap-8 py-3.5 md:py-5 text-white transition-all duration-500 cursor-none ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                 }`}
               style={{
@@ -166,8 +177,9 @@ const StaggeredMenu = ({
         <div className="absolute bottom-12 left-6 md:left-16 lg:left-32 flex gap-8">
           {socialItems.map((social, index) => (
             <a
-              key={index}
+              key={social.link}
               href={social.link}
+              tabIndex={isOpen ? 0 : -1}
               className={`relative text-sm md:text-base text-white transition-all duration-500 cursor-none group ${isOpen ? 'opacity-60 translate-y-0' : 'opacity-0 translate-y-4'
                 }`}
               style={{ transitionDelay: isOpen ? `${0.3 + index * 0.05}s` : '0s', cursor: 'none' }}
@@ -193,7 +205,10 @@ const StaggeredMenu = ({
           }`}
         onClick={toggleMenu}
         aria-label="Open menu"
-        aria-hidden={isOpen}
+        aria-expanded={isOpen}
+        aria-controls={overlayId}
+        aria-haspopup="dialog"
+        tabIndex={isOpen ? -1 : 0}
         style={{ cursor: 'none' }}
       >
         <div className="w-6 h-4 relative flex flex-col justify-between pointer-events-none">

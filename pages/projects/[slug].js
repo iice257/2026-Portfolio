@@ -89,6 +89,7 @@ const ProjectMediaPreview = ({ project, variant = "desktop", priority = false })
   const [isPaused, setIsPaused] = useState(false);
   const [isMonochrome, setIsMonochrome] = useState(true);
   const [areControlsVisible, setAreControlsVisible] = useState(true);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const videoSrc = variant === "desktop" ? project.desktopVideo : project.mobileVideo;
   const isMobile = variant === "mobile";
 
@@ -109,6 +110,23 @@ const ProjectMediaPreview = ({ project, variant = "desktop", priority = false })
       window.clearTimeout(controlsTimerRef.current);
     };
   }, [showControls]);
+
+  useEffect(() => {
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const syncMotionPreference = () => {
+      setPrefersReducedMotion(motionQuery.matches);
+      if (motionQuery.matches && videoRef.current) {
+        videoRef.current.pause();
+        setIsPaused(true);
+      }
+    };
+
+    syncMotionPreference();
+    motionQuery.addEventListener("change", syncMotionPreference);
+
+    return () => motionQuery.removeEventListener("change", syncMotionPreference);
+  }, []);
 
   const togglePlayback = () => {
     const video = videoRef.current;
@@ -136,7 +154,7 @@ const ProjectMediaPreview = ({ project, variant = "desktop", priority = false })
             ref={videoRef}
             className="h-full w-full object-cover"
             src={videoSrc}
-            autoPlay
+            autoPlay={!prefersReducedMotion}
             muted
             loop
             playsInline
@@ -158,6 +176,7 @@ const ProjectMediaPreview = ({ project, variant = "desktop", priority = false })
               className="project-media-playback"
               onClick={togglePlayback}
               aria-label={`${isPaused ? "Play" : "Pause"} ${project.name} preview`}
+              aria-pressed={!isPaused}
             >
               <span className={`project-media-playback-icon ${isPaused ? "is-play" : "is-pause"}`} aria-hidden="true" />
             </button>

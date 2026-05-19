@@ -36,6 +36,7 @@ const ThemeToggle = () => {
         onClick={handleClick}
         className="theme-toggle"
         aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+        aria-pressed={theme === "dark"}
       >
         {theme === "dark" ? (
           // Sun icon

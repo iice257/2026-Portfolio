@@ -4,7 +4,9 @@
     "dev": "node scripts/next-dev.mjs",
     "build": "node scripts/next-build.mjs",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "validate:data": "node scripts/validate-project-data.mjs",
+    "check": "npm run validate:data && npm run lint && npm run build"
   },
   "dependencies": {
     "@next/third-parties": "^14.2.35",

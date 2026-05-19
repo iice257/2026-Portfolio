@@ -123,10 +123,10 @@ const AppContent = ({ Component, pageProps }) => {
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={router.asPath}
-            initial={{ opacity: 0, y: 18 }}
+            initial={allowMotion ? { opacity: 0, y: 18 } : false}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
+            exit={allowMotion ? { opacity: 0, y: -12 } : { opacity: 1, y: 0 }}
+            transition={{ duration: allowMotion ? 0.42 : 0, ease: [0.16, 1, 0.3, 1] }}
           >
             <Component {...pageProps} />
           </motion.div>

@@ -157,7 +157,8 @@ const SnowToggle = () => {
         onMouseEnter={handleHint}
         onFocus={handleHint}
         className="relative group p-2 hover:bg-[var(--fg-secondary)]/10 rounded-full transition-colors duration-300"
-        aria-label="Toggle snow effect"
+        aria-label={`${isSnowing ? "Disable" : "Enable"} snow effect`}
+        aria-pressed={isSnowing}
         style={{ color: 'var(--fg-primary)' }}
       >
         <svg
