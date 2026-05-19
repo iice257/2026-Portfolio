@@ -74,28 +74,69 @@ const Work = () => {
     {
       company: "W3Pets",
       role: "Frontend Developer",
-      period: "Jun 2025 - Present",
-      description:
-        "Building responsive, user-friendly interfaces with modern frameworks. Optimizing performance and collaborating with cross-functional teams.",
-    },
-    {
-      company: "Nestle",
-      role: "IT Attendant",
-      period: "Feb 2025 - Present",
-      description:
-        "IT support, system maintenance, and infrastructure optimization. Training staff on software and IT best practices.",
-      hidden: true,
+      period: "JUN 2025 - DEC 2025",
+      summary:
+        "Built responsive frontend experiences for W3Pets, focusing on clean UI implementation, reusable components, polished user flows, and frontend performance.",
+      details: [
+        "Developed frontend interfaces with attention to layout, responsiveness, and interaction quality.",
+        "Translated product requirements into clean, reusable UI components.",
+        "Improved visual consistency across pages, components, and user journeys.",
+        "Worked across layout structure, state handling, styling, and frontend refinement.",
+      ],
+      stack: ["React", "JavaScript", "CSS", "Responsive UI", "Component Systems"],
     },
     {
       company: "Ice Design Studio",
       role: "Freelance Web Designer",
-      period: "Feb 2019 - Present",
-      description:
-        "Delivering custom websites for clients. Designing responsive, modern interfaces and managing multiple concurrent projects.",
+      period: "FEB 2019 - PRESENT",
+      summary:
+        "Designed and built custom websites for clients, from concept to delivery, with focus on modern interfaces, responsive layouts, and practical business websites.",
+      details: [
+        "Built client websites across portfolio, business, landing page, and service-based use cases.",
+        "Managed multiple concurrent projects, including design direction, revisions, and delivery.",
+        "Created responsive interfaces optimized for mobile, desktop, clarity, and conversion.",
+        "Helped clients turn rough ideas into structured, usable web experiences.",
+      ],
+      stack: ["React", "HTML", "CSS", "JavaScript", "UI Design", "Client Delivery"],
+    },
+    {
+      company: "GamblePause",
+      role: "Web Developer",
+      period: "MAY 2024 - SEPT 2024",
+      summary:
+        "Helped build and maintain the first version of the GamblePause website, supporting the early web presence and refining the frontend experience after launch.",
+      details: [
+        "Contributed to the first public version of the website.",
+        "Helped implement and refine key frontend pages and content sections.",
+        "Maintained the site after launch with updates, fixes, and layout improvements.",
+        "Balanced speed, clarity, and maintainability during early-stage delivery.",
+      ],
+      stack: ["HTML", "CSS", "JavaScript", "Responsive Design", "Website Maintenance"],
+    },
+    {
+      company: "REDACTED",
+      role: "IT Attendant",
+      period: "REDACTED - REDACTED",
+      location: "REDACTED",
+      redacted: true,
+      summary:
+        "Provided IT support in a disciplined operational environment, assisting with endpoint support, system access, troubleshooting, and day-to-day technical issue resolution.",
+      details: [
+        "Supported users with technical issues across devices, access, and workplace systems.",
+        "Assisted with hardware, software, and basic network-related troubleshooting.",
+        "Worked in an operations-focused environment where reliability, documentation, and response time mattered.",
+        "Built practical experience across support workflows, escalation, and IT service delivery.",
+      ],
+      stack: [
+        "IT Support",
+        "Troubleshooting",
+        "Hardware Support",
+        "Software Support",
+        "User Support",
+        "Operations",
+      ],
     },
   ];
-
-  const visibleExperiences = experiences.filter((experience) => !experience.hidden);
 
   const toggleExperience = (index) => {
     setOpenExperience((current) => (current === index ? null : index));
@@ -123,8 +164,8 @@ const Work = () => {
         </div>
 
         <div className="space-y-0">
-          {visibleExperiences.map((exp, i) => (
-            <article key={exp.company} className="work-item" onMouseEnter={() => setOpenExperience(i)}>
+          {experiences.map((exp, i) => (
+            <article key={`${exp.role}-${i}`} className="work-item" onMouseEnter={() => setOpenExperience(i)}>
               <div className="work-line h-px w-full" style={{ backgroundColor: "var(--border)" }} />
 
               <div className="work-content">
@@ -148,7 +189,7 @@ const Work = () => {
                         {exp.role}
                       </h3>
                       <span className="text-body-md" style={{ color: "var(--fg-secondary)" }}>
-                        {exp.company}
+                        {exp.redacted ? <span className="redacted-text">REDACTED</span> : exp.company}
                       </span>
                     </div>
                   </div>
@@ -184,7 +225,23 @@ const Work = () => {
                           className="text-editorial font-light leading-relaxed max-w-3xl"
                           style={{ color: "var(--fg-secondary)" }}
                         >
-                          {exp.description}
+                          {exp.summary}
+                        </p>
+                        {exp.location && (
+                          <p className="text-micro mt-5" style={{ color: "var(--fg-muted)" }}>
+                            Location: <span className="redacted-text">REDACTED</span>
+                          </p>
+                        )}
+                        <ul className="mt-6 space-y-3 max-w-3xl">
+                          {exp.details.map((detail) => (
+                            <li key={detail} className="flex gap-4 text-body-md" style={{ color: "var(--fg-secondary)" }}>
+                              <span className="mt-[0.75em] h-px w-5 shrink-0" style={{ backgroundColor: "var(--border)" }} />
+                              <span>{detail}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        <p className="text-micro mt-7 max-w-3xl" style={{ color: "var(--fg-muted)" }}>
+                          {exp.stack.join(" · ")}
                         </p>
                       </div>
                     </motion.div>
@@ -195,6 +252,25 @@ const Work = () => {
           ))}
 
           <div style={{ borderTop: "1px solid var(--border)" }} />
+        </div>
+
+        <p
+          className="text-micro py-6 border-b"
+          style={{ color: "var(--fg-muted)", borderColor: "var(--border)" }}
+        >
+          5+ years building for the web · Multiple client websites shipped · Frontend, UI, and IT systems experience · Applied AI/ML learning in progress
+        </p>
+
+        <div className="pt-10 max-w-4xl">
+          <p className="text-micro mb-4" style={{ color: "var(--fg-muted)" }}>
+            AI & Machine Learning Practice
+          </p>
+          <p className="text-body-lg font-light leading-relaxed" style={{ color: "var(--fg-secondary)" }}>
+            Currently building deeper machine learning foundations through Deep Learning with Python, neural network fundamentals, and applied exploration of modern AI systems. Focused on understanding how models learn, how they are evaluated, and how AI can be integrated into real products with strong UX and reliable systems thinking.
+          </p>
+          <p className="text-micro mt-5" style={{ color: "var(--fg-muted)" }}>
+            Deep Learning · Neural Networks · LLMs · AI Agents · Model Evaluation · Product UX
+          </p>
         </div>
       </div>
     </section>

@@ -365,6 +365,20 @@ body {
   padding-bottom: clamp(12rem, 30vh, 24rem);
 }
 
+.redacted-text {
+  display: inline-block;
+  padding: 0.08em 0.55em 0.12em;
+  background: #050505;
+  color: #ffffff;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.78em;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  vertical-align: 0.08em;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #ffffff 18%, transparent);
+}
+
 .homepage-menu-close {
   top: 1.5rem;
   right: 1.5rem;
@@ -594,8 +608,8 @@ a {
   position: relative;
   display: inline-flex;
   align-items: flex-start;
-  gap: clamp(1.1rem, 2vw, 1.7rem);
-  min-height: clamp(4.5rem, 8vw, 6.2rem);
+  gap: clamp(0.42rem, 0.9vw, 0.8rem);
+  min-height: clamp(3.2rem, 6vw, 5rem);
   overflow: visible;
   background: transparent;
   color: var(--fg-muted);
@@ -605,7 +619,7 @@ a {
   display: inline-flex;
   flex-direction: column;
   align-items: flex-start;
-  min-width: clamp(4.6rem, 7.5vw, 6.8rem);
+  min-width: clamp(3.55rem, 5.8vw, 5.25rem);
 }
 
 .project-number-current {
@@ -614,50 +628,22 @@ a {
   line-height: 0.95;
   letter-spacing: -0.02em;
   transition: color 0.38s cubic-bezier(0.16, 1, 0.3, 1),
-    font-weight 0.38s cubic-bezier(0.16, 1, 0.3, 1),
     transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .project-number-carousel:hover .project-number-current,
 .project-number-carousel:focus-within .project-number-current {
   color: var(--fg-primary);
-  font-weight: 800;
   transform: translateX(-0.03em);
-}
-
-.project-number-category {
-  position: relative;
-  display: block;
-  width: min(28ch, 62vw);
-  height: 1.25rem;
-  margin-top: 0.35rem;
-  overflow: hidden;
-  color: var(--fg-muted);
-}
-
-.project-number-category-text {
-  display: block;
-  font-size: 0.625rem;
-  line-height: 1.2;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  font-weight: 500;
-  animation: project-number-category-morph 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.project-number-carousel:hover .project-number-category-text,
-.project-number-carousel:focus-within .project-number-category-text {
-  color: var(--fg-primary);
-  font-weight: 700;
 }
 
 .project-number-track {
   display: inline-flex;
   align-items: baseline;
-  gap: clamp(0.85rem, 1.5vw, 1.25rem);
+  gap: clamp(0.55rem, 1vw, 0.85rem);
   padding-top: clamp(0.28rem, 1vw, 0.6rem);
   opacity: 0;
-  transform: translateX(-1.05rem);
+  transform: translateX(-0.58rem);
   pointer-events: none;
   transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
     transform 0.46s cubic-bezier(0.16, 1, 0.3, 1);
@@ -675,7 +661,7 @@ a {
   display: inline-flex;
   color: var(--fg-muted);
   text-decoration: none;
-  font-size: clamp(1.45rem, 3vw, 2.15rem);
+  font-size: clamp(1.35rem, 2.65vw, 1.95rem);
   line-height: 1;
   font-weight: 300;
   letter-spacing: -0.01em;
@@ -683,41 +669,11 @@ a {
     font-weight 0.3s cubic-bezier(0.16, 1, 0.3, 1),
     transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 
-  &::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -0.18em;
-    height: 1px;
-    background: currentColor;
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
   &:hover,
   &:focus-visible {
     color: var(--fg-primary);
     font-weight: 650;
     transform: translateY(-0.04em);
-  }
-
-  &:hover::after,
-  &:focus-visible::after {
-    transform: scaleX(1);
-  }
-}
-
-@keyframes project-number-category-morph {
-  0% {
-    opacity: 0;
-    transform: translateY(85%);
-  }
-
-  100% {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 

@@ -45,8 +45,6 @@ const DetailBlock = ({ label, title, children }) => (
 
 const ProjectNumberCarousel = ({ projects, currentIndex }) => {
   const currentProject = projects[currentIndex];
-  const [hoveredProjectIndex, setHoveredProjectIndex] = useState(null);
-  const previewProject = hoveredProjectIndex !== null ? projects[hoveredProjectIndex] : currentProject;
   const otherProjects = projects
     .map((item, itemIndex) => ({ item, itemIndex }))
     .filter(({ itemIndex }) => itemIndex !== currentIndex);
@@ -56,21 +54,10 @@ const ProjectNumberCarousel = ({ projects, currentIndex }) => {
       className="project-number-carousel mb-4"
       tabIndex={0}
       aria-label={`Project ${String(currentIndex + 1).padStart(2, "0")}: ${currentProject.name}`}
-      onMouseLeave={() => setHoveredProjectIndex(null)}
-      onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) {
-          setHoveredProjectIndex(null);
-        }
-      }}
     >
       <div className="project-number-current-stack">
         <span className="project-number-current text-display-2xl" aria-hidden="true">
           {String(currentIndex + 1).padStart(2, "0")}
-        </span>
-        <span className="project-number-category" aria-live="polite">
-          <span key={previewProject.slug} className="project-number-category-text">
-            {previewProject.category}
-          </span>
         </span>
       </div>
 
@@ -80,8 +67,6 @@ const ProjectNumberCarousel = ({ projects, currentIndex }) => {
             key={item.slug}
             href={`/projects/${item.slug}`}
             className="project-number-item"
-            onMouseEnter={() => setHoveredProjectIndex(itemIndex)}
-            onFocus={() => setHoveredProjectIndex(itemIndex)}
           >
             {String(itemIndex + 1).padStart(2, "0")}
           </Link>

@@ -25,6 +25,7 @@ const CustomCursor = () => {
   const xSet = useRef(null);
   const ySet = useRef(null);
   const lastPointerRef = useRef({ x: 0, y: 0 });
+  const loadingTimelineRef = useRef(null);
 
   useEffect(() => {
     // Setup quickSetters
@@ -89,6 +90,7 @@ const CustomCursor = () => {
 
   useEffect(() => {
     if (!outlinePathRef.current || !fillPathRef.current || !fillRectRef.current) return;
+    if (isRouteLoading) return;
 
     const targetPath = isClickable ? CLICKABLE_CURSOR_PATH : DEFAULT_CURSOR_PATH;
 
@@ -106,7 +108,66 @@ const CustomCursor = () => {
       duration: 0.38,
       ease: "power3.out",
     });
-  }, [isClickable]);
+  }, [isClickable, isRouteLoading]);
+
+  useEffect(() => {
+    if (!outlinePathRef.current || !fillPathRef.current || !fillRectRef.current) return undefined;
+
+    loadingTimelineRef.current?.kill();
+
+    if (!isRouteLoading) {
+      const targetPath = isClickableRef.current ? CLICKABLE_CURSOR_PATH : DEFAULT_CURSOR_PATH;
+
+      gsap.to([outlinePathRef.current, fillPathRef.current], {
+        attr: { d: targetPath },
+        duration: 0.22,
+        ease: "power3.out",
+      });
+
+      gsap.to(fillRectRef.current, {
+        attr: {
+          y: isClickableRef.current ? 0 : 32,
+          height: isClickableRef.current ? 32 : 0,
+        },
+        duration: 0.24,
+        ease: "power3.out",
+      });
+
+      return undefined;
+    }
+
+    loadingTimelineRef.current = gsap.timeline({
+      repeat: -1,
+      defaults: { overwrite: "auto" },
+    });
+
+    loadingTimelineRef.current
+      .to([outlinePathRef.current, fillPathRef.current], {
+        attr: { d: CLICKABLE_CURSOR_PATH },
+        duration: 0.18,
+        ease: "power3.inOut",
+      }, 0)
+      .to(fillRectRef.current, {
+        attr: { y: 0, height: 32 },
+        duration: 0.18,
+        ease: "power3.inOut",
+      }, 0)
+      .to([outlinePathRef.current, fillPathRef.current], {
+        attr: { d: DEFAULT_CURSOR_PATH },
+        duration: 0.18,
+        ease: "power3.inOut",
+      }, 0.23)
+      .to(fillRectRef.current, {
+        attr: { y: 32, height: 0 },
+        duration: 0.18,
+        ease: "power3.inOut",
+      }, 0.23);
+
+    return () => {
+      loadingTimelineRef.current?.kill();
+      loadingTimelineRef.current = null;
+    };
+  }, [isRouteLoading]);
 
   useEffect(() => {
     if (!cursorText || !textRef.current) return;
@@ -145,12 +206,10 @@ const CustomCursor = () => {
           }}
         >
           <div
-            className={isRouteLoading ? "cursor-tip-spin" : ""}
             style={{
               width: `${CURSOR_SIZE}px`,
               height: `${CURSOR_SIZE}px`,
               transformOrigin: `${CURSOR_TIP_X}px ${CURSOR_TIP_Y}px`,
-              willChange: isRouteLoading ? "transform" : "auto",
             }}
           >
             <svg
@@ -224,19 +283,6 @@ const CustomCursor = () => {
           cursor: none;
         }
 
-        .cursor-tip-spin {
-          animation: cursor-tip-spin 560ms linear infinite;
-        }
-
-        @keyframes cursor-tip-spin {
-          from {
-            transform: rotate(0deg);
-          }
-
-          to {
-            transform: rotate(360deg);
-          }
-        }
       `}</style>
     </>
   );
