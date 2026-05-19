@@ -14,7 +14,7 @@ const Projects = ({ isDesktop }) => {
   const sectionRef = useRef(null);
   const titleRef = useRef(null);
   const projectsContainerRef = useRef(null);
-  const lastPointerRef = useRef({ x: null, y: null });
+  const lastPointerRef = useRef({ pageX: null, pageY: null, clientX: null, clientY: null });
   const panelRectsRef = useRef([]);
   const projectCursorActiveRef = useRef(false);
   const { setCursorText, setCursorVariant } = useCursor();
@@ -100,14 +100,30 @@ const Projects = ({ isDesktop }) => {
       return;
     }
 
-    const { x, y } = lastPointerRef.current;
-    if (x === null || y === null) {
+    const { pageX, pageY, clientX, clientY } = lastPointerRef.current;
+    if (pageX === null || pageY === null || clientX === null || clientY === null) {
       clearProjectCursor();
       return;
     }
 
+    const header = document.querySelector("[data-cursor-boundary='navigation']");
+    if (header) {
+      const headerRect = header.getBoundingClientRect();
+      const isInsideHeader = (
+        clientX >= headerRect.left &&
+        clientX <= headerRect.right &&
+        clientY >= headerRect.top &&
+        clientY <= headerRect.bottom
+      );
+
+      if (isInsideHeader) {
+        clearProjectCursor();
+        return;
+      }
+    }
+
     const isOverProject = panelRectsRef.current.some((rect) => (
-      x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
+      pageX >= rect.left && pageX <= rect.right && pageY >= rect.top && pageY <= rect.bottom
     ));
 
     if (isOverProject) {
@@ -126,7 +142,12 @@ const Projects = ({ isDesktop }) => {
     };
 
     const handlePointerMove = (event) => {
-      lastPointerRef.current = { x: event.pageX, y: event.pageY };
+      lastPointerRef.current = {
+        pageX: event.pageX,
+        pageY: event.pageY,
+        clientX: event.clientX,
+        clientY: event.clientY,
+      };
       updateProjectCursorFromPointer();
     };
 
@@ -136,7 +157,7 @@ const Projects = ({ isDesktop }) => {
     };
 
     const handlePointerLeave = () => {
-      lastPointerRef.current = { x: null, y: null };
+      lastPointerRef.current = { pageX: null, pageY: null, clientX: null, clientY: null };
       clearProjectCursor();
     };
 

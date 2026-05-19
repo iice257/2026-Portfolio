@@ -10,14 +10,38 @@ const ASCIIText = dynamic(() => import("../ReactBits/ASCIIText"), {
   ssr: false,
 });
 
+const HERO_CAPABILITY_PHRASES = [
+  "digital experiences",
+  "mobile apps",
+  "infrastructure",
+  "human-centred interfaces",
+  "landing pages",
+  "machine learning algorithms",
+  "intelligence and research systems",
+  "cross-platform experiences",
+  "agentic workflows",
+  "design systems",
+  "automation systems",
+  "data dashboards",
+  "vertical software architecture",
+  "API integrations",
+  "AI-powered tools",
+];
+
+const HERO_CAPABILITY_TRANSITION_MS = 640;
+
 const Hero = () => {
   const { theme } = useTheme();
   const [isMobileViewport, setIsMobileViewport] = useState(false);
   const [showMobileAscii, setShowMobileAscii] = useState(false);
+  const [activeCapabilityIndex, setActiveCapabilityIndex] = useState(0);
+  const [previousCapabilityIndex, setPreviousCapabilityIndex] = useState(null);
+  const [capabilityWidth, setCapabilityWidth] = useState(null);
   const sectionRef = useRef(null);
   const nameContainerRef = useRef(null);
   const subtitleRef = useRef(null);
   const scrollIndicatorRef = useRef(null);
+  const capabilitySizerRef = useRef(null);
   const isMobileRef = useRef(false);
 
   useEffect(() => {
@@ -32,6 +56,51 @@ const Hero = () => {
 
     return () => mediaQuery.removeEventListener("change", updateMobileViewport);
   }, []);
+
+  useEffect(() => {
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (motionQuery.matches) return undefined;
+
+    const intervalId = window.setInterval(() => {
+      setActiveCapabilityIndex((index) => {
+        setPreviousCapabilityIndex(index);
+        return (index + 1) % HERO_CAPABILITY_PHRASES.length;
+      });
+    }, 2200);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
+    if (previousCapabilityIndex === null) return undefined;
+
+    const timeoutId = window.setTimeout(() => {
+      setPreviousCapabilityIndex(null);
+    }, HERO_CAPABILITY_TRANSITION_MS);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [previousCapabilityIndex]);
+
+  useEffect(() => {
+    const sizer = capabilitySizerRef.current;
+    if (!sizer) return undefined;
+
+    const updateCapabilityWidth = () => {
+      setCapabilityWidth(Math.ceil(sizer.getBoundingClientRect().width));
+    };
+
+    updateCapabilityWidth();
+
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", updateCapabilityWidth);
+      return () => window.removeEventListener("resize", updateCapabilityWidth);
+    }
+
+    const observer = new ResizeObserver(updateCapabilityWidth);
+    observer.observe(sizer);
+
+    return () => observer.disconnect();
+  }, [activeCapabilityIndex]);
 
   useEffect(() => {
     if (!isMobileViewport || !sectionRef.current) {
@@ -224,22 +293,57 @@ const Hero = () => {
         {/* Subtitle - editorial style */}
         <div
           ref={subtitleRef}
-          className="hidden md:block mt-24 text-center max-w-2xl mx-auto"
+          className="hidden md:block mt-24 text-center max-w-4xl mx-auto"
         >
           <p
             className="text-editorial font-light"
             style={{ color: 'var(--fg-secondary)' }}
           >
-            Full-Stack Developer crafting digital experiences with precision,
-            performance, and intentional design.
+            <span className="block text-center">
+              Full-Stack Engineer crafting{" "}
+              <span
+                className="hero-capability-cycle"
+                aria-live="off"
+                style={capabilityWidth ? { width: `${capabilityWidth}px` } : undefined}
+              >
+                {previousCapabilityIndex !== null && (
+                  <span
+                    key={`previous-${previousCapabilityIndex}`}
+                    className="hero-capability-cycle__item hero-capability-cycle__item--exit"
+                  >
+                    {HERO_CAPABILITY_PHRASES[previousCapabilityIndex]}
+                  </span>
+                )}
+                <span
+                  key={`active-${activeCapabilityIndex}`}
+                  className={`hero-capability-cycle__item ${
+                    previousCapabilityIndex !== null ? "hero-capability-cycle__item--enter" : "hero-capability-cycle__item--current"
+                  }`}
+                >
+                  {HERO_CAPABILITY_PHRASES[activeCapabilityIndex]}
+                </span>
+                <span
+                  ref={capabilitySizerRef}
+                  className="hero-capability-cycle__sizer"
+                  aria-hidden="true"
+                >
+                  {HERO_CAPABILITY_PHRASES[activeCapabilityIndex]}
+                </span>
+              </span>
+            </span>
+            <span className="block">
+              with precision, performance, and intentional design.
+            </span>
           </p>
+
+          <div className="hero-subtitle-divider" aria-hidden="true" />
 
           {/* Micro text for contrast */}
           <p
-            className="text-micro mt-8"
+            className="text-micro mt-6"
             style={{ color: 'var(--fg-muted)' }}
           >
-            Currently building at W3Pets — Lagos, Nigeria
+            BUILDING IN PUBLIC — LAGOS, NIGERIA
           </p>
         </div>
       </div>

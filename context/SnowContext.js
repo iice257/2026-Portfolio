@@ -7,21 +7,26 @@ const SnowContext = createContext({
 
 export const SnowProvider = ({ children }) => {
   const [isSnowing, setIsSnowing] = useState(false);
+  const [hasLoadedSnowPreference, setHasLoadedSnowPreference] = useState(false);
 
   // Persist snow preference in sessionStorage (not localStorage - only for current session)
   useEffect(() => {
     const saved = sessionStorage.getItem("isSnowing");
     if (saved !== null) {
       setIsSnowing(saved === "true");
+      setHasLoadedSnowPreference(true);
       return;
     }
 
     setIsSnowing(window.matchMedia("(max-width: 767px)").matches);
+    setHasLoadedSnowPreference(true);
   }, []);
 
   useEffect(() => {
+    if (!hasLoadedSnowPreference) return;
+
     sessionStorage.setItem("isSnowing", isSnowing);
-  }, [isSnowing]);
+  }, [hasLoadedSnowPreference, isSnowing]);
 
   const toggleSnow = () => setIsSnowing((prev) => !prev);
 

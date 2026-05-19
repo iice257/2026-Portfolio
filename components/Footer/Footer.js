@@ -1,10 +1,26 @@
 import Link from "next/link";
-import { CONTACT_LINKS, MENULINKS, METADATA } from "../../constants";
+import { CONTACT_LINKS, MENULINKS } from "../../constants";
 import ShuffleText from "../ReactBits/ShuffleText";
+import { getSectionHref, scrollToSection, SECTION_IDS } from "../../utils/sectionNavigation";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const navLinks = MENULINKS.filter((link) => link.ref !== "home");
+  const directOrder = ["twitter", "mail", "github", "linkedin"];
+  const directLinks = [...CONTACT_LINKS].sort((a, b) => (
+    directOrder.indexOf(a.name) - directOrder.indexOf(b.name)
+  ));
+
+  const handleSectionClick = (event, sectionId) => {
+    if (typeof window === "undefined") return;
+
+    const currentPathSection = window.location.pathname.replace(/^\/+|\/+$/g, "");
+    const isHomeSurface = window.location.pathname === "/" || SECTION_IDS.includes(currentPathSection);
+    if (!isHomeSurface) return;
+
+    event.preventDefault();
+    scrollToSection(sectionId);
+  };
 
   return (
     <footer
@@ -23,13 +39,18 @@ const Footer = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10">
           <div className="lg:col-span-7">
             <p className="text-micro mb-5" style={{ color: "var(--fg-muted)" }}>
-              Available for selected builds
+              hit me up
             </p>
             <h2
-              className="text-display-lg md:text-display-xl font-light leading-none max-w-4xl"
+              className="text-display-lg md:text-display-xl font-light leading-[0.95] max-w-4xl"
               style={{ color: "var(--fg-primary)" }}
             >
-              <ShuffleText text="Let's get busy." duration={0.45} shuffleTimes={4} />
+              <span className="block">
+                <ShuffleText text="Let's get" duration={0.45} shuffleTimes={4} textAlign="left" />
+              </span>
+              <span className="block">
+                <ShuffleText text="busy..." duration={0.45} shuffleTimes={4} textAlign="left" />
+              </span>
             </h2>
           </div>
 
@@ -42,9 +63,10 @@ const Footer = () => {
                 {navLinks.map((link) => (
                   <li key={link.ref}>
                     <Link
-                      href={`/#${link.ref}`}
+                      href={getSectionHref(link.ref)}
                       className="text-body-lg link-underline"
                       style={{ color: "var(--fg-primary)" }}
+                      onClick={(event) => handleSectionClick(event, link.ref)}
                     >
                       {link.name}
                     </Link>
@@ -58,7 +80,7 @@ const Footer = () => {
                 Direct
               </p>
               <ul className="space-y-3">
-                {CONTACT_LINKS.map((link) => (
+                {directLinks.map((link) => (
                   <li key={link.name}>
                     <a
                       href={link.url}
@@ -81,7 +103,7 @@ const Footer = () => {
             &copy; {currentYear} KA
           </p>
           <p className="text-body-sm" style={{ color: "var(--fg-muted)" }}>
-            Full-Stack Developer based in {METADATA.location}.
+            Full-Stack Engineer.
           </p>
         </div>
       </div>

@@ -68,8 +68,99 @@ const flipTransition = {
   ease: [0.16, 1, 0.3, 1],
 };
 
-const MajorProjectCard = ({ project, index, flipped, onFlip, onHover, onLeave, hidden }) => {
-  if (hidden) return null;
+const ProjectActionLinks = ({ project, className = "" }) => {
+  const actions = [
+    project.url !== "#" ? { label: "View on GitHub", href: project.url } : null,
+    project.liveUrl ? { label: "View website", href: project.liveUrl } : null,
+  ].filter(Boolean);
+
+  if (!actions.length) return null;
+
+  return (
+    <div className={`flex flex-wrap items-center gap-3 ${className}`}>
+      {actions.map((action) => (
+        <a
+          key={action.label}
+          href={action.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="project-action-link"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <span>{action.label}</span>
+        </a>
+      ))}
+    </div>
+  );
+};
+
+const chunkProjects = (projects, size = 2) => {
+  const rows = [];
+  for (let index = 0; index < projects.length; index += size) {
+    rows.push(projects.slice(index, index + size));
+  }
+  return rows;
+};
+
+const MajorProjectExpandedCard = ({ project, index, onFlip, onHover, onLeave }) => {
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onFlip();
+    }
+  };
+
+  return (
+    <motion.article
+      key={`${project.slug}-expanded`}
+      initial={{ opacity: 0, rotateY: -78, scale: 0.985 }}
+      animate={{ opacity: 1, rotateY: 0, scale: 1 }}
+      exit={{ opacity: 0, rotateY: 72, scale: 0.985 }}
+      transition={flipTransition}
+      role="button"
+      tabIndex={0}
+      aria-expanded="true"
+      aria-label={`Collapse details for ${project.name}`}
+      onClick={onFlip}
+      onKeyDown={handleKeyDown}
+      onMouseEnter={() => onHover("Click to collapse")}
+      onMouseLeave={onLeave}
+      className="major-project-expanded cursor-none"
+    >
+      <div className="grid h-full grid-cols-1 xl:grid-cols-12 gap-8 p-6 md:p-8 lg:p-10">
+        <div className="xl:col-span-4 flex flex-col justify-between gap-10">
+          <div>
+            <span className="text-micro mb-5 block" style={{ color: "var(--fg-muted)" }}>
+              {String(index + 5).padStart(2, "0")} / Expanded
+            </span>
+            <h3 className="text-display-md font-light mb-5 whitespace-nowrap" style={{ color: "var(--fg-primary)" }}>
+              <ShuffleText text={project.name} duration={0.45} shuffleTimes={3} textAlign="left" />
+            </h3>
+            <p className="text-body-lg mb-6" style={{ color: "var(--fg-secondary)" }}>
+              {project.description}
+            </p>
+            <div className="space-y-4 text-body-sm" style={{ color: "var(--fg-muted)" }}>
+              <p>{project.notes}</p>
+              <p>
+                <span style={{ color: "var(--fg-secondary)" }}>Status: </span>
+                {project.status}
+              </p>
+            </div>
+          </div>
+          <div>
+            <TagList tags={project.tech} />
+            <ProjectActionLinks project={project} className="mt-4 justify-start" />
+          </div>
+        </div>
+        <div className="xl:col-span-8">
+          <MockupPair project={project} />
+        </div>
+      </div>
+    </motion.article>
+  );
+};
+
+const MajorProjectCard = ({ project, index, onFlip, onHover, onLeave, dimmed }) => {
 
   const handleKeyDown = (event) => {
     if (event.key === "Enter" || event.key === " ") {
@@ -78,188 +169,43 @@ const MajorProjectCard = ({ project, index, flipped, onFlip, onHover, onLeave, h
     }
   };
 
-  if (flipped) {
-    return (
-      <motion.article
-        layout
-        key={`${project.slug}-expanded`}
-        initial={{ opacity: 0, rotateY: -72, scale: 0.985 }}
-        animate={{ opacity: 1, rotateY: 0, scale: 1 }}
-        exit={{ opacity: 0, rotateY: 72, scale: 0.985 }}
-        transition={flipTransition}
-        role="button"
-        tabIndex={0}
-        aria-expanded="true"
-        aria-label={`Collapse details for ${project.name}`}
-        onClick={onFlip}
-        onKeyDown={handleKeyDown}
-        onMouseEnter={() => onHover("Click to collapse")}
-        onMouseLeave={onLeave}
-        className="group relative md:col-span-2 outline outline-1 outline-[var(--border)] cursor-none"
-        style={{
-          backgroundColor: "var(--bg-primary)",
-          transformStyle: "preserve-3d",
-          transformOrigin: "center center",
-        }}
-      >
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 p-6 md:p-8 lg:p-10">
-          <div className="xl:col-span-4 flex flex-col justify-between gap-10">
-            <div>
-              <span className="text-micro mb-5 block" style={{ color: "var(--fg-muted)" }}>
-                {String(index + 5).padStart(2, "0")} / Expanded
-              </span>
-              <h3 className="text-display-md font-light mb-5 whitespace-nowrap" style={{ color: "var(--fg-primary)" }}>
-                <ShuffleText text={project.name} duration={0.45} shuffleTimes={3} textAlign="left" />
-              </h3>
-              <p className="text-body-lg mb-6" style={{ color: "var(--fg-secondary)" }}>
-                {project.description}
-              </p>
-              <div className="space-y-4 text-body-sm" style={{ color: "var(--fg-muted)" }}>
-                <p>{project.notes}</p>
-                <p>
-                  <span style={{ color: "var(--fg-secondary)" }}>Status: </span>
-                  {project.status}
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <TagList tags={project.tech} />
-              {project.url !== "#" && (
-                <a
-                  href={project.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="project-action-link"
-                  onClick={(event) => event.stopPropagation()}
-                >
-                  <span>View on GitHub</span>
-                </a>
-              )}
-              {project.liveUrl && (
-                <a
-                  href={project.liveUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="project-action-link"
-                  onClick={(event) => event.stopPropagation()}
-                >
-                  <span>View website</span>
-                </a>
-              )}
-            </div>
-          </div>
-          <div className="xl:col-span-8">
-            <MockupPair project={project} />
-          </div>
-        </div>
-      </motion.article>
-    );
-  }
-
   return (
   <motion.article
     layout
     key={`${project.slug}-collapsed`}
-    initial={{ opacity: 0, rotateY: -18, scale: 0.985 }}
-    animate={{ opacity: 1, rotateY: 0, scale: 1 }}
-    exit={{ opacity: 0, rotateY: 18, scale: 0.985 }}
+    initial={{ opacity: 0, scale: 0.985 }}
+    animate={{ opacity: dimmed ? 0.18 : 1, scale: 1 }}
     transition={flipTransition}
-    className="group relative min-h-[31rem] outline outline-1 outline-[var(--border)]"
-    style={{ perspective: "1200px", transformStyle: "preserve-3d", transformOrigin: "center center" }}
-    onMouseEnter={() => onHover("Click to expand")}
-    onMouseLeave={onLeave}
+    className={`major-project-card group relative outline outline-1 outline-[var(--border)] cursor-none ${dimmed ? "is-dimmed" : ""}`}
+    role="button"
+    tabIndex={dimmed ? -1 : 0}
+    aria-expanded="false"
+    aria-label={`Expand details for ${project.name}`}
+    onClick={dimmed ? undefined : onFlip}
+    onKeyDown={dimmed ? undefined : handleKeyDown}
+    onMouseEnter={dimmed ? undefined : () => onHover("Click to expand")}
+    onMouseLeave={dimmed ? undefined : onLeave}
   >
-    <button
-      type="button"
-      onClick={onFlip}
-      className="absolute inset-0 w-full text-left"
-      aria-pressed={flipped}
-      aria-label={`${flipped ? "Hide" : "Show"} details for ${project.name}`}
-    >
-      <div
-        className="relative h-full w-full transition-transform duration-700"
-        style={{
-          transformStyle: "preserve-3d",
-          transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
-        }}
-      >
-        <div
-          className="absolute inset-0 flex flex-col"
-          style={{ backfaceVisibility: "hidden", backgroundColor: "var(--bg-primary)" }}
-        >
-          <div className="relative aspect-[4/3] overflow-hidden">
-            <ProjectVisual project={project} compact />
-          </div>
-          <div className="flex flex-1 flex-col justify-between p-6 md:p-8">
-            <div>
-              <span className="text-micro mb-4 block" style={{ color: "var(--fg-muted)" }}>
-                {String(index + 5).padStart(2, "0")} / Major
-              </span>
-              <h3 className="text-display-sm font-light mb-3 whitespace-nowrap" style={{ color: "var(--fg-primary)" }}>
-                <ShuffleText text={project.name} duration={0.45} shuffleTimes={3} textAlign="left" />
-              </h3>
-              <p className="text-body-md" style={{ color: "var(--fg-secondary)" }}>
-                {project.subtitle}
-              </p>
-            </div>
-            <TagList tags={project.tech} />
-          </div>
-        </div>
-
-        <div
-          className="absolute inset-0 flex flex-col justify-between p-6 md:p-8"
-          style={{
-            backfaceVisibility: "hidden",
-            backgroundColor: "var(--fg-primary)",
-            color: "var(--bg-primary)",
-            transform: "rotateY(180deg)",
-          }}
-        >
-          <div>
-            <span className="text-micro mb-5 block opacity-60">Details</span>
-            <h3 className="text-display-sm font-light mb-5 whitespace-nowrap">
-              <ShuffleText text={project.name} duration={0.45} shuffleTimes={3} textAlign="left" />
-            </h3>
-            <p className="text-body-md leading-relaxed mb-6 opacity-80">{project.description}</p>
-            <div className="space-y-4 text-body-sm">
-              <p>
-                <span className="opacity-50">Tools: </span>
-                {project.tech.join(", ")}
-              </p>
-              <p>
-                <span className="opacity-50">Status: </span>
-                {project.status}
-              </p>
-              <p className="opacity-80">{project.notes}</p>
-            </div>
-          </div>
-          <span className="text-micro opacity-60">Tap to flip back</span>
-        </div>
+    <div className="major-project-visual relative overflow-hidden">
+      <ProjectVisual project={project} compact />
+    </div>
+    <div className="flex flex-1 flex-col justify-between p-6 md:p-8">
+      <div>
+        <span className="text-micro mb-4 block" style={{ color: "var(--fg-muted)" }}>
+          {String(index + 5).padStart(2, "0")} / Major
+        </span>
+        <h3 className="text-display-sm font-light mb-3 whitespace-nowrap" style={{ color: "var(--fg-primary)" }}>
+          <ShuffleText text={project.name} duration={0.45} shuffleTimes={3} textAlign="left" />
+        </h3>
+        <p className="text-body-md" style={{ color: "var(--fg-secondary)" }}>
+          {project.subtitle}
+        </p>
       </div>
-    </button>
-
-    {project.url !== "#" && (
-      <a
-        href={project.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="project-action-link absolute bottom-6 right-6 z-10"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <span>View on GitHub</span>
-      </a>
-    )}
-    {project.liveUrl && (
-      <a
-        href={project.liveUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="project-action-link absolute bottom-6 left-6 z-10"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <span>View website</span>
-      </a>
-    )}
+      <div className="mt-8">
+        <TagList tags={project.tech} />
+        <ProjectActionLinks project={project} className="mt-4 justify-start" />
+      </div>
+    </div>
   </motion.article>
   );
 };
@@ -268,6 +214,8 @@ export default function ProjectsIndex() {
   const [flippedCards, setFlippedCards] = useState({});
   const [openProject, setOpenProject] = useState(remainingProjects[0]?.slug);
   const { setCursorText, setCursorVariant } = useCursor();
+  const expandedSlug = Object.keys(flippedCards).find((slug) => flippedCards[slug]);
+  const majorProjectRows = chunkProjects(majorProjects);
 
   const toggleFlip = (slug) => {
     setFlippedCards((current) => {
@@ -307,7 +255,7 @@ export default function ProjectsIndex() {
       <main id="main-content" className="min-h-screen" style={{ backgroundColor: "var(--bg-primary)" }}>
         <section className="section-container pt-40 pb-24">
           <Link
-            href="/#projects"
+            href="/"
             className="project-action-link mb-8"
           >
             <span>Back home</span>
@@ -403,33 +351,55 @@ export default function ProjectsIndex() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8" style={{ perspective: "1400px" }}>
-            <AnimatePresence initial={false}>
-              {majorProjects.map((project, index) => {
-              const expandedSlug = Object.keys(flippedCards).find((slug) => flippedCards[slug]);
-              const expandedIndex = expandedSlug ? majorProjects.findIndex((item) => item.slug === expandedSlug) : -1;
-              const expandedRow = expandedIndex >= 0 ? Math.floor(expandedIndex / 2) : null;
-              const row = Math.floor(index / 2);
-              const isHiddenSibling = expandedRow === row && expandedSlug !== project.slug;
-
-              if (isHiddenSibling) return null;
+          <div className="space-y-8" style={{ perspective: "1400px" }}>
+            {majorProjectRows.map((rowProjects, rowIndex) => {
+              const expandedProject = rowProjects.find((project) => project.slug === expandedSlug);
 
               return (
-                <MajorProjectCard
-                  key={project.slug}
-                  project={project}
-                  index={index}
-                  flipped={Boolean(flippedCards[project.slug])}
-                  onFlip={() => {
-                    toggleFlip(project.slug);
-                    setProjectCursor(flippedCards[project.slug] ? "Click to expand" : "Click to collapse");
-                  }}
-                  onHover={setProjectCursor}
-                  onLeave={clearProjectCursor}
-                />
+                <motion.div
+                  key={rowProjects.map((project) => project.slug).join("-")}
+                  layout
+                  className={`major-project-row ${expandedProject ? "is-expanded" : ""}`}
+                  transition={flipTransition}
+                >
+                  {rowProjects.map((project, projectIndex) => {
+                    const absoluteIndex = rowIndex * 2 + projectIndex;
+                    const isExpandedRow = Boolean(expandedProject);
+
+                    return (
+                      <MajorProjectCard
+                        key={project.slug}
+                        project={project}
+                        index={absoluteIndex}
+                        dimmed={isExpandedRow}
+                        onFlip={() => {
+                          toggleFlip(project.slug);
+                          setProjectCursor(flippedCards[project.slug] ? "Click to expand" : "Click to collapse");
+                        }}
+                        onHover={setProjectCursor}
+                        onLeave={clearProjectCursor}
+                      />
+                    );
+                  })}
+
+                  <AnimatePresence initial={false}>
+                    {expandedProject && (
+                      <MajorProjectExpandedCard
+                        key={expandedProject.slug}
+                        project={expandedProject}
+                        index={majorProjects.findIndex((project) => project.slug === expandedProject.slug)}
+                        onFlip={() => {
+                          toggleFlip(expandedProject.slug);
+                          setProjectCursor("Click to expand");
+                        }}
+                        onHover={setProjectCursor}
+                        onLeave={clearProjectCursor}
+                      />
+                    )}
+                  </AnimatePresence>
+                </motion.div>
               );
-              })}
-            </AnimatePresence>
+            })}
           </div>
         </section>
 
@@ -492,27 +462,35 @@ export default function ProjectsIndex() {
                         transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
                         style={{ overflow: "hidden" }}
                       >
-                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 pb-8">
+                        <div
+                          className="grid grid-cols-1 md:grid-cols-12 gap-4 pb-8 cursor-none"
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => {
+                            setOpenProject(null);
+                            setProjectCursor("Click to expand");
+                          }}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              setOpenProject(null);
+                              setProjectCursor("Click to expand");
+                            }
+                          }}
+                          onMouseEnter={() => setProjectCursor("Click to collapse")}
+                          onMouseLeave={clearProjectCursor}
+                        >
                           <div className="hidden md:block md:col-span-2" />
                           <div className="md:col-span-10 max-w-4xl">
                             <p className="text-body-lg mb-5 leading-relaxed" style={{ color: "var(--fg-secondary)" }}>
                               {project.description}
                             </p>
-                            <TagList tags={project.tech} />
-                            <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 text-body-sm" style={{ color: "var(--fg-muted)" }}>
+                            <div className="flex flex-wrap items-center justify-between gap-4">
+                              <TagList tags={project.tech} />
+                              <ProjectActionLinks project={project} />
+                            </div>
+                            <div className="mt-5 text-body-sm" style={{ color: "var(--fg-muted)" }}>
                               <p>{project.notes}</p>
-                              <div className="flex flex-wrap gap-3 justify-start md:justify-end">
-                                {project.url !== "#" && (
-                                  <a href={project.url} target="_blank" rel="noopener noreferrer" className="project-action-link">
-                                    <span>View on GitHub</span>
-                                  </a>
-                                )}
-                                {project.liveUrl && (
-                                  <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="project-action-link">
-                                    <span>View website</span>
-                                  </a>
-                                )}
-                              </div>
                             </div>
                           </div>
                         </div>

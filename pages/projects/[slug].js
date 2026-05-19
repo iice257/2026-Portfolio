@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Head from "next/head";
 import { featuredProjects } from "../../data/projects";
@@ -45,54 +45,85 @@ const DetailBlock = ({ label, title, children }) => (
 
 const ProjectNumberCarousel = ({ projects, currentIndex }) => {
   const currentProject = projects[currentIndex];
+  const [hoveredProjectIndex, setHoveredProjectIndex] = useState(null);
+  const previewProject = hoveredProjectIndex !== null ? projects[hoveredProjectIndex] : currentProject;
+  const otherProjects = projects
+    .map((item, itemIndex) => ({ item, itemIndex }))
+    .filter(({ itemIndex }) => itemIndex !== currentIndex);
 
   return (
     <div
       className="project-number-carousel mb-4"
       tabIndex={0}
       aria-label={`Project ${String(currentIndex + 1).padStart(2, "0")}: ${currentProject.name}`}
+      onMouseLeave={() => setHoveredProjectIndex(null)}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+          setHoveredProjectIndex(null);
+        }
+      }}
     >
-      <span className="project-number-current text-display-2xl font-thin" aria-hidden="true">
-        {String(currentIndex + 1).padStart(2, "0")}
-      </span>
-      <div className="project-number-track">
-        {projects.map((item, itemIndex) => {
-          const isCurrent = itemIndex === currentIndex;
-          const content = (
-            <>
-              <span className="block text-display-sm leading-none">
-                {String(itemIndex + 1).padStart(2, "0")}
-              </span>
-              <span className="mt-2 block text-micro normal-case tracking-normal">
-                {item.name}
-              </span>
-            </>
-          );
+      <div className="project-number-current-stack">
+        <span className="project-number-current text-display-2xl" aria-hidden="true">
+          {String(currentIndex + 1).padStart(2, "0")}
+        </span>
+        <span className="project-number-category" aria-live="polite">
+          <span key={previewProject.slug} className="project-number-category-text">
+            {previewProject.category}
+          </span>
+        </span>
+      </div>
 
-          if (isCurrent) {
-            return (
-              <div key={item.slug} className="project-number-item is-current">
-                {content}
-              </div>
-            );
-          }
-
-          return (
-            <Link key={item.slug} href={`/projects/${item.slug}`} className="project-number-item">
-              {content}
-            </Link>
-          );
-        })}
+      <div className="project-number-track" aria-label="Other featured projects">
+        {otherProjects.map(({ item, itemIndex }) => (
+          <Link
+            key={item.slug}
+            href={`/projects/${item.slug}`}
+            className="project-number-item"
+            onMouseEnter={() => setHoveredProjectIndex(itemIndex)}
+            onFocus={() => setHoveredProjectIndex(itemIndex)}
+          >
+            {String(itemIndex + 1).padStart(2, "0")}
+          </Link>
+        ))}
       </div>
     </div>
   );
 };
 
+const PROJECT_TITLE_SIZES = {
+  "formmate-ai": "clamp(6.6rem, 18.5cqw, 12rem)",
+  pastevault: "clamp(7.1rem, 20cqw, 13rem)",
+  "ai-agent-skills": "clamp(5.9rem, 16.5cqw, 10.8rem)",
+  "restore-ai": "clamp(7.2rem, 20.5cqw, 13.2rem)",
+};
+
 const ProjectMediaPreview = ({ project, variant = "desktop", priority = false }) => {
   const videoRef = useRef(null);
+  const controlsTimerRef = useRef(null);
   const [isPaused, setIsPaused] = useState(false);
+  const [isMonochrome, setIsMonochrome] = useState(true);
+  const [areControlsVisible, setAreControlsVisible] = useState(true);
   const videoSrc = variant === "desktop" ? project.desktopVideo : project.mobileVideo;
   const isMobile = variant === "mobile";
+
+  const showControls = useCallback(() => {
+    if (!videoSrc) return;
+
+    window.clearTimeout(controlsTimerRef.current);
+    setAreControlsVisible(true);
+    controlsTimerRef.current = window.setTimeout(() => {
+      setAreControlsVisible(false);
+    }, 2200);
+  }, [videoSrc]);
+
+  useEffect(() => {
+    showControls();
+
+    return () => {
+      window.clearTimeout(controlsTimerRef.current);
+    };
+  }, [showControls]);
 
   const togglePlayback = () => {
     const video = videoRef.current;
@@ -107,8 +138,14 @@ const ProjectMediaPreview = ({ project, variant = "desktop", priority = false })
   };
 
   return (
-    <div className={`project-media-preview ${isMobile ? "is-mobile" : "is-desktop"}`}>
-      <div className="project-media-frame">
+    <div
+      className={`project-media-preview ${isMobile ? "is-mobile" : "is-desktop"}`}
+      onMouseMove={showControls}
+      onMouseEnter={showControls}
+      onPointerDown={showControls}
+      onFocus={showControls}
+    >
+      <div className={`project-media-frame ${isMonochrome ? "is-monochrome" : ""}`}>
         {videoSrc ? (
           <video
             ref={videoRef}
@@ -130,14 +167,25 @@ const ProjectMediaPreview = ({ project, variant = "desktop", priority = false })
         )}
 
         {videoSrc && (
-          <button
-            type="button"
-            className="project-media-control"
-            onClick={togglePlayback}
-            aria-label={`${isPaused ? "Play" : "Pause"} ${project.name} preview`}
-          >
-            <span>{isPaused ? "Play" : "Pause"}</span>
-          </button>
+          <div className={`project-media-controls ${areControlsVisible ? "is-visible" : ""}`}>
+            <button
+              type="button"
+              className="project-media-playback"
+              onClick={togglePlayback}
+              aria-label={`${isPaused ? "Play" : "Pause"} ${project.name} preview`}
+            >
+              <span className={`project-media-playback-icon ${isPaused ? "is-play" : "is-pause"}`} aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              className={`project-media-control ${isMonochrome ? "is-active" : ""}`}
+              onClick={() => setIsMonochrome((value) => !value)}
+              aria-pressed={isMonochrome}
+              aria-label={`${isMonochrome ? "Disable" : "Enable"} black and white filter for ${project.name} preview`}
+            >
+              <span>{isMonochrome ? "Turn B/W Off" : "Turn B/W On"}</span>
+            </button>
+          </div>
         )}
       </div>
     </div>
@@ -192,41 +240,43 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
       </Head>
 
       <main id="main-content" className="min-h-screen" style={{ backgroundColor: "var(--bg-primary)" }}>
-        <section className="section-container pt-40 pb-16">
-          <div className="mb-10 flex flex-wrap items-center gap-3">
+        <section className="section-container pt-32 pb-12">
+          <div className="mb-7 flex flex-wrap items-center justify-between gap-3">
             <Link href="/projects" className="project-action-link">
               <span>All projects</span>
             </Link>
-            {projectActions.map((action) => (
-              <a
-                key={action.label}
-                href={action.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="project-action-link"
-              >
-                <span>{action.label}</span>
-              </a>
-            ))}
+            <div className="ml-auto flex flex-wrap items-center justify-end gap-3">
+              {projectActions.map((action) => (
+                <a
+                  key={action.label}
+                  href={action.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="project-action-link"
+                >
+                  <span>{action.label}</span>
+                </a>
+              ))}
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-            <div className="lg:col-span-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-6 items-start">
+            <div className="project-detail-copy lg:col-span-8 lg:self-end">
               <ProjectNumberCarousel projects={featuredProjects} currentIndex={projectIndex} />
-              <p className="text-micro mb-5" style={{ color: "var(--fg-muted)" }}>
-                {project.category}
-              </p>
               <h1
-                className="project-detail-title font-extralight mb-6"
-                style={{ color: "var(--fg-primary)" }}
+                className="project-detail-title font-extralight mb-5"
+                style={{
+                  color: "var(--fg-primary)",
+                  "--project-title-size": PROJECT_TITLE_SIZES[project.slug],
+                }}
               >
                 <ShuffleText text={project.name} duration={0.52} shuffleTimes={4} textAlign="left" className="block whitespace-nowrap" />
               </h1>
-              <p className="text-editorial font-light mb-8 max-w-3xl" style={{ color: "var(--fg-secondary)" }}>
+              <p className="text-editorial font-light max-w-3xl" style={{ color: "var(--fg-secondary)" }}>
                 {project.longDescription}
               </p>
             </div>
-            <div className="lg:col-span-4 lg:pt-[5.5rem]">
+            <div className="lg:col-span-4">
               <ProjectMediaPreview project={project} variant="mobile" priority />
             </div>
           </div>
@@ -273,9 +323,9 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
         <section className="section-container py-16" style={{ borderTop: "1px solid var(--border)" }}>
           <div className="grid grid-cols-2 gap-8">
             {prevProject ? (
-              <Link href={`/projects/${prevProject.slug}`} className="project-nav-link group is-prev items-center gap-5">
+              <Link href={`/projects/${prevProject.slug}`} className="project-nav-link group is-prev justify-self-start items-center gap-4">
                 <span className="project-nav-caret" aria-hidden="true">
-                  ‹
+                  &lsaquo;
                 </span>
                 <span>
                   <span className="text-micro block mb-2 opacity-60">Previous</span>
@@ -289,7 +339,7 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
             )}
 
             {nextProject ? (
-              <Link href={`/projects/${nextProject.slug}`} className="project-nav-link group is-next items-center justify-end gap-5 text-right">
+              <Link href={`/projects/${nextProject.slug}`} className="project-nav-link group is-next justify-self-end items-center justify-end gap-4 text-right">
                 <span>
                   <span className="text-micro block mb-2 opacity-60">Next</span>
                   <span className="text-body-xl font-light transition-transform duration-300 inline-block">
@@ -297,7 +347,7 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
                   </span>
                 </span>
                 <span className="project-nav-caret" aria-hidden="true">
-                  ›
+                  &rsaquo;
                 </span>
               </Link>
             ) : (

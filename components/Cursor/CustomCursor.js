@@ -5,11 +5,12 @@ import { gsap } from 'gsap';
 const DEFAULT_CURSOR_PATH = "M5.5 3 C5.5 3 5.5 3 5.5 3 L11.5 26.5 C11.5 26.5 11.5 26.5 11.5 26.5 L16.2 17.8 C16.2 17.8 16.2 17.8 16.2 17.8 L25.5 17.8 C25.5 17.8 25.5 17.8 25.5 17.8 L5.5 3 Z";
 const CLICKABLE_CURSOR_PATH = "M5.45 3.18 C5.25 2.8 5.78 2.52 6.18 2.84 L24.02 16.02 C25.82 17.36 25.16 19.18 22.78 19.18 L17.38 19.18 C16.48 19.18 15.96 19.58 15.54 20.34 L12.9 25.14 C11.72 27.28 9.96 26.66 9.5 24.28 L5.06 4.46 C4.92 3.84 5.08 3.38 5.45 3.18 Z";
 const CURSOR_SIZE = 32;
+const CURSOR_TIP_X = 5.5;
+const CURSOR_TIP_Y = 3;
 
 const CustomCursor = () => {
   const cursorRef = useRef(null);
   const shapeRef = useRef(null);
-  const loadingMotionRef = useRef(null);
   const textRef = useRef(null);
   const outlinePathRef = useRef(null);
   const fillPathRef = useRef(null);
@@ -18,7 +19,7 @@ const CustomCursor = () => {
   const [isClickable, setIsClickable] = useState(false);
   const isVisibleRef = useRef(false);
   const isClickableRef = useRef(false);
-  const { cursorText, cursorVariant, isRouteLoading } = useCursor();
+  const { cursorText, setCursorText, cursorVariant, setCursorVariant, isRouteLoading } = useCursor();
 
   // Use GSAP's quickSetter for performance
   const xSet = useRef(null);
@@ -40,6 +41,13 @@ const CustomCursor = () => {
       const clickableTarget = e.target?.closest?.(
         'a, button, [role="button"], input, textarea, select, summary, [data-clickable="true"]'
       );
+      const cursorBoundary = e.target?.closest?.("[data-cursor-boundary='navigation']");
+
+      if (cursorBoundary && cursorVariant === 'project') {
+        setCursorText("");
+        setCursorVariant("default");
+      }
+
       const nextClickable = Boolean(clickableTarget) && cursorVariant !== 'project';
 
       if (isClickableRef.current !== nextClickable) {
@@ -48,8 +56,8 @@ const CustomCursor = () => {
       }
 
       if (xSet.current && ySet.current) {
-        xSet.current(e.clientX - CURSOR_SIZE / 2);
-        ySet.current(e.clientY - CURSOR_SIZE / 2);
+        xSet.current(e.clientX - CURSOR_TIP_X);
+        ySet.current(e.clientY - CURSOR_TIP_Y);
       }
       if (textRef.current) {
         gsap.set(textRef.current, { x: e.clientX, y: e.clientY });
@@ -77,7 +85,7 @@ const CustomCursor = () => {
       document.removeEventListener('mouseleave', onMouseLeave);
       document.removeEventListener('mouseenter', onMouseEnter);
     };
-  }, [cursorVariant]);
+  }, [cursorVariant, setCursorText, setCursorVariant]);
 
   useEffect(() => {
     if (!outlinePathRef.current || !fillPathRef.current || !fillRectRef.current) return;
@@ -99,47 +107,6 @@ const CustomCursor = () => {
       ease: "power3.out",
     });
   }, [isClickable]);
-
-  useEffect(() => {
-    if (!loadingMotionRef.current) return undefined;
-
-    if (!isRouteLoading) {
-      gsap.killTweensOf(loadingMotionRef.current);
-      gsap.to(loadingMotionRef.current, {
-        rotate: 0,
-        duration: 0.18,
-        ease: "power2.out",
-      });
-      return undefined;
-    }
-
-    const timeline = gsap.timeline({ repeat: -1 });
-    timeline
-      .to(loadingMotionRef.current, {
-        rotate: 720,
-        duration: 0.28,
-        ease: "power4.in",
-      })
-      .to(loadingMotionRef.current, {
-        rotate: 720,
-        duration: 0.12,
-        ease: "none",
-      })
-      .to(loadingMotionRef.current, {
-        rotate: 1440,
-        duration: 0.24,
-        ease: "power4.in",
-      })
-      .to(loadingMotionRef.current, {
-        rotate: 1440,
-        duration: 0.16,
-        ease: "none",
-      });
-
-    return () => {
-      timeline.kill();
-    };
-  }, [isRouteLoading]);
 
   useEffect(() => {
     if (!cursorText || !textRef.current) return;
@@ -178,11 +145,12 @@ const CustomCursor = () => {
           }}
         >
           <div
-            ref={loadingMotionRef}
+            className={isRouteLoading ? "cursor-tip-spin" : ""}
             style={{
               width: `${CURSOR_SIZE}px`,
               height: `${CURSOR_SIZE}px`,
-              transformOrigin: "50% 50%",
+              transformOrigin: `${CURSOR_TIP_X}px ${CURSOR_TIP_Y}px`,
+              willChange: isRouteLoading ? "transform" : "auto",
             }}
           >
             <svg
@@ -254,6 +222,20 @@ const CustomCursor = () => {
       <style jsx global>{`
         body, a, button, input, textarea {
           cursor: none;
+        }
+
+        .cursor-tip-spin {
+          animation: cursor-tip-spin 560ms linear infinite;
+        }
+
+        @keyframes cursor-tip-spin {
+          from {
+            transform: rotate(0deg);
+          }
+
+          to {
+            transform: rotate(360deg);
+          }
         }
       `}</style>
     </>

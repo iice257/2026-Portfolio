@@ -49,14 +49,15 @@ const Contact = () => {
           className="text-display-lg md:text-display-xl font-light mb-8 contact-reveal"
           style={{ color: "var(--fg-primary)" }}
         >
-          Let&apos;s build something together
+          <span className="block">We&apos;re gonna build amazing things,</span>
+          <span className="block">together.</span>
         </h2>
 
         <p
           className="text-body-xl mb-12 contact-reveal"
           style={{ color: "var(--fg-secondary)" }}
         >
-          I&apos;m always open to discussing new projects, creative ideas, or opportunities to be part of your vision.
+          I&apos;m always open. Really.
         </p>
 
         <a href={CONTACT_LINKS[0].url} className="btn btn-primary contact-reveal">

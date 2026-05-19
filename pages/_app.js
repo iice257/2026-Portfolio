@@ -94,14 +94,22 @@ const AppContent = ({ Component, pageProps }) => {
   }, [router.events, setIsRouteLoading]);
 
   // Different snow colors for different themes
-  const snowColor = theme === 'dark' ? '#ffffff' : '#888888';
-  const snowflakeCount = isMobileViewport ? 130 : 240;
+  const snowColor = theme === 'dark' ? '#ffffff' : '#303030';
+  const snowflakeCount = isMobileViewport ? 110 : 190;
+  const skipToContent = () => {
+    const main = document.getElementById("main-content");
+    if (!main) return;
+
+    main.setAttribute("tabindex", "-1");
+    main.focus({ preventScroll: true });
+    main.scrollIntoView({ block: "start" });
+  };
 
   return (
     <>
-      <a href="#main-content" className="skip-link">
+      <button type="button" onClick={skipToContent} className="skip-link">
         Skip to content
-      </a>
+      </button>
       {isFinePointer && <CustomCursor />}
       <Header />
 
@@ -127,17 +135,18 @@ const AppContent = ({ Component, pageProps }) => {
 
       {isSnowing && allowMotion && isPageVisible && (
         <Snowfall
+          key={`${theme}-${isMobileViewport ? "mobile" : "desktop"}`}
           color={snowColor}
           snowflakeCount={snowflakeCount}
           speed={[1.1, 3.4]}
           wind={[-0.45, 1.7]}
           radius={[0.45, 2.2]}
-          opacity={[0.35, 0.95]}
+          opacity={[0.42, 0.9]}
           style={{
             position: 'fixed',
             width: '100vw',
-            height: '100dvh',
-            zIndex: 9999,
+            height: '100vh',
+            zIndex: 10000,
             pointerEvents: 'none',
             contain: 'strict'
           }}

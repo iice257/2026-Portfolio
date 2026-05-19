@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useCursor } from '../../context/CursorContext';
 
@@ -27,11 +27,15 @@ const StaggeredMenu = ({
     return () => setMounted(false);
   }, []);
 
+  const closeMenu = useCallback(() => {
+    setIsOpen(false);
+    setCursorVariant('default');
+    onMenuClose?.();
+  }, [onMenuClose, setCursorVariant]);
+
   const toggleMenu = () => {
     if (isOpen) {
-      setIsOpen(false);
-      setCursorVariant('default');
-      onMenuClose?.();
+      closeMenu();
     } else {
       setIsOpen(true);
       setCursorVariant('menu');
@@ -40,9 +44,7 @@ const StaggeredMenu = ({
   };
 
   const handleItemClick = (item, index) => {
-    setIsOpen(false);
-    setCursorVariant('default');
-    onMenuClose?.();
+    closeMenu();
     onItemClick?.(item, index);
   };
 
@@ -57,6 +59,19 @@ const StaggeredMenu = ({
       document.body.style.overflow = '';
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        closeMenu();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [closeMenu, isOpen]);
 
   const buttonColor = isOpen && changeMenuColorOnOpen ? openMenuButtonColor : menuButtonColor;
 
@@ -80,7 +95,22 @@ const StaggeredMenu = ({
 
       {/* Navigation Items - LEFT ALIGNED */}
       <nav className="min-h-[calc(100svh-8rem)] md:min-h-full pl-6 md:pl-16 lg:pl-32 pr-6 pb-24 md:pb-16 flex flex-col justify-center items-start w-full">
-        {items.map((item, index) => (
+        {items.map((item, index) => {
+          const renderLabelContent = () => (
+            <>
+              <span>{item.label}</span>
+              {item.opensPage && (
+                <span
+                  aria-hidden="true"
+                  className="mt-[0.16em] inline-block text-[0.36em] leading-none opacity-70 transition-transform duration-500 ease-in-out group-hover:translate-x-1 group-hover:-translate-y-1"
+                >
+                  ↗
+                </span>
+              )}
+            </>
+          );
+
+          return (
           <div key={index} className="border-b border-white/20 w-auto max-w-4xl">
             <Link
               href={item.link}
@@ -94,7 +124,7 @@ const StaggeredMenu = ({
               }}
               aria-label={item.ariaLabel || item.label}
               onClick={(e) => {
-                // Remove e.preventDefault() to allow Link to navigate/scroll
+                e.preventDefault();
                 handleItemClick(item, index);
               }}
             >
@@ -109,12 +139,14 @@ const StaggeredMenu = ({
               )}
 
               {/* Label Container */}
-              <span className="relative z-10 overflow-hidden block h-[1.2em]">
-                <span className="block transition-transform duration-500 ease-in-out group-hover:-translate-y-full">
-                  {item.label}
+              <span
+                className="relative z-10 block h-[1.24em] overflow-hidden pb-[0.04em] leading-[1.12]"
+              >
+                <span className="flex items-start gap-2 transition-transform duration-500 ease-in-out group-hover:-translate-y-full">
+                  {renderLabelContent()}
                 </span>
-                <span className="absolute top-0 left-0 block translate-y-full transition-transform duration-500 ease-in-out group-hover:translate-y-0 text-white/50">
-                  {item.label}
+                <span className="absolute top-0 left-0 flex items-start gap-2 translate-y-full transition-transform duration-500 ease-in-out group-hover:translate-y-0 text-white/50">
+                  {renderLabelContent()}
                 </span>
               </span>
 
@@ -125,7 +157,8 @@ const StaggeredMenu = ({
               />
             </Link>
           </div>
-        ))}
+          );
+        })}
       </nav>
 
       {/* Social Links */}

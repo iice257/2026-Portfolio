@@ -55,7 +55,7 @@ const Skills = () => {
     },
     {
       name: "Practices",
-      skills: ["Performance Optimization", "Responsive Design", "UI/UX Awareness", "System Maintenance"],
+      skills: ["Performance Optimization", "Responsive Design", "UI/UX Awareness", "System Maintenance", "Problem Solving"],
       description: "Applying industry best practices for maintainable, high-quality code."
     }
   ];

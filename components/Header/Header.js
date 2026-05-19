@@ -5,16 +5,18 @@ import ThemeToggle from "../ThemeToggle/ThemeToggle";
 import SnowToggle from "../ReactBits/SnowToggle";
 import StaggeredMenu from "../ReactBits/StaggeredMenu";
 import { MENULINKS, SOCIAL_LINKS } from "../../constants";
+import { getSectionHref, scrollToSection } from "../../utils/sectionNavigation";
 
 const Header = () => {
   const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
 
   // Refs for direct DOM manipulation (performance)
-  const kaRef = useRef(null);
-  const nameRef = useRef(null);
+  const logoLeadingRef = useRef(null);
+  const logoTrailingRef = useRef(null);
   const progressBarRef = useRef(null);
   const isScrolledRef = useRef(false);
+  const logoWidthsRef = useRef({ leading: 0, trailing: 0 });
 
   useEffect(() => {
     let frameId = null;
@@ -33,18 +35,28 @@ const Header = () => {
 
       // 2. Direct DOM updates for continuous animations (No re-renders)
 
-      // Logo Fade Logic (0 to 1 over first 200px)
-      const logoProgress = Math.min(scrollY / 200, 1);
+      // Logo wordmark reveal: closed at top, open after 5% page scroll.
+      const totalScroll = docHeight - winHeight;
+      const pageScrollProgress = totalScroll > 0 ? scrollY / totalScroll : 0;
+      const logoProgress = pageScrollProgress > 0.05 ? 1 : 0;
 
-      if (kaRef.current) {
-        kaRef.current.style.opacity = 1 - logoProgress;
-      }
-      if (nameRef.current) {
-        nameRef.current.style.opacity = logoProgress;
+      const leadingLetters = logoLeadingRef.current;
+      const trailingLetters = logoTrailingRef.current;
+      if (leadingLetters && trailingLetters) {
+        if (!logoWidthsRef.current.leading || !logoWidthsRef.current.trailing) {
+          logoWidthsRef.current = {
+            leading: leadingLetters.scrollWidth,
+            trailing: trailingLetters.scrollWidth,
+          };
+        }
+
+        leadingLetters.style.width = `${logoWidthsRef.current.leading * logoProgress}px`;
+        trailingLetters.style.width = `${logoWidthsRef.current.trailing * logoProgress}px`;
+        leadingLetters.style.opacity = logoProgress;
+        trailingLetters.style.opacity = logoProgress;
       }
 
       // Progress Bar Logic (0 to 1 across entire page)
-      const totalScroll = docHeight - winHeight;
       if (progressBarRef.current && totalScroll > 0) {
         const progress = Math.min(scrollY / totalScroll, 1);
         progressBarRef.current.style.width = `${progress * 100}%`;
@@ -72,27 +84,32 @@ const Header = () => {
     // If on home, scroll to top instead of navigating
     if (router.pathname === '/') {
       e.preventDefault();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollToSection("home");
     }
   };
 
   const handleNavClick = (item) => {
-    const ref = item.link.replace('/#', '');
+    if (item.opensPage) {
+      router.push(item.link);
+      return;
+    }
+
+    const ref = item.sectionRef;
     if (router.pathname !== '/') {
       router.push(item.link);
-    } else {
-      const element = document.getElementById(ref);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
+      return;
     }
+
+    scrollToSection(ref);
   };
 
   // Menu items for StaggeredMenu
   const menuItems = MENULINKS.map((link) => ({
     label: link.name,
-    ariaLabel: `Go to ${link.name}`,
-    link: `/#${link.ref}`
+    ariaLabel: link.ref === "projects" ? "Open Projects page" : `Go to ${link.name}`,
+    link: getSectionHref(link.ref),
+    sectionRef: link.ref,
+    opensPage: link.ref === "projects",
   }));
 
   const socialItems = SOCIAL_LINKS.map((social) => ({
@@ -102,6 +119,7 @@ const Header = () => {
 
   return (
     <header
+      data-cursor-boundary="navigation"
       className={`fixed top-0 left-0 w-full z-[9999] transition-all duration-300 ease-in-out ${isScrolled ? 'bg-[var(--bg-primary)]' : 'bg-transparent'} py-6`}
     >
       <div className="section-container flex justify-between items-center">
@@ -109,24 +127,29 @@ const Header = () => {
         <Link
           href="/"
           onClick={handleLogoClick}
+          aria-label="Kingsley Aremu"
           className="relative block h-6 min-w-[140px] cursor-none"
           style={{ color: 'var(--fg-primary)' }}
         >
-          {/* KA - fades out */}
-          <span
-            ref={kaRef}
-            className="absolute left-0 top-0 text-body-sm font-semibold tracking-wide transition-opacity duration-300"
-            style={{ opacity: 1 }}
-          >
-            KA
-          </span>
-          {/* Full Name - fades in */}
-          <span
-            ref={nameRef}
-            className="absolute left-0 top-0 text-body-sm font-medium tracking-wide whitespace-nowrap transition-opacity duration-300"
-            style={{ opacity: 0 }}
-          >
-            Kingsley Aremu
+          <span className="inline-flex h-6 items-center whitespace-nowrap text-body-sm font-medium tracking-wide">
+            <span className="font-semibold">K</span>
+            <span
+              ref={logoLeadingRef}
+              aria-hidden="true"
+              className="inline-block overflow-hidden whitespace-nowrap transition-[opacity,width] duration-200 ease-out"
+              style={{ width: 0, opacity: 0 }}
+            >
+              ingsley&nbsp;
+            </span>
+            <span className="font-semibold">A</span>
+            <span
+              ref={logoTrailingRef}
+              aria-hidden="true"
+              className="inline-block overflow-hidden whitespace-nowrap transition-[opacity,width] duration-200 ease-out"
+              style={{ width: 0, opacity: 0 }}
+            >
+              remu
+            </span>
           </span>
         </Link>
 
