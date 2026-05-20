@@ -1,13 +1,8 @@
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/dist/ScrollTrigger";
 import Hero from "@/components/Hero/Hero";
-import Philosophy from "@/components/Philosophy/Philosophy";
-import Skills from "@/components/Skills/Skills";
-import Projects from "@/components/Projects/Projects";
-import Work from "@/components/Work/Work";
-import Contact from "@/components/Contact/Contact";
-import Footer from "@/components/Footer/Footer";
 import ProgressIndicator from "@/components/ProgressIndicator/ProgressIndicator";
 import {
   getRequestedSection,
@@ -18,6 +13,13 @@ import {
 
 gsap.registerPlugin(ScrollTrigger);
 gsap.config({ nullTargetWarn: false });
+
+const Philosophy = dynamic(() => import("@/components/Philosophy/Philosophy"));
+const Skills = dynamic(() => import("@/components/Skills/Skills"));
+const Projects = dynamic(() => import("@/components/Projects/Projects"));
+const Work = dynamic(() => import("@/components/Work/Work"));
+const Contact = dynamic(() => import("@/components/Contact/Contact"));
+const Footer = dynamic(() => import("@/components/Footer/Footer"));
 
 export default function Home() {
   const [isDesktop, setIsDesktop] = useState(true);

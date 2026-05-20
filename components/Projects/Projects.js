@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import { MENULINKS } from "../../constants";
 import { featuredProjects } from "../../data/projects";
 import gsap from "gsap";
@@ -10,13 +9,9 @@ import { useCursor } from "../../context/CursorContext";
 import ShuffleText from "../ReactBits/ShuffleText";
 
 const Projects = ({ isDesktop }) => {
-  const router = useRouter();
   const sectionRef = useRef(null);
   const titleRef = useRef(null);
   const projectsContainerRef = useRef(null);
-  const lastPointerRef = useRef({ pageX: null, pageY: null, clientX: null, clientY: null });
-  const panelRectsRef = useRef([]);
-  const projectCursorActiveRef = useRef(false);
   const { setCursorText, setCursorVariant } = useCursor();
 
   useEffect(() => {
@@ -68,125 +63,15 @@ const Projects = ({ isDesktop }) => {
   ), []);
 
   const clearProjectCursor = useCallback(() => {
-    if (!projectCursorActiveRef.current) return;
-    projectCursorActiveRef.current = false;
     setCursorText("");
     setCursorVariant("default");
   }, [setCursorText, setCursorVariant]);
 
   const setProjectCursor = useCallback(() => {
-    if (projectCursorActiveRef.current) return;
-    projectCursorActiveRef.current = true;
+    if (!canUseHoverCursor()) return;
     setCursorText("Click for more details");
     setCursorVariant("project");
-  }, [setCursorText, setCursorVariant]);
-
-  const cacheProjectRects = useCallback(() => {
-    const panels = projectsContainerRef.current?.querySelectorAll(".project-panel");
-    panelRectsRef.current = Array.from(panels || []).map((panel) => {
-      const rect = panel.getBoundingClientRect();
-      return {
-        left: rect.left + window.scrollX,
-        right: rect.right + window.scrollX,
-        top: rect.top + window.scrollY,
-        bottom: rect.bottom + window.scrollY,
-      };
-    });
-  }, []);
-
-  const updateProjectCursorFromPointer = useCallback(() => {
-    if (!canUseHoverCursor()) {
-      clearProjectCursor();
-      return;
-    }
-
-    const { pageX, pageY, clientX, clientY } = lastPointerRef.current;
-    if (pageX === null || pageY === null || clientX === null || clientY === null) {
-      clearProjectCursor();
-      return;
-    }
-
-    const header = document.querySelector("[data-cursor-boundary='navigation']");
-    if (header) {
-      const headerRect = header.getBoundingClientRect();
-      const isInsideHeader = (
-        clientX >= headerRect.left &&
-        clientX <= headerRect.right &&
-        clientY >= headerRect.top &&
-        clientY <= headerRect.bottom
-      );
-
-      if (isInsideHeader) {
-        clearProjectCursor();
-        return;
-      }
-    }
-
-    const isOverProject = panelRectsRef.current.some((rect) => (
-      pageX >= rect.left && pageX <= rect.right && pageY >= rect.top && pageY <= rect.bottom
-    ));
-
-    if (isOverProject) {
-      setProjectCursor();
-    } else {
-      clearProjectCursor();
-    }
-  }, [canUseHoverCursor, clearProjectCursor, setProjectCursor]);
-
-  useEffect(() => {
-    let frameId = null;
-
-    const scheduleCacheProjectRects = () => {
-      window.cancelAnimationFrame(frameId);
-      frameId = window.requestAnimationFrame(cacheProjectRects);
-    };
-
-    const handlePointerMove = (event) => {
-      lastPointerRef.current = {
-        pageX: event.pageX,
-        pageY: event.pageY,
-        clientX: event.clientX,
-        clientY: event.clientY,
-      };
-      updateProjectCursorFromPointer();
-    };
-
-    const handleResize = () => {
-      scheduleCacheProjectRects();
-      updateProjectCursorFromPointer();
-    };
-
-    const handlePointerLeave = () => {
-      lastPointerRef.current = { pageX: null, pageY: null, clientX: null, clientY: null };
-      clearProjectCursor();
-    };
-
-    const handleRouteStart = () => {
-      clearProjectCursor();
-    };
-
-    scheduleCacheProjectRects();
-
-    const resizeObserver = new ResizeObserver(scheduleCacheProjectRects);
-    if (projectsContainerRef.current) {
-      resizeObserver.observe(projectsContainerRef.current);
-    }
-
-    window.addEventListener("pointermove", handlePointerMove, { passive: true });
-    window.addEventListener("resize", handleResize);
-    document.addEventListener("pointerleave", handlePointerLeave);
-    router.events.on("routeChangeStart", handleRouteStart);
-
-    return () => {
-      window.cancelAnimationFrame(frameId);
-      resizeObserver.disconnect();
-      window.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("resize", handleResize);
-      document.removeEventListener("pointerleave", handlePointerLeave);
-      router.events.off("routeChangeStart", handleRouteStart);
-      clearProjectCursor();
-    };
-  }, [cacheProjectRects, clearProjectCursor, router.events, updateProjectCursorFromPointer]);
+  }, [canUseHoverCursor, setCursorText, setCursorVariant]);
 
   return (
     <section
@@ -221,6 +106,10 @@ const Projects = ({ isDesktop }) => {
               key={project.name}
               href={`/projects/${project.slug}`}
               className="project-panel min-h-screen grid grid-cols-1 lg:grid-cols-2 group cursor-none"
+              onMouseEnter={setProjectCursor}
+              onFocus={setProjectCursor}
+              onMouseLeave={clearProjectCursor}
+              onBlur={clearProjectCursor}
               onClick={clearProjectCursor}
             >
               {/* Image Side - Full height image */}
