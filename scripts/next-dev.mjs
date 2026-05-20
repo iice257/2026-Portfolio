@@ -1,18 +1,27 @@
 import { spawn } from "node:child_process";
-import { rm } from "node:fs/promises";
 import { join } from "node:path";
+import { cleanDistDir } from "./clean-dist-dir.mjs";
 
 const cwd = process.cwd();
 const nextBin = join(cwd, "node_modules", "next", "dist", "bin", "next");
-const devDir = join(cwd, ".next-dev");
+let distDir = ".next-dev";
 
-await rm(devDir, { recursive: true, force: true });
+try {
+  await cleanDistDir(join(cwd, distDir));
+} catch (error) {
+  if (error?.code !== "EPERM" && error?.code !== "EBUSY") {
+    throw error;
+  }
+
+  distDir = `.next-dev-${Date.now()}`;
+  console.warn(`Could not clean .next-dev (${error.code}); using ${distDir} for this dev server.`);
+}
 
 const child = spawn(process.execPath, [nextBin, "dev", ...process.argv.slice(2)], {
   cwd,
   env: {
     ...process.env,
-    NEXT_DIST_DIR: ".next-dev",
+    NEXT_DIST_DIR: distDir,
   },
   stdio: "inherit",
 });

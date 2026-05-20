@@ -28,6 +28,13 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
+  experimental: {
+    cpus: 1,
+    workerThreads: true,
+    webpackBuildWorker: false,
+    parallelServerCompiles: false,
+    parallelServerBuildTraces: false,
+  },
   async rewrites() {
     return [
       {
