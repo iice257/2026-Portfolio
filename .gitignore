@@ -13,6 +13,7 @@
 
 # next.js
 /.next/
+/.next-dist-state.json
 /.next-dev/
 /.next-build-*/
 /out/
@@ -29,6 +30,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 dev-server*.log
+prod-server*.log
 
 # local tool runtimes
 .codex-tools/

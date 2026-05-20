@@ -5,6 +5,7 @@ import { cleanDistDir } from "./clean-dist-dir.mjs";
 const cwd = process.cwd();
 const nextBin = join(cwd, "node_modules", "next", "dist", "bin", "next");
 let distDir = ".next-dev";
+const useLocalCompatibility = !process.env.CI && !process.env.VERCEL;
 
 try {
   await cleanDistDir(join(cwd, distDir));
@@ -22,6 +23,7 @@ const child = spawn(process.execPath, [nextBin, "dev", ...process.argv.slice(2)]
   env: {
     ...process.env,
     NEXT_DIST_DIR: distDir,
+    ...(useLocalCompatibility ? { NEXT_LOCAL_BUILD_COMPAT: "1" } : {}),
   },
   stdio: "inherit",
 });

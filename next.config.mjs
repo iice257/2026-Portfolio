@@ -21,6 +21,17 @@ const securityHeaders = [
   },
 ];
 
+const localBuildCompatibility =
+  process.env.NEXT_LOCAL_BUILD_COMPAT === "1"
+    ? {
+        cpus: 1,
+        workerThreads: true,
+        webpackBuildWorker: false,
+        parallelServerCompiles: false,
+        parallelServerBuildTraces: false,
+      }
+    : undefined;
+
 const nextConfig = {
   distDir: process.env.NEXT_DIST_DIR || ".next",
   poweredByHeader: false,
@@ -28,13 +39,7 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
-  experimental: {
-    cpus: 1,
-    workerThreads: true,
-    webpackBuildWorker: false,
-    parallelServerCompiles: false,
-    parallelServerBuildTraces: false,
-  },
+  ...(localBuildCompatibility ? { experimental: localBuildCompatibility } : {}),
   async rewrites() {
     return [
       {
