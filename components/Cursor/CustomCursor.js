@@ -265,13 +265,8 @@ const CustomCursor = () => {
           style={{ willChange: 'transform' }}
         >
           <div
-            className="absolute left-0 top-0 bg-black/80 text-white backdrop-blur-sm px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-widest whitespace-nowrap"
-            style={{
-              backgroundColor: 'rgba(0,0,0,0.8)',
-              color: '#fff',
-              border: '1px solid rgba(255,255,255,0.2)',
-              transform: 'translate(-50%, -50%)',
-            }}
+            className={`custom-cursor-label absolute left-0 top-0 backdrop-blur-sm px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-widest whitespace-nowrap ${cursorVariant === 'project' ? 'is-project' : ''}`}
+            style={{ transform: 'translate(-50%, -50%)' }}
           >
             {cursorText}
           </div>
@@ -281,6 +276,22 @@ const CustomCursor = () => {
       <style jsx global>{`
         body, a, button, input, textarea {
           cursor: none;
+        }
+
+        .custom-cursor-label {
+          background-color: rgba(0, 0, 0, 0.82);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          color: #fff;
+          transition:
+            background-color 0.34s cubic-bezier(0.16, 1, 0.3, 1),
+            border-color 0.34s cubic-bezier(0.16, 1, 0.3, 1),
+            color 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .custom-cursor-label.is-project {
+          background-color: var(--fg-primary);
+          border-color: color-mix(in srgb, var(--fg-primary) 42%, var(--border));
+          color: var(--bg-primary);
         }
 
       `}</style>

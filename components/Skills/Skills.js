@@ -112,6 +112,8 @@ const Skills = () => {
               {/* Category Header - Clickable */}
               <button
                 onClick={() => handleCategoryClick(category.name)}
+                onMouseEnter={() => setExpandedCategory(category.name)}
+                onFocus={() => setExpandedCategory(category.name)}
                 aria-expanded={expandedCategory === category.name}
                 aria-controls={`skills-panel-${category.name.toLowerCase().replace(/\s+/g, "-")}`}
                 className="w-full flex items-center justify-between py-6 group text-left"

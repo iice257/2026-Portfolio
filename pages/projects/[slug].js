@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Head from "next/head";
+import { AnimatePresence, motion } from "framer-motion";
 import { featuredProjects } from "../../data/projects";
 import { METADATA } from "../../constants";
 import Footer from "@/components/Footer/Footer";
 import ProjectVisual from "@/components/Projects/ProjectVisual";
 import ShuffleText from "@/components/ReactBits/ShuffleText";
+import { useCursor } from "../../context/CursorContext";
 
 export async function getStaticPaths() {
   const paths = featuredProjects.map((project) => ({
@@ -83,7 +85,7 @@ const PROJECT_TITLE_SIZES = {
   "restore-ai": "clamp(7.2rem, 20.5cqw, 13.2rem)",
 };
 
-const ProjectMediaPreview = ({ project, variant = "desktop", priority = false }) => {
+const ProjectMediaPreview = ({ project, variant = "desktop", priority = false, onOpen, onHover, onLeave }) => {
   const videoRef = useRef(null);
   const controlsTimerRef = useRef(null);
   const [isPaused, setIsPaused] = useState(false);
@@ -140,15 +142,35 @@ const ProjectMediaPreview = ({ project, variant = "desktop", priority = false })
     }
   };
 
+  const openPreview = () => {
+    onOpen?.(variant);
+  };
+
   return (
     <div
       className={`project-media-preview ${isMobile ? "is-mobile" : "is-desktop"}`}
       onMouseMove={showControls}
-      onMouseEnter={showControls}
+      onMouseEnter={() => {
+        showControls();
+        onHover?.("Click to open");
+      }}
+      onMouseLeave={onLeave}
       onPointerDown={showControls}
       onFocus={showControls}
     >
-      <div className={`project-media-frame ${isMonochrome ? "is-monochrome" : ""}`}>
+      <div
+        className={`project-media-frame ${isMonochrome ? "is-monochrome" : ""}`}
+        role="button"
+        tabIndex={0}
+        onClick={openPreview}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openPreview();
+          }
+        }}
+        aria-label={`Open ${isMobile ? "mobile" : "desktop"} preview for ${project.name}`}
+      >
         {videoSrc ? (
           <video
             ref={videoRef}
@@ -169,8 +191,15 @@ const ProjectMediaPreview = ({ project, variant = "desktop", priority = false })
           </div>
         )}
 
+        <span className="mockup-expand-icon" aria-hidden="true">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5" />
+            <path d="M3 3l6 6M21 3l-6 6M21 21l-6-6M3 21l6-6" />
+          </svg>
+        </span>
+
         {videoSrc && (
-          <div className={`project-media-controls ${areControlsVisible ? "is-visible" : ""}`}>
+          <div className={`project-media-controls ${areControlsVisible ? "is-visible" : ""}`} onClick={(event) => event.stopPropagation()}>
             <button
               type="button"
               className="project-media-playback"
@@ -196,7 +225,73 @@ const ProjectMediaPreview = ({ project, variant = "desktop", priority = false })
   );
 };
 
+const ProjectMediaLightbox = ({ project, variant, onClose, onNavigate, onHover, onLeave }) => {
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") onClose();
+      if (event.key === "ArrowRight") onNavigate(1);
+      if (event.key === "ArrowLeft") onNavigate(-1);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose, onNavigate]);
+
+  const videoSrc = variant === "desktop" ? project.desktopVideo : project.mobileVideo;
+  const isMobile = variant === "mobile";
+
+  return (
+    <motion.div
+      className="mockup-lightbox"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+      onMouseEnter={() => onHover("Click to close")}
+      onMouseLeave={onLeave}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${project.name} ${isMobile ? "mobile" : "desktop"} preview`}
+    >
+      <button type="button" className="mockup-lightbox-nav is-prev" onClick={(event) => { event.stopPropagation(); onNavigate(-1); }} aria-label="Previous mockup">
+        <span aria-hidden="true">&lsaquo;</span>
+      </button>
+      <motion.div
+        className={`mockup-lightbox-panel ${isMobile ? "is-mobile" : "is-desktop"}`}
+        initial={{ y: 24, scale: 0.98 }}
+        animate={{ y: 0, scale: 1 }}
+        exit={{ y: 18, scale: 0.98 }}
+        transition={{ duration: 0.34, ease: [0.16, 1, 0.3, 1] }}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="mockup-lightbox-header">
+          <div>
+            <p className="text-micro" style={{ color: "var(--fg-muted)" }}>{isMobile ? "Mobile" : "Desktop"}</p>
+            <h3 className="text-body-xl font-light" style={{ color: "var(--fg-primary)" }}>{project.name}</h3>
+          </div>
+          <button type="button" className="mockup-lightbox-close" onClick={onClose} aria-label="Close mockup preview">
+            &times;
+          </button>
+        </div>
+        <div className="mockup-lightbox-stage">
+          {videoSrc ? (
+            <video src={videoSrc} autoPlay muted loop playsInline controls className="h-full w-full object-cover" />
+          ) : (
+            <ProjectVisual project={project} priority compact={isMobile} />
+          )}
+        </div>
+      </motion.div>
+      <button type="button" className="mockup-lightbox-nav is-next" onClick={(event) => { event.stopPropagation(); onNavigate(1); }} aria-label="Next mockup">
+        <span aria-hidden="true">&rsaquo;</span>
+      </button>
+    </motion.div>
+  );
+};
+
 export default function ProjectDetail({ project, projectIndex, prevProject, nextProject }) {
+  const [activePreview, setActivePreview] = useState(null);
+  const { setCursorText, setCursorVariant } = useCursor();
+
   if (!project) return null;
 
   const canonicalUrl = `${METADATA.siteUrl.replace(/\/$/, "")}/projects/${project.slug}`;
@@ -220,6 +315,24 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
     keywords: project.tech.join(", "),
     sameAs: [project.url, project.liveUrl].filter((url) => url && url !== "#"),
   }).replace(/</g, "\\u003c");
+
+  const setProjectCursor = (text) => {
+    if (typeof window !== "undefined" && !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    setCursorText(text);
+    setCursorVariant("project");
+  };
+
+  const clearProjectCursor = () => {
+    setCursorText("");
+    setCursorVariant("default");
+  };
+
+  const navigatePreview = (direction) => {
+    setActivePreview((current) => {
+      const currentIndex = current === "mobile" ? 0 : 1;
+      return ["mobile", "desktop"][(currentIndex + direction + 2) % 2];
+    });
+  };
 
   return (
     <>
@@ -281,13 +394,13 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
               </p>
             </div>
             <div className="lg:col-span-4">
-              <ProjectMediaPreview project={project} variant="mobile" priority />
+              <ProjectMediaPreview project={project} variant="mobile" priority onOpen={setActivePreview} onHover={setProjectCursor} onLeave={clearProjectCursor} />
             </div>
           </div>
         </section>
 
         <section className="section-container-wide pb-20">
-          <ProjectMediaPreview project={project} variant="desktop" priority />
+          <ProjectMediaPreview project={project} variant="desktop" priority onOpen={setActivePreview} onHover={setProjectCursor} onLeave={clearProjectCursor} />
         </section>
 
         <section className="section-container pb-24">
@@ -360,6 +473,22 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
           </div>
         </section>
       </main>
+
+      <AnimatePresence>
+        {activePreview && (
+          <ProjectMediaLightbox
+            project={project}
+            variant={activePreview}
+            onClose={() => {
+              setActivePreview(null);
+              clearProjectCursor();
+            }}
+            onNavigate={navigatePreview}
+            onHover={setProjectCursor}
+            onLeave={clearProjectCursor}
+          />
+        )}
+      </AnimatePresence>
 
       <Footer />
     </>

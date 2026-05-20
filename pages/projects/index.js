@@ -1,6 +1,7 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Head from "next/head";
+import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { METADATA } from "../../constants";
 import {
@@ -25,41 +26,107 @@ const TagList = ({ tags = [] }) => (
   </div>
 );
 
-const MockupPair = ({ project }) => (
-  <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_0.7fr] gap-6">
-    <div className="mockup-shell aspect-[16/10] p-5">
-      <div className="mb-5 flex items-center justify-between">
-        <span className="text-micro" style={{ color: "var(--fg-muted)" }}>
-          Desktop
-        </span>
-        <span className="h-2 w-2" style={{ backgroundColor: project.visual?.accent || "var(--fg-primary)" }} />
-      </div>
-      <div className="grid h-[calc(100%-2.5rem)] grid-cols-12 gap-3">
-        <div className="col-span-4 border" style={{ borderColor: "var(--border)" }} />
-        <div className="col-span-8 space-y-3">
-          <div className="h-8 w-3/4" style={{ backgroundColor: "var(--fg-primary)", opacity: 0.12 }} />
-          <div className="h-3 w-full" style={{ backgroundColor: "var(--fg-primary)", opacity: 0.1 }} />
-          <div className="h-3 w-4/5" style={{ backgroundColor: "var(--fg-primary)", opacity: 0.1 }} />
-          <div className="mt-8 grid grid-cols-2 gap-3">
-            <div className="h-24 border" style={{ borderColor: "var(--border)" }} />
-            <div className="h-24 border" style={{ borderColor: "var(--border)" }} />
-          </div>
-        </div>
-      </div>
-    </div>
+const IconDesktop = () => (
+  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="12" rx="1.5" />
+    <path d="M9 20h6M12 16v4" />
+  </svg>
+);
 
-    <div className="mockup-shell mx-auto aspect-[9/16] w-full max-w-[15rem] p-4">
-      <div className="mb-4 h-2 w-16 mx-auto" style={{ backgroundColor: "var(--fg-primary)", opacity: 0.12 }} />
-      <div className="space-y-3">
-        <div className="h-20 border" style={{ borderColor: "var(--border)" }} />
-        <div className="h-3 w-full" style={{ backgroundColor: "var(--fg-primary)", opacity: 0.12 }} />
-        <div className="h-3 w-2/3" style={{ backgroundColor: "var(--fg-primary)", opacity: 0.12 }} />
-        <div className="grid grid-cols-2 gap-2 pt-4">
-          <div className="h-16 border" style={{ borderColor: "var(--border)" }} />
-          <div className="h-16 border" style={{ borderColor: "var(--border)" }} />
-        </div>
-      </div>
+const IconPhone = () => (
+  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="7" y="2.5" width="10" height="19" rx="2" />
+    <path d="M11 18.5h2" />
+  </svg>
+);
+
+const IconExpand = () => (
+  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5" />
+    <path d="M3 3l6 6M21 3l-6 6M21 21l-6-6M3 21l6-6" />
+  </svg>
+);
+
+const previewLabel = (variant) => (variant === "mobile" ? "Mobile" : "Desktop");
+
+const getProjectPreview = (project, variant = "desktop") => {
+  const video = variant === "desktop" ? project.desktopVideo : project.mobileVideo;
+  if (video) return { type: "video", src: video };
+  if (project.image) return { type: "image", src: project.image };
+  return { type: "mockup" };
+};
+
+const ProjectMockupFrame = ({ project, variant = "desktop", className = "" }) => {
+  const isMobile = variant === "mobile";
+
+  return (
+    <div className={`mockup-shell ${isMobile ? "is-mobile" : "is-desktop"} ${className}`}>
+      {isMobile ? (
+        <>
+          <div className="mb-4 h-2 w-16 mx-auto" style={{ backgroundColor: "var(--fg-primary)", opacity: 0.12 }} />
+          <div className="space-y-3">
+            <div className="h-20 border" style={{ borderColor: "var(--border)" }} />
+            <div className="h-3 w-full" style={{ backgroundColor: "var(--fg-primary)", opacity: 0.12 }} />
+            <div className="h-3 w-2/3" style={{ backgroundColor: "var(--fg-primary)", opacity: 0.12 }} />
+            <div className="grid grid-cols-2 gap-2 pt-4">
+              <div className="h-16 border" style={{ borderColor: "var(--border)" }} />
+              <div className="h-16 border" style={{ borderColor: "var(--border)" }} />
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="mb-5 flex items-center justify-between">
+            <span className="text-micro" style={{ color: "var(--fg-muted)" }}>
+              Desktop
+            </span>
+            <span className="h-2 w-2" style={{ backgroundColor: project.visual?.accent || "var(--fg-primary)" }} />
+          </div>
+          <div className="grid h-[calc(100%-2.5rem)] grid-cols-12 gap-3">
+            <div className="col-span-4 border" style={{ borderColor: "var(--border)" }} />
+            <div className="col-span-8 space-y-3">
+              <div className="h-8 w-3/4" style={{ backgroundColor: "var(--fg-primary)", opacity: 0.12 }} />
+              <div className="h-3 w-full" style={{ backgroundColor: "var(--fg-primary)", opacity: 0.1 }} />
+              <div className="h-3 w-4/5" style={{ backgroundColor: "var(--fg-primary)", opacity: 0.1 }} />
+              <div className="mt-8 grid grid-cols-2 gap-3">
+                <div className="h-24 border" style={{ borderColor: "var(--border)" }} />
+                <div className="h-24 border" style={{ borderColor: "var(--border)" }} />
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
+  );
+};
+
+const PreviewSurface = ({ project, variant = "desktop", onOpen, onHover, onLeave, children }) => (
+  <button
+    type="button"
+    className="mockup-preview-trigger group"
+    onClick={(event) => {
+      event.stopPropagation();
+      onOpen(project, variant);
+    }}
+    onMouseEnter={() => onHover("Click to open")}
+    onMouseLeave={onLeave}
+    aria-label={`Open ${previewLabel(variant).toLowerCase()} mockup for ${project.name}`}
+  >
+    {children}
+    <span className="mockup-expand-icon" aria-hidden="true">
+      <IconExpand />
+    </span>
+  </button>
+);
+
+const MockupPair = ({ project, onOpenPreview, onHover, onLeave }) => (
+  <div className="major-expanded-media grid grid-cols-1 lg:grid-cols-[1.5fr_0.7fr] gap-5">
+    <PreviewSurface project={project} variant="desktop" onOpen={onOpenPreview} onHover={onHover} onLeave={onLeave}>
+      <ProjectMockupFrame project={project} variant="desktop" className="aspect-[16/10] p-5" />
+    </PreviewSurface>
+    <PreviewSurface project={project} variant="mobile" onOpen={onOpenPreview} onHover={onHover} onLeave={onLeave}>
+      <ProjectMockupFrame project={project} variant="mobile" className="mx-auto aspect-[9/16] w-full max-w-[13rem] p-4" />
+    </PreviewSurface>
   </div>
 );
 
@@ -102,7 +169,122 @@ const chunkProjects = (projects, size = 2) => {
   return rows;
 };
 
-const MajorProjectExpandedCard = ({ project, index, onFlip, onHover, onLeave }) => {
+const MockupPreviewModal = ({ active, onClose, onNavigate, onHover, onLeave }) => {
+  useEffect(() => {
+    if (!active) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") onClose();
+      if (event.key === "ArrowRight") onNavigate(1);
+      if (event.key === "ArrowLeft") onNavigate(-1);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [active, onClose, onNavigate]);
+
+  if (!active) return null;
+
+  const preview = getProjectPreview(active.project, active.variant);
+  const isMobile = active.variant === "mobile";
+
+  return (
+    <motion.div
+      className="mockup-lightbox"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+      onMouseEnter={() => onHover("Click to close")}
+      onMouseLeave={onLeave}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${active.project.name} ${previewLabel(active.variant)} mockup preview`}
+    >
+      <button type="button" className="mockup-lightbox-nav is-prev" onClick={(event) => { event.stopPropagation(); onNavigate(-1); }} aria-label="Previous mockup">
+        <span aria-hidden="true">‹</span>
+      </button>
+      <motion.div
+        className={`mockup-lightbox-panel ${isMobile ? "is-mobile" : "is-desktop"}`}
+        initial={{ y: 24, scale: 0.98 }}
+        animate={{ y: 0, scale: 1 }}
+        exit={{ y: 18, scale: 0.98 }}
+        transition={{ duration: 0.34, ease: [0.16, 1, 0.3, 1] }}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="mockup-lightbox-header">
+          <div>
+            <p className="text-micro" style={{ color: "var(--fg-muted)" }}>{previewLabel(active.variant)}</p>
+            <h3 className="text-body-xl font-light" style={{ color: "var(--fg-primary)" }}>{active.project.name}</h3>
+          </div>
+          <button type="button" className="mockup-lightbox-close" onClick={onClose} aria-label="Close mockup preview">
+            ×
+          </button>
+        </div>
+
+        <div className="mockup-lightbox-stage">
+          {preview.type === "video" && (
+            <video src={preview.src} autoPlay muted loop playsInline controls className="h-full w-full object-cover" />
+          )}
+          {preview.type === "image" && (
+            <Image src={preview.src} alt={`${active.project.name} ${previewLabel(active.variant)} mockup`} fill sizes="90vw" className="object-contain" />
+          )}
+          {preview.type === "mockup" && (
+            <ProjectMockupFrame project={active.project} variant={active.variant} className={isMobile ? "h-full w-full p-5" : "h-full w-full p-6"} />
+          )}
+        </div>
+      </motion.div>
+      <button type="button" className="mockup-lightbox-nav is-next" onClick={(event) => { event.stopPropagation(); onNavigate(1); }} aria-label="Next mockup">
+        <span aria-hidden="true">›</span>
+      </button>
+    </motion.div>
+  );
+};
+
+const MockupChoiceButton = ({ project, onOpenPreview, onHover, onLeave }) => {
+  const [isChoosing, setIsChoosing] = useState(false);
+
+  return (
+    <div className={`mockup-choice ${isChoosing ? "is-open" : ""}`} onMouseLeave={() => setIsChoosing(false)}>
+      <button
+        type="button"
+        className="project-action-link mockup-choice-main"
+        onClick={(event) => {
+          event.stopPropagation();
+          setIsChoosing((value) => !value);
+        }}
+        onMouseEnter={() => onHover(isChoosing ? "Choose mockup" : "View mockup")}
+        onMouseLeave={onLeave}
+        aria-expanded={isChoosing}
+      >
+        <IconExpand />
+        <span>View mockup</span>
+      </button>
+      <div className="mockup-choice-options" aria-hidden={!isChoosing}>
+        {["mobile", "desktop"].map((variant) => (
+          <button
+            type="button"
+            key={variant}
+            className="project-action-link"
+            tabIndex={isChoosing ? 0 : -1}
+            onClick={(event) => {
+              event.stopPropagation();
+              onOpenPreview(project, variant);
+              setIsChoosing(false);
+            }}
+            onMouseEnter={() => onHover(`Open ${variant}`)}
+            onMouseLeave={onLeave}
+          >
+            {variant === "mobile" ? <IconPhone /> : <IconDesktop />}
+            <span>{variant}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const MajorProjectExpandedCard = ({ project, index, onFlip, onHover, onLeave, onOpenPreview }) => {
   const handleKeyDown = (event) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
@@ -117,26 +299,24 @@ const MajorProjectExpandedCard = ({ project, index, onFlip, onHover, onLeave }) 
       animate={{ opacity: 1, rotateY: 0, scale: 1 }}
       exit={{ opacity: 0, rotateY: 72, scale: 0.985 }}
       transition={flipTransition}
-      role="button"
       tabIndex={0}
       aria-expanded="true"
       aria-label={`Collapse details for ${project.name}`}
-      onClick={onFlip}
       onKeyDown={handleKeyDown}
       onMouseEnter={() => onHover("Click to collapse")}
       onMouseLeave={onLeave}
       className="major-project-expanded cursor-none"
     >
-      <div className="grid h-full grid-cols-1 xl:grid-cols-12 gap-8 p-6 md:p-8 lg:p-10">
-        <div className="xl:col-span-4 flex flex-col justify-between gap-10">
+      <div className="grid h-full grid-cols-1 xl:grid-cols-12 gap-7 p-5 md:p-7 lg:p-8">
+        <div className="xl:col-span-4 flex flex-col justify-between gap-6" onClick={onFlip} role="button">
           <div>
-            <span className="text-micro mb-5 block" style={{ color: "var(--fg-muted)" }}>
+            <span className="text-micro mb-4 block" style={{ color: "var(--fg-muted)" }}>
               {String(index + 5).padStart(2, "0")} / Expanded
             </span>
-            <h3 className="text-display-md font-light mb-5 whitespace-nowrap" style={{ color: "var(--fg-primary)" }}>
+            <h3 className="text-display-md font-light mb-4 whitespace-nowrap" style={{ color: "var(--fg-primary)" }}>
               <ShuffleText text={project.name} duration={0.45} shuffleTimes={3} textAlign="left" />
             </h3>
-            <p className="text-body-lg mb-6" style={{ color: "var(--fg-secondary)" }}>
+            <p className="text-body-lg mb-5" style={{ color: "var(--fg-secondary)" }}>
               {project.description}
             </p>
             <div className="space-y-4 text-body-sm" style={{ color: "var(--fg-muted)" }}>
@@ -147,13 +327,13 @@ const MajorProjectExpandedCard = ({ project, index, onFlip, onHover, onLeave }) 
               </p>
             </div>
           </div>
-          <div>
-            <TagList tags={project.tech} />
-            <ProjectActionLinks project={project} className="mt-4 justify-start" />
-          </div>
         </div>
-        <div className="xl:col-span-8">
-          <MockupPair project={project} />
+        <div className="xl:col-span-8 flex flex-col gap-4">
+          <MockupPair project={project} onOpenPreview={onOpenPreview} onHover={onHover} onLeave={onLeave} />
+          <div className="major-expanded-actions" onClick={(event) => event.stopPropagation()}>
+            <TagList tags={project.tech} />
+            <ProjectActionLinks project={project} />
+          </div>
         </div>
       </div>
     </motion.article>
@@ -189,21 +369,23 @@ const MajorProjectCard = ({ project, index, onFlip, onHover, onLeave, dimmed }) 
     <div className="major-project-visual relative overflow-hidden">
       <ProjectVisual project={project} compact />
     </div>
-    <div className="flex flex-1 flex-col justify-between p-6 md:p-8">
+    <div className="major-card-body">
       <div>
         <span className="text-micro mb-4 block" style={{ color: "var(--fg-muted)" }}>
-          {String(index + 5).padStart(2, "0")} / Major
+          {String(index + 5).padStart(2, "0")}
         </span>
         <h3 className="text-display-sm font-light mb-3 whitespace-nowrap" style={{ color: "var(--fg-primary)" }}>
           <ShuffleText text={project.name} duration={0.45} shuffleTimes={3} textAlign="left" />
         </h3>
-        <p className="text-body-md" style={{ color: "var(--fg-secondary)" }}>
+      </div>
+      <div className="major-card-meta">
+        <p className="text-body-md major-card-subtitle" style={{ color: "var(--fg-secondary)" }}>
           {project.subtitle}
         </p>
-      </div>
-      <div className="mt-8">
-        <TagList tags={project.tech} />
-        <ProjectActionLinks project={project} className="mt-4 justify-start" />
+        <div className="major-card-actions" onClick={(event) => event.stopPropagation()}>
+          <TagList tags={project.tech} />
+          <ProjectActionLinks project={project} />
+        </div>
       </div>
     </div>
   </motion.article>
@@ -213,9 +395,16 @@ const MajorProjectCard = ({ project, index, onFlip, onHover, onLeave, dimmed }) 
 export default function ProjectsIndex() {
   const [flippedCards, setFlippedCards] = useState({});
   const [openProject, setOpenProject] = useState(remainingProjects[0]?.slug);
+  const [activePreview, setActivePreview] = useState(null);
   const { setCursorText, setCursorVariant } = useCursor();
   const expandedSlug = Object.keys(flippedCards).find((slug) => flippedCards[slug]);
   const majorProjectRows = chunkProjects(majorProjects);
+  const previewItems = useMemo(() => (
+    [...featuredProjects, ...majorProjects, ...remainingProjects].flatMap((project) => [
+      { project, variant: "mobile" },
+      { project, variant: "desktop" },
+    ])
+  ), []);
 
   const toggleFlip = (slug) => {
     setFlippedCards((current) => {
@@ -234,6 +423,25 @@ export default function ProjectsIndex() {
     setCursorText("");
     setCursorVariant("default");
   }, [setCursorText, setCursorVariant]);
+
+  const openPreview = useCallback((project, variant = "desktop") => {
+    setActivePreview({ project, variant });
+    setProjectCursor("Click to close");
+  }, [setProjectCursor]);
+
+  const navigatePreview = useCallback((direction) => {
+    setActivePreview((current) => {
+      if (!current) return current;
+      const currentIndex = previewItems.findIndex((item) => item.project.slug === current.project.slug && item.variant === current.variant);
+      const nextIndex = (currentIndex + direction + previewItems.length) % previewItems.length;
+      return previewItems[nextIndex];
+    });
+  }, [previewItems]);
+
+  const closePreview = useCallback(() => {
+    setActivePreview(null);
+    clearProjectCursor();
+  }, [clearProjectCursor]);
 
   return (
     <>
@@ -394,6 +602,7 @@ export default function ProjectsIndex() {
                         }}
                         onHover={setProjectCursor}
                         onLeave={clearProjectCursor}
+                        onOpenPreview={openPreview}
                       />
                     )}
                   </AnimatePresence>
@@ -485,9 +694,12 @@ export default function ProjectsIndex() {
                             <p className="text-body-lg mb-5 leading-relaxed" style={{ color: "var(--fg-secondary)" }}>
                               {project.description}
                             </p>
-                            <div className="flex flex-wrap items-center justify-between gap-4">
+                            <div className="archive-project-actions">
                               <TagList tags={project.tech} />
-                              <ProjectActionLinks project={project} />
+                              <div className="flex flex-wrap items-center gap-3" onClick={(event) => event.stopPropagation()}>
+                                <ProjectActionLinks project={project} />
+                                <MockupChoiceButton project={project} onOpenPreview={openPreview} onHover={setProjectCursor} onLeave={clearProjectCursor} />
+                              </div>
                             </div>
                             <div className="mt-5 text-body-sm" style={{ color: "var(--fg-muted)" }}>
                               <p>{project.notes}</p>
@@ -503,6 +715,18 @@ export default function ProjectsIndex() {
           </div>
         </section>
       </main>
+
+      <AnimatePresence>
+        {activePreview && (
+          <MockupPreviewModal
+            active={activePreview}
+            onClose={closePreview}
+            onNavigate={navigatePreview}
+            onHover={setProjectCursor}
+            onLeave={clearProjectCursor}
+          />
+        )}
+      </AnimatePresence>
 
       <Footer />
     </>

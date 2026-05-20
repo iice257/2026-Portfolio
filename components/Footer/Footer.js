@@ -63,12 +63,15 @@ const Footer = () => {
                 {navLinks.map((link) => (
                   <li key={link.ref}>
                     <Link
-                      href={getSectionHref(link.ref)}
-                      className="text-body-lg link-underline"
+                      href={link.ref === "projects" ? "/projects" : getSectionHref(link.ref)}
+                      className="text-body-lg link-underline inline-flex items-center gap-2"
                       style={{ color: "var(--fg-primary)" }}
-                      onClick={(event) => handleSectionClick(event, link.ref)}
+                      onClick={(event) => {
+                        if (link.ref !== "projects") handleSectionClick(event, link.ref);
+                      }}
                     >
-                      {link.name}
+                      <span>{link.name}</span>
+                      {link.ref === "projects" && <span aria-hidden="true">↗</span>}
                     </Link>
                   </li>
                 ))}
