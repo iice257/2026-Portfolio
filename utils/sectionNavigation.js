@@ -1,4 +1,4 @@
-export const SECTION_IDS = ["skills", "projects", "experience", "contact"];
+export const SECTION_IDS = ["skills", "experience", "contact"];
 
 export const getSectionHref = (sectionId) => {
   if (!sectionId || sectionId === "home") return "/";

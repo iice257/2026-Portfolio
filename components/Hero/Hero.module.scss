@@ -1,48 +1,222 @@
-.intro {
-  animation: fadeAppear 1s 0.2s;
+.heroSection {
+  isolation: isolate;
 }
 
-.heroName{
-    line-height: 1.5em;
-    animation: fadeAppear 1.3s 0.3s;
-
-    .emphasize {
-        &::after {
-            content: '';
-            position: absolute;
-            bottom: 0.7rem;
-            left: 0;
-            width: 100%;
-            height: 0.35rem;
-            border-radius: 1rem;
-            background-image: linear-gradient(to right, theme("colors.indigo.light"), theme("colors.indigo.dark"));
-            box-shadow: 0 0 1rem theme("colors.indigo.dark");
-            animation: growHorizontal 1.3s cubic-bezier(0.9, 0, 0.5, 0.9) 0.8s;
-        }
-    }
+.heroSectionLocked {
+  touch-action: none;
 }
 
+.heroSectionUnlocked {
+  touch-action: pan-y;
+}
 
-@keyframes fadeAppear {
-  0% {
-    opacity: 0;
+.heroTitleShell {
+  gap: clamp(1.35rem, 3.6vw, 2rem);
+  will-change: transform, opacity;
+}
+
+.heroTitleShellPulse {
+  animation: titleIntentPulse 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lockDock {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    opacity 180ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lockDockVisible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.lockDockHidden {
+  pointer-events: none;
+}
+
+.lockButton {
+  width: 3.15rem;
+  height: 3.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-primary);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--bg-primary) 92%, var(--fg-primary) 8%), var(--bg-primary));
+  border: 1px solid color-mix(in srgb, var(--fg-primary) 18%, transparent);
+  border-radius: 999px;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--fg-primary) 9%, transparent);
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 160ms ease;
+}
+
+.lockButton:hover {
+  border-color: color-mix(in srgb, var(--fg-primary) 34%, transparent);
+}
+
+.lockButton:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.lockButton svg {
+  width: 1.35rem;
+  height: 1.35rem;
+  display: block;
+}
+
+.unlockTooltip {
+  position: absolute;
+  top: calc(100% + 0.65rem);
+  left: 50%;
+  z-index: 3;
+  padding: 0.5rem 0.7rem;
+  color: var(--bg-primary);
+  background: var(--fg-primary);
+  border: 1px solid color-mix(in srgb, var(--bg-primary) 20%, transparent);
+  border-radius: 0.35rem;
+  font-size: 0.75rem;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(-50%, -4px, 0) scale(0.96);
+  transition:
+    opacity 180ms ease,
+    transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.unlockTooltipVisible {
+  opacity: 1;
+  transform: translate3d(-50%, 0, 0) scale(1);
+}
+
+.nameStack {
+  display: flex;
+  width: min(100%, 50rem);
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.15rem, 1.2vw, 1rem);
+}
+
+.firstName,
+.lastName {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+}
+
+.firstName {
+  height: clamp(5.8rem, 22vw, 7.5rem);
+  max-width: min(100%, 50rem);
+}
+
+.lastName {
+  height: clamp(5.6rem, 21vw, 7.5rem);
+  max-width: min(82vw, 37.5rem);
+}
+
+.heroDetails,
+.scrollCue {
+  transition:
+    opacity 180ms ease,
+    transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
+    visibility 180ms ease;
+}
+
+.heroDetailsHidden,
+.scrollCueHidden {
+  opacity: 0 !important;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(8px);
+}
+
+@media (min-width: 768px) {
+  .lockButton {
+    width: 3.35rem;
+    height: 3.35rem;
   }
 
-  50% {
-    opacity: 0;
+  .firstName {
+    height: clamp(6.75rem, 16vw, 7.5rem);
+  }
+
+  .lastName {
+    height: clamp(6.5rem, 15vw, 7.5rem);
+  }
+}
+
+@media (min-width: 1024px) {
+  .heroTitleShell {
+    gap: 2rem;
+  }
+
+  .nameStack {
+    width: min(100%, 50rem);
+  }
+
+  .firstName {
+    height: 7.5rem;
+    max-width: 50rem;
+  }
+
+  .lastName {
+    height: 7.5rem;
+    max-width: 37.5rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .nameStack {
+    width: min(100%, 23.5rem);
+  }
+
+  .firstName {
+    height: clamp(4.7rem, 24vw, 5.8rem);
+  }
+
+  .lastName {
+    height: clamp(4.5rem, 23vw, 5.6rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heroTitleShellPulse {
+    animation: none;
+  }
+
+  .lockDock,
+  .lockButton,
+  .unlockTooltip,
+  .heroDetails,
+  .scrollCue {
+    transition-duration: 1ms;
+  }
+}
+
+@keyframes titleIntentPulse {
+  0% {
+    transform: translateY(0);
+  }
+
+  45% {
+    transform: translateY(-2px);
   }
 
   100% {
-    opacity: 1;
+    transform: translateY(0);
   }
 }
-
-@keyframes growHorizontal {
-    from {
-      width: 0;
-    }
-    to {
-      width: 98%; 
-    }
-  }
-

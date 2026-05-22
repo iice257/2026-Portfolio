@@ -33,8 +33,8 @@ module.exports = {
       },
     },
     fontFamily: {
-      sans: ["var(--font-inter)", "system-ui", "sans-serif"],
-      mono: ["var(--font-jetbrains-mono)", "monospace"],
+      sans: ["var(--font-inter)", "Arial", "system-ui", "sans-serif"],
+      mono: ["var(--font-ibm-plex-mono)", "monospace"],
     },
     extend: {
       fontSize: {

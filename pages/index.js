@@ -4,6 +4,7 @@ import gsap from "gsap";
 import ScrollTrigger from "gsap/dist/ScrollTrigger";
 import Hero from "@/components/Hero/Hero";
 import ProgressIndicator from "@/components/ProgressIndicator/ProgressIndicator";
+import { useHeroLock } from "../context/HeroLockContext";
 import {
   getRequestedSection,
   replaceSectionUrl,
@@ -23,6 +24,10 @@ const Footer = dynamic(() => import("@/components/Footer/Footer"));
 
 export default function Home() {
   const [isDesktop, setIsDesktop] = useState(true);
+  const { isHeroLocked } = useHeroLock();
+  const lockedContentProps = isHeroLocked
+    ? { "aria-hidden": "true", inert: "" }
+    : {};
 
   useEffect(() => {
     const { orientation } = window;
@@ -122,14 +127,26 @@ export default function Home() {
 
       <main id="main-content" className="relative z-10">
         <Hero />
-        <Philosophy />
-        <Skills />
-        <Projects isDesktop={isDesktop} />
-        <Work />
-        <Contact />
+        <div
+          className={`site-unlocked-content ${isHeroLocked ? "site-unlocked-content--hidden" : ""}`}
+          data-hide-when-hero-locked="true"
+          {...lockedContentProps}
+        >
+          <Philosophy />
+          <Skills />
+          <Projects isDesktop={isDesktop} />
+          <Work />
+          <Contact />
+        </div>
       </main>
 
-      <Footer />
+      <div
+        className={`site-unlocked-content ${isHeroLocked ? "site-unlocked-content--hidden" : ""}`}
+        data-hide-when-hero-locked="true"
+        {...lockedContentProps}
+      >
+        <Footer />
+      </div>
     </>
   );
 }

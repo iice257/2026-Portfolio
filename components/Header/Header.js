@@ -5,11 +5,13 @@ import ThemeToggle from "../ThemeToggle/ThemeToggle";
 import SnowToggle from "../ReactBits/SnowToggle";
 import StaggeredMenu from "../ReactBits/StaggeredMenu";
 import { MENULINKS, SOCIAL_LINKS } from "../../constants";
+import { useHeroLock } from "../../context/HeroLockContext";
 import { getSectionHref, scrollToSection } from "../../utils/sectionNavigation";
 
 const Header = () => {
   const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
+  const { isHeroLocked } = useHeroLock();
 
   // Refs for direct DOM manipulation (performance)
   const logoLeadingRef = useRef(null);
@@ -120,15 +122,18 @@ const Header = () => {
   return (
     <header
       data-cursor-boundary="navigation"
-      className={`fixed top-0 left-0 w-full z-[9999] transition-all duration-300 ease-in-out ${isScrolled ? 'bg-[var(--bg-primary)]' : 'bg-transparent'} py-6`}
+      aria-hidden={isHeroLocked}
+      className={`fixed top-0 left-0 w-full z-[9999] transition-all duration-200 ease-out ${isHeroLocked ? 'pointer-events-none -translate-y-3 opacity-0' : 'translate-y-0 opacity-100'} ${isScrolled ? 'bg-[var(--bg-primary)]' : 'bg-transparent'} py-4 md:py-6`}
+      style={isHeroLocked ? { opacity: 0, transform: "translateY(-0.75rem)", pointerEvents: "none" } : undefined}
     >
-      <div className="section-container flex justify-between items-center">
+      <div className="section-container flex justify-between items-center gap-4">
         {/* Logo */}
         <Link
           href="/"
           onClick={handleLogoClick}
           aria-label="Kingsley Aremu"
-          className="relative block h-6 min-w-[140px] cursor-none"
+          tabIndex={isHeroLocked ? -1 : 0}
+          className="relative block h-6 min-w-[90px] sm:min-w-[140px] cursor-none"
           style={{ color: 'var(--fg-primary)' }}
         >
           <span className="inline-flex h-6 items-center whitespace-nowrap text-body-sm font-medium tracking-wide">
@@ -154,7 +159,7 @@ const Header = () => {
         </Link>
 
         {/* Controls */}
-        <div className="flex items-center gap-4">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-4">
           <ThemeToggle />
           <SnowToggle />
           <StaggeredMenu

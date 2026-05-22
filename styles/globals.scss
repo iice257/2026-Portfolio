@@ -5,11 +5,9 @@
 /* ===========================================
    FONTS
    =========================================== */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&display=swap');
-
 :root {
-  --font-inter: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-inter: Arial, "Helvetica Neue", system-ui, -apple-system, sans-serif;
+  --font-ibm-plex-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 
   /* Theme variables - Light mode */
   --bg-primary: #fafafa;
@@ -76,7 +74,7 @@ html {
 }
 
 body {
-  font-family: var(--font-inter);
+  font-family: var(--font-inter), Arial, "Helvetica Neue", system-ui, -apple-system, sans-serif;
   background-color: var(--bg-primary);
   color: var(--fg-primary);
   overflow-x: hidden;
@@ -266,6 +264,46 @@ body {
   @apply max-w-[90rem] mx-auto px-6 md:px-12 lg:px-16;
 }
 
+html[data-hero-locked="true"],
+html[data-hero-locked="true"] body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+html[data-hero-locked="true"] header {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-0.75rem);
+}
+
+html[data-hero-locked="true"] [data-hide-when-hero-locked="true"] {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transform: translateY(8px);
+}
+
+.site-unlocked-content {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition:
+    opacity 180ms ease,
+    transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
+    visibility 180ms ease;
+}
+
+.site-unlocked-content--hidden {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(8px);
+}
+
 .hero-capability-cycle {
   position: relative;
   display: inline-block;
@@ -370,7 +408,7 @@ body {
   padding: 0.08em 0.55em 0.12em;
   background: #050505;
   color: #ffffff;
-  font-family: var(--font-jetbrains-mono), monospace;
+  font-family: var(--font-ibm-plex-mono), "SFMono-Regular", Consolas, monospace;
   font-size: 0.78em;
   line-height: 1;
   letter-spacing: 0.14em;
@@ -382,38 +420,6 @@ body {
 .homepage-menu-close {
   top: 1.5rem;
   right: 1.5rem;
-}
-
-.ascii-text-container canvas {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  image-rendering: optimizeSpeed;
-  image-rendering: -moz-crisp-edges;
-  image-rendering: -o-crisp-edges;
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: optimize-contrast;
-  image-rendering: crisp-edges;
-  image-rendering: pixelated;
-}
-
-.ascii-text-container pre {
-  margin: 0;
-  user-select: none;
-  padding: 0;
-  line-height: 1em;
-  text-align: left;
-  position: absolute;
-  left: 0;
-  top: 0;
-  background-image: radial-gradient(circle, #ff6188 0%, #fc9867 50%, #ffd866 100%);
-  background-attachment: fixed;
-  -webkit-text-fill-color: transparent;
-  -webkit-background-clip: text;
-  z-index: 9;
-  mix-blend-mode: difference;
 }
 
 [data-theme="light"] .project-panel-visual {

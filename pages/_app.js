@@ -1,5 +1,6 @@
 import { GoogleAnalytics } from "@next/third-parties/google";
 import dynamic from "next/dynamic";
+import { IBM_Plex_Mono, Inter } from "next/font/google";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { AnimatePresence, motion } from "framer-motion";
@@ -8,6 +9,7 @@ import { ThemeProvider, useTheme } from "../context/ThemeContext";
 import { SnowProvider, useSnow } from "../context/SnowContext";
 import { TooltipProvider } from "../context/TooltipContext";
 import { CursorProvider, useCursor } from "../context/CursorContext";
+import { HeroLockProvider, useHeroLock } from "../context/HeroLockContext";
 import Header from "../components/Header/Header";
 import "../styles/globals.scss";
 // React Bits component styles
@@ -15,6 +17,22 @@ import "../components/ReactBits/ShuffleText.css";
 import "../components/ReactBits/TextPressure.css";
 import "../components/ReactBits/StaggeredMenu.css";
 import { GTAG } from "../constants";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+  adjustFontFallback: true,
+  preload: true,
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["500", "600"],
+  variable: "--font-ibm-plex-mono",
+  display: "swap",
+  preload: true,
+});
 
 const CustomCursor = dynamic(() => import("../components/Cursor/CustomCursor"), {
   ssr: false,
@@ -28,6 +46,7 @@ const Snowfall = dynamic(() => import("react-snowfall"), {
 const AppContent = ({ Component, pageProps }) => {
   const { isSnowing } = useSnow();
   const { theme } = useTheme();
+  const { isHeroLocked } = useHeroLock();
   const { setIsRouteLoading } = useCursor();
   const router = useRouter();
   const [isLoaded, setIsLoaded] = useState(false);
@@ -106,7 +125,7 @@ const AppContent = ({ Component, pageProps }) => {
   };
 
   return (
-    <>
+    <div className={`${inter.variable} ${ibmPlexMono.variable} app-shell`}>
       <button type="button" onClick={skipToContent} className="skip-link">
         Skip to content
       </button>
@@ -117,23 +136,23 @@ const AppContent = ({ Component, pageProps }) => {
       <motion.div
         style={{
           opacity: isLoaded ? 1 : 0,
-          transition: 'opacity 220ms ease-out',
+          transition: 'opacity 160ms ease-out',
         }}
       >
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={router.asPath}
-            initial={allowMotion ? { opacity: 0, y: 18 } : false}
+            initial={allowMotion ? { opacity: 0, y: 8 } : false}
             animate={{ opacity: 1, y: 0 }}
-            exit={allowMotion ? { opacity: 0, y: -12 } : { opacity: 1, y: 0 }}
-            transition={{ duration: allowMotion ? 0.42 : 0, ease: [0.16, 1, 0.3, 1] }}
+            exit={allowMotion ? { opacity: 0, y: -6 } : { opacity: 1, y: 0 }}
+            transition={{ duration: allowMotion ? 0.2 : 0, ease: [0.16, 1, 0.3, 1] }}
           >
             <Component {...pageProps} />
           </motion.div>
         </AnimatePresence>
       </motion.div>
 
-      {isSnowing && allowMotion && isPageVisible && (
+      {isSnowing && allowMotion && isPageVisible && !isHeroLocked && (
         <Snowfall
           key={`${theme}-${isMobileViewport ? "mobile" : "desktop"}`}
           color={snowColor}
@@ -152,7 +171,7 @@ const AppContent = ({ Component, pageProps }) => {
           }}
         />
       )}
-    </>
+    </div>
   );
 };
 
@@ -162,9 +181,11 @@ const App = ({ Component, pageProps }) => {
       <SnowProvider>
         <TooltipProvider>
           <CursorProvider>
-            <Meta />
-            <AppContent Component={Component} pageProps={pageProps} />
-            {GTAG ? <GoogleAnalytics gaId={GTAG} /> : null}
+            <HeroLockProvider>
+              <Meta />
+              <AppContent Component={Component} pageProps={pageProps} />
+              {GTAG ? <GoogleAnalytics gaId={GTAG} /> : null}
+            </HeroLockProvider>
           </CursorProvider>
         </TooltipProvider>
       </SnowProvider>

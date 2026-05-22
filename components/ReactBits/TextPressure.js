@@ -208,6 +208,12 @@ const TextPressure = ({
       const t = e.touches[0];
       if (t) activatePointer(t.clientX, t.clientY);
     };
+    const handleLockedPointer = (event) => {
+      const { x, y } = event.detail || {};
+      if (Number.isFinite(x) && Number.isFinite(y)) {
+        activatePointer(x, y);
+      }
+    };
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
@@ -267,6 +273,7 @@ const TextPressure = ({
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('portfolio:hero-locked-pointer', handleLockedPointer);
     window.addEventListener('scroll', handleScroll, { passive: true });
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
@@ -278,6 +285,7 @@ const TextPressure = ({
       observer.disconnect();
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('portfolio:hero-locked-pointer', handleLockedPointer);
       window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
@@ -285,11 +293,14 @@ const TextPressure = ({
 
   const styleElement = useMemo(() => {
     const css = `
-      @font-face {
-        font-family: '${fontFamily}';
-        src: url('${fontUrl}');
-        font-style: normal;
-      }
+      ${fontUrl ? `
+        @font-face {
+          font-family: '${fontFamily}';
+          src: url('${fontUrl}');
+          font-style: normal;
+          font-display: swap;
+        }
+      ` : ""}
 
       .flex {
         display: flex;

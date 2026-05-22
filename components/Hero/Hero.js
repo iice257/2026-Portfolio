@@ -1,14 +1,10 @@
-import { useEffect, useRef, useState } from "react";
-import dynamic from "next/dynamic";
+import { useCallback, useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { MENULINKS } from "../../constants";
-import { useTheme } from "../../context/ThemeContext";
+import { useHeroLock } from "../../context/HeroLockContext";
 import TextPressure from "../ReactBits/TextPressure";
-
-const ASCIIText = dynamic(() => import("../ReactBits/ASCIIText"), {
-  ssr: false,
-});
+import styles from "./Hero.module.scss";
 
 const HERO_CAPABILITY_PHRASES = [
   "digital experiences",
@@ -29,11 +25,50 @@ const HERO_CAPABILITY_PHRASES = [
 ];
 
 const HERO_CAPABILITY_TRANSITION_MS = 640;
+const LOCK_VIEWPORT_QUERY = "(max-width: 1023px)";
+const TOOLTIP_DELAY_MS = 4000;
+
+const LockIcon = ({ unlocked = false }) => (
+  <svg
+    aria-hidden="true"
+    viewBox="0 0 32 32"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d={unlocked ? "M10 14V9.7C10 5.85 12.52 3.5 16.05 3.5C18.62 3.5 20.65 4.78 21.55 6.88" : "M10 14V9.7C10 5.85 12.45 3.5 16 3.5C19.55 3.5 22 5.85 22 9.7V14"}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <rect
+      x="6.5"
+      y="13.5"
+      width="19"
+      height="15"
+      rx="3.5"
+      stroke="currentColor"
+      strokeWidth="2"
+    />
+    <path
+      d="M16 17.8V24.2M13.25 19.35L18.75 22.65M18.75 19.35L13.25 22.65M12.8 21H19.2"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 const Hero = () => {
-  const { theme } = useTheme();
-  const [isMobileViewport, setIsMobileViewport] = useState(false);
-  const [showMobileAscii, setShowMobileAscii] = useState(false);
+  const { setIsHeroLocked } = useHeroLock();
+  const [isLockViewport, setIsLockViewport] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
+  const [hasUnlocked, setHasUnlocked] = useState(false);
+  const [isHeroInView, setIsHeroInView] = useState(true);
+  const [showUnlockTooltip, setShowUnlockTooltip] = useState(false);
+  const [interactionPulse, setInteractionPulse] = useState(0);
   const [activeCapabilityIndex, setActiveCapabilityIndex] = useState(0);
   const [previousCapabilityIndex, setPreviousCapabilityIndex] = useState(null);
   const [capabilityWidth, setCapabilityWidth] = useState(null);
@@ -42,19 +77,192 @@ const Hero = () => {
   const subtitleRef = useRef(null);
   const scrollIndicatorRef = useRef(null);
   const capabilitySizerRef = useRef(null);
-  const isMobileRef = useRef(false);
+  const isLockViewportRef = useRef(false);
+  const isLockedRef = useRef(false);
+  const hasUnlockedRef = useRef(false);
+  const initialLockViewportRef = useRef(false);
+  const tooltipTimerRef = useRef(null);
+  const lockedInteractionSeenRef = useRef(false);
+  const savedScrollYRef = useRef(0);
+
+  const clearTooltipTimer = useCallback(() => {
+    window.clearTimeout(tooltipTimerRef.current);
+    tooltipTimerRef.current = null;
+  }, []);
+
+  const triggerTextPressureInteraction = useCallback((x, y) => {
+    window.dispatchEvent(
+      new CustomEvent("portfolio:hero-locked-pointer", {
+        detail: { x, y },
+      })
+    );
+  }, []);
+
+  const registerLockedInteraction = useCallback((x, y) => {
+    triggerTextPressureInteraction(x, y);
+    setInteractionPulse((value) => value + 1);
+
+    if (lockedInteractionSeenRef.current) return;
+    lockedInteractionSeenRef.current = true;
+    clearTooltipTimer();
+
+    tooltipTimerRef.current = window.setTimeout(() => {
+      if (isLockedRef.current) {
+        setShowUnlockTooltip(true);
+      }
+    }, TOOLTIP_DELAY_MS);
+  }, [clearTooltipTimer, triggerTextPressureInteraction]);
+
+  const unlockHero = useCallback(() => {
+    hasUnlockedRef.current = true;
+    setHasUnlocked(true);
+    setIsLocked(false);
+    setShowUnlockTooltip(false);
+    clearTooltipTimer();
+  }, [clearTooltipTimer]);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 767px)");
-    const updateMobileViewport = () => {
-      isMobileRef.current = mediaQuery.matches;
-      setIsMobileViewport(mediaQuery.matches);
+    const mediaQuery = window.matchMedia(LOCK_VIEWPORT_QUERY);
+    initialLockViewportRef.current = mediaQuery.matches;
+
+    const updateLockViewport = () => {
+      const matches = mediaQuery.matches;
+      isLockViewportRef.current = matches;
+      setIsLockViewport(matches);
+
+      if (!matches) {
+        setIsLocked(false);
+        return;
+      }
+
+      if (initialLockViewportRef.current && !hasUnlockedRef.current) {
+        setIsLocked(true);
+      }
     };
 
-    updateMobileViewport();
-    mediaQuery.addEventListener("change", updateMobileViewport);
+    updateLockViewport();
+    mediaQuery.addEventListener("change", updateLockViewport);
 
-    return () => mediaQuery.removeEventListener("change", updateMobileViewport);
+    return () => mediaQuery.removeEventListener("change", updateLockViewport);
+  }, []);
+
+  useEffect(() => {
+    isLockedRef.current = isLocked;
+    setIsHeroLocked(isLocked);
+  }, [isLocked, setIsHeroLocked]);
+
+  useEffect(() => {
+    return () => {
+      clearTooltipTimer();
+      window.setTimeout(() => {
+        if (!document.getElementById(MENULINKS[0].ref)) {
+          setIsHeroLocked(false);
+        }
+      }, 0);
+    };
+  }, [clearTooltipTimer, setIsHeroLocked]);
+
+  useEffect(() => {
+    if (!isLocked) return undefined;
+
+    savedScrollYRef.current = window.scrollY;
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+
+    const previousBody = {
+      overflow: document.body.style.overflow,
+      position: document.body.style.position,
+      top: document.body.style.top,
+      left: document.body.style.left,
+      right: document.body.style.right,
+      width: document.body.style.width,
+      overscrollBehavior: document.body.style.overscrollBehavior,
+    };
+    const previousHtml = {
+      overflow: document.documentElement.style.overflow,
+      overscrollBehavior: document.documentElement.style.overscrollBehavior,
+    };
+
+    document.documentElement.style.overflow = "hidden";
+    document.documentElement.style.overscrollBehavior = "none";
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = "0";
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+    document.body.style.width = "100%";
+    document.body.style.overscrollBehavior = "none";
+
+    const getEventPoint = (event) => {
+      const touch = event.touches?.[0] || event.changedTouches?.[0];
+      if (touch) return { x: touch.clientX, y: touch.clientY };
+      return {
+        x: Number.isFinite(event.clientX) ? event.clientX : window.innerWidth / 2,
+        y: Number.isFinite(event.clientY) ? event.clientY : window.innerHeight / 2,
+      };
+    };
+
+    const handleLockedIntent = (event) => {
+      if (event.target?.closest?.("[data-hero-lock-control='true']")) {
+        return;
+      }
+
+      if (event.cancelable) {
+        event.preventDefault();
+      }
+
+      const point = getEventPoint(event);
+      registerLockedInteraction(point.x, point.y);
+    };
+
+    const handleLockedKeydown = (event) => {
+      const scrollKeys = [" ", "ArrowDown", "ArrowUp", "PageDown", "PageUp", "Home", "End"];
+      if (!scrollKeys.includes(event.key)) return;
+
+      if (event.target?.closest?.("[data-hero-lock-control='true']")) {
+        return;
+      }
+
+      event.preventDefault();
+      registerLockedInteraction(window.innerWidth / 2, window.innerHeight / 2);
+    };
+
+    window.addEventListener("touchstart", handleLockedIntent, { passive: false, capture: true });
+    window.addEventListener("touchmove", handleLockedIntent, { passive: false, capture: true });
+    window.addEventListener("wheel", handleLockedIntent, { passive: false, capture: true });
+    window.addEventListener("keydown", handleLockedKeydown, true);
+
+    return () => {
+      window.removeEventListener("touchstart", handleLockedIntent, true);
+      window.removeEventListener("touchmove", handleLockedIntent, true);
+      window.removeEventListener("wheel", handleLockedIntent, true);
+      window.removeEventListener("keydown", handleLockedKeydown, true);
+
+      document.documentElement.style.overflow = previousHtml.overflow;
+      document.documentElement.style.overscrollBehavior = previousHtml.overscrollBehavior;
+      document.body.style.overflow = previousBody.overflow;
+      document.body.style.position = previousBody.position;
+      document.body.style.top = previousBody.top;
+      document.body.style.left = previousBody.left;
+      document.body.style.right = previousBody.right;
+      document.body.style.width = previousBody.width;
+      document.body.style.overscrollBehavior = previousBody.overscrollBehavior;
+      window.scrollTo({ top: savedScrollYRef.current, left: 0, behavior: "auto" });
+    };
+  }, [isLocked, registerLockedInteraction]);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return undefined;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsHeroInView(entry.isIntersecting && entry.intersectionRatio > 0.18);
+      },
+      { threshold: [0, 0.18, 0.45] }
+    );
+
+    observer.observe(section);
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
@@ -103,201 +311,151 @@ const Hero = () => {
   }, [activeCapabilityIndex]);
 
   useEffect(() => {
-    if (!isMobileViewport || !sectionRef.current) {
-      setShowMobileAscii(false);
-      return undefined;
-    }
-
-    let idleId = null;
-    let timeoutId = null;
-    let isHeroInView = false;
-
-    const clearMountTimers = () => {
-      if (typeof window.cancelIdleCallback === "function" && idleId !== null) {
-        window.cancelIdleCallback(idleId);
-      }
-      window.clearTimeout(timeoutId);
-      idleId = null;
-      timeoutId = null;
-    };
-
-    const deferAsciiMount = () => {
-      clearMountTimers();
-      const mount = () => setShowMobileAscii(true);
-      if (typeof window.requestIdleCallback === "function") {
-        idleId = window.requestIdleCallback(mount, { timeout: 900 });
-      } else {
-        timeoutId = window.setTimeout(mount, 450);
-      }
-    };
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        isHeroInView = entry.isIntersecting;
-        if (entry.isIntersecting && !document.hidden) {
-          deferAsciiMount();
-          return;
-        }
-
-        clearMountTimers();
-        setShowMobileAscii(false);
-      },
-      { rootMargin: "120px 0px", threshold: 0.01 }
-    );
-
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        clearMountTimers();
-        setShowMobileAscii(false);
-      } else if (isHeroInView) {
-        deferAsciiMount();
-      }
-    };
-
-    observer.observe(sectionRef.current);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      clearMountTimers();
-      observer.disconnect();
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [isMobileViewport]);
-
-  useEffect(() => {
     const ctx = gsap.context(() => {
-      // Initial load animation
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const tl = gsap.timeline({
         defaults: {
           ease: "power3.out",
-        }
+        },
       });
 
-      // Animate the name container
       tl.fromTo(
         nameContainerRef.current,
-        { opacity: 0, y: 60 },
-        { opacity: 1, y: 0, duration: 1.2 }
+        { opacity: 0, y: reduceMotion ? 0 : 14 },
+        { opacity: 1, y: 0, duration: reduceMotion ? 0.01 : 0.22 }
       )
         .fromTo(
           subtitleRef.current,
-          { opacity: 0, y: 40 },
-          { opacity: 1, y: 0, duration: 0.8 },
-          "-=0.6"
+          { opacity: 0, y: reduceMotion ? 0 : 8 },
+          { opacity: 1, y: 0, duration: reduceMotion ? 0.01 : 0.18 },
+          "-=0.08"
         )
         .fromTo(
           scrollIndicatorRef.current,
           { opacity: 0 },
-          { opacity: 1, duration: 0.6 },
-          "-=0.4"
+          { opacity: 1, duration: reduceMotion ? 0.01 : 0.16 },
+          "-=0.08"
         );
 
-      // Parallax on scroll
       ScrollTrigger.create({
         trigger: sectionRef.current,
         start: "top top",
         end: "bottom top",
         scrub: 1,
         onUpdate: (self) => {
+          if (isLockedRef.current) return;
+
           const progress = self.progress;
-          const isMobile = isMobileRef.current;
+          const isCompact = isLockViewportRef.current;
 
           gsap.set(nameContainerRef.current, {
-            y: isMobile ? progress * 72 : progress * 150,
-            scale: isMobile ? 1 - progress * 0.18 : 1,
-            filter: isMobile ? `blur(${progress * 8}px)` : "blur(0px)",
-            opacity: isMobile ? 1 - progress * 0.55 : 1 - progress * 1.2,
+            y: isCompact ? progress * 56 : progress * 150,
+            scale: isCompact ? 1 - progress * 0.1 : 1,
+            filter: isCompact ? `blur(${progress * 3}px)` : "blur(0px)",
+            opacity: isCompact ? 1 - progress * 0.38 : 1 - progress * 1.2,
           });
 
           gsap.set(subtitleRef.current, {
-            y: progress * 250,
-            opacity: 1 - progress * 1.5,
+            y: progress * 180,
+            opacity: 1 - progress * 1.35,
           });
 
           gsap.set(scrollIndicatorRef.current, {
             opacity: 1 - progress * 3,
           });
-        }
+        },
       });
     });
 
     return () => ctx.revert();
   }, []);
 
+  const isLockControlVisible = isLockViewport && (isLocked || isHeroInView);
+
   return (
     <section
       ref={sectionRef}
       id={MENULINKS[0].ref}
-      className="relative min-h-[112svh] md:min-h-screen flex items-center justify-center overflow-hidden"
-      style={{ backgroundColor: 'var(--bg-primary)' }}
+      className={`${styles.heroSection} ${isLocked ? styles.heroSectionLocked : ""} ${hasUnlocked ? styles.heroSectionUnlocked : ""} relative min-h-[100dvh] lg:min-h-screen flex items-center justify-center overflow-hidden`}
+      style={{ backgroundColor: "var(--bg-primary)" }}
+      data-hero-locked={isLocked ? "true" : "false"}
     >
       <div className="section-container-wide w-full">
-        {/* Name with TextPressure effect - CENTERED */}
         <div
           ref={nameContainerRef}
-          className="relative flex flex-col items-center gap-8"
+          className={`${styles.heroTitleShell} ${interactionPulse ? styles.heroTitleShellPulse : ""} relative flex flex-col items-center`}
+          style={{ "--pulse-index": interactionPulse }}
         >
-          <div className="md:hidden relative w-full h-[34vh] min-h-[18rem] max-h-[24rem]" aria-label="Kingsley Aremu">
-            {showMobileAscii && (
-              <ASCIIText
-                text="Kingsley_Aremu"
-                enableWaves={true}
-                asciiFontSize={7}
-                textFontSize={130}
-                planeBaseHeight={8}
-                textColor={theme === "dark" ? "#fdf9f3" : "#0a0a0a"}
+          {isLockViewport && (
+            <div
+              className={`${styles.lockDock} ${isLockControlVisible ? styles.lockDockVisible : styles.lockDockHidden}`}
+            >
+              <button
+                type="button"
+                data-hero-lock-control="true"
+                className={styles.lockButton}
+                onClick={isLocked ? unlockHero : undefined}
+                aria-label={isLocked ? "Unlock page scrolling" : "Page scrolling unlocked"}
+                aria-pressed={!isLocked}
+              >
+                <LockIcon unlocked={!isLocked && hasUnlocked} />
+              </button>
+
+              <div
+                role="status"
+                aria-live="polite"
+                className={`${styles.unlockTooltip} ${showUnlockTooltip ? styles.unlockTooltipVisible : ""}`}
+              >
+                Unlock to scroll
+              </div>
+            </div>
+          )}
+
+          <div className={styles.nameStack} aria-label="Kingsley Aremu">
+            <div className={styles.firstName}>
+              <TextPressure
+                text="KINGSLEY"
+                fontFamily="var(--font-inter)"
+                fontUrl={null}
+                width={false}
+                weight={true}
+                italic={false}
+                alpha={false}
+                flex={false}
+                stroke={false}
+                scale={false}
+                textColor="var(--fg-primary)"
+                minFontSize={44}
               />
-            )}
-          </div>
+            </div>
 
-          <div className="hidden md:flex w-full flex-col items-center gap-8">
-          {/* First name */}
-          <div style={{ position: 'relative', height: '120px', width: '100%', maxWidth: '800px', margin: '0 auto', marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
-            <TextPressure
-              text="KINGSLEY"
-              fontFamily="Inter"
-              fontUrl="https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZNhiJ-Ek-_EeAmM.woff2"
-              width={false}
-              weight={true}
-              italic={false}
-              alpha={false}
-              flex={false}
-              stroke={false}
-              scale={false}
-              textColor="var(--fg-primary)"
-              minFontSize={56}
-            />
-          </div>
-
-
-          {/* Last name */}
-          <div style={{ position: 'relative', height: '120px', width: '100%', maxWidth: '600px', margin: '0 auto', display: 'flex', justifyContent: 'center' }}>
-            <TextPressure
-              text="AREMU"
-              fontFamily="Inter"
-              fontUrl="https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZNhiJ-Ek-_EeAmM.woff2"
-              width={false}
-              weight={true}
-              italic={false}
-              alpha={false}
-              flex={false}
-              stroke={false}
-              scale={false}
-              textColor="var(--fg-primary)"
-              minFontSize={56}
-            />
-          </div>
+            <div className={styles.lastName}>
+              <TextPressure
+                text="AREMU"
+                fontFamily="var(--font-inter)"
+                fontUrl={null}
+                width={false}
+                weight={true}
+                italic={false}
+                alpha={false}
+                flex={false}
+                stroke={false}
+                scale={false}
+                textColor="var(--fg-primary)"
+                minFontSize={44}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Subtitle - editorial style */}
         <div
           ref={subtitleRef}
-          className="hidden md:block mt-24 text-center max-w-4xl mx-auto"
+          data-hide-when-hero-locked="true"
+          className={`${styles.heroDetails} ${isLocked ? styles.heroDetailsHidden : ""} mt-12 md:mt-16 lg:mt-24 text-center max-w-4xl mx-auto`}
         >
           <p
             className="text-editorial font-light"
-            style={{ color: 'var(--fg-secondary)' }}
+            style={{ color: "var(--fg-secondary)" }}
           >
             <span className="block text-center">
               Full-Stack Engineer crafting{" "}
@@ -338,41 +496,39 @@ const Hero = () => {
 
           <div className="hero-subtitle-divider" aria-hidden="true" />
 
-          {/* Micro text for contrast */}
           <p
             className="text-micro mt-6"
-            style={{ color: 'var(--fg-muted)' }}
+            style={{ color: "var(--fg-muted)" }}
           >
-            BUILDING IN PUBLIC — LAGOS, NIGERIA
+            BUILDING IN PUBLIC - LAGOS, NIGERIA
           </p>
         </div>
       </div>
 
-      {/* Scroll indicator */}
       <div
         ref={scrollIndicatorRef}
-        className="absolute bottom-4 md:bottom-5 left-1/2 -translate-x-1/2"
+        data-hide-when-hero-locked="true"
+        className={`${styles.scrollCue} ${isLocked ? styles.scrollCueHidden : ""} absolute bottom-4 md:bottom-5 left-1/2 -translate-x-1/2`}
       >
         <div className="flex flex-col items-center gap-3">
           <span
             className="text-micro"
-            style={{ color: 'var(--fg-muted)' }}
+            style={{ color: "var(--fg-muted)" }}
           >
             SCROLL
           </span>
           <div
             className="w-px h-16 bg-gradient-to-b from-current to-transparent"
-            style={{ color: 'var(--fg-muted)' }}
+            style={{ color: "var(--fg-muted)" }}
           />
         </div>
       </div>
 
-      {/* Background texture */}
       <div
         className="absolute inset-0 pointer-events-none opacity-[0.02]"
         style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, var(--fg-primary) 1px, transparent 0)`,
-          backgroundSize: '40px 40px'
+          backgroundImage: "radial-gradient(circle at 1px 1px, var(--fg-primary) 1px, transparent 0)",
+          backgroundSize: "40px 40px",
         }}
       />
     </section>
