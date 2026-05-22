@@ -104,6 +104,8 @@ const PreviewSurface = ({ project, variant = "desktop", onOpen, onHover, onLeave
   <button
     type="button"
     className="mockup-preview-trigger group"
+    data-cursor-label="Click to open"
+    data-cursor-variant="project"
     onClick={(event) => {
       event.stopPropagation();
       onOpen(project, variant);
@@ -119,11 +121,18 @@ const PreviewSurface = ({ project, variant = "desktop", onOpen, onHover, onLeave
   </button>
 );
 
-const MockupPair = ({ project, onOpenPreview, onHover, onLeave }) => (
+const MockupPair = ({ project, onOpenPreview, onHover, onLeave, actions = null }) => (
   <div className="major-expanded-media grid grid-cols-1 lg:grid-cols-[1.5fr_0.7fr] gap-5">
-    <PreviewSurface project={project} variant="desktop" onOpen={onOpenPreview} onHover={onHover} onLeave={onLeave}>
-      <ProjectMockupFrame project={project} variant="desktop" className="aspect-[16/10] p-5" />
-    </PreviewSurface>
+    <div className="major-expanded-desktop-stack">
+      <PreviewSurface project={project} variant="desktop" onOpen={onOpenPreview} onHover={onHover} onLeave={onLeave}>
+        <ProjectMockupFrame project={project} variant="desktop" className="aspect-[16/10] p-5" />
+      </PreviewSurface>
+      {actions && (
+        <div className="major-expanded-buttons" onClick={(event) => event.stopPropagation()}>
+          {actions}
+        </div>
+      )}
+    </div>
     <PreviewSurface project={project} variant="mobile" onOpen={onOpenPreview} onHover={onHover} onLeave={onLeave}>
       <ProjectMockupFrame project={project} variant="mobile" className="mx-auto aspect-[9/16] w-full max-w-[13rem] p-4" />
     </PreviewSurface>
@@ -191,6 +200,8 @@ const MockupPreviewModal = ({ active, onClose, onNavigate, onHover, onLeave }) =
   return (
     <motion.div
       className="mockup-lightbox"
+      data-cursor-label="Click to close"
+      data-cursor-variant="project"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -222,7 +233,19 @@ const MockupPreviewModal = ({ active, onClose, onNavigate, onHover, onLeave }) =
           </button>
         </div>
 
-        <div className="mockup-lightbox-stage">
+        <div
+          className="mockup-lightbox-stage"
+          onClick={onClose}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              onClose();
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Close mockup preview"
+        >
           {preview.type === "video" && (
             <video src={preview.src} autoPlay muted loop playsInline controls className="h-full w-full object-cover" />
           )}
@@ -244,11 +267,19 @@ const MockupPreviewModal = ({ active, onClose, onNavigate, onHover, onLeave }) =
 const MockupChoiceButton = ({ project, onOpenPreview, onHover, onLeave }) => {
   const [isChoosing, setIsChoosing] = useState(false);
 
+  useEffect(() => {
+    window.setTimeout(() => {
+      window.dispatchEvent(new CustomEvent("portfolio:cursor-refresh"));
+    }, 0);
+  }, [isChoosing]);
+
   return (
     <div className={`mockup-choice ${isChoosing ? "is-open" : ""}`} onMouseLeave={() => setIsChoosing(false)}>
       <button
         type="button"
         className="project-action-link mockup-choice-main"
+        data-cursor-label="View mockup"
+        data-cursor-variant="project"
         onClick={(event) => {
           event.stopPropagation();
           setIsChoosing((value) => !value);
@@ -266,6 +297,8 @@ const MockupChoiceButton = ({ project, onOpenPreview, onHover, onLeave }) => {
             type="button"
             key={variant}
             className="project-action-link"
+            data-cursor-label="Click to open"
+            data-cursor-variant="project"
             tabIndex={isChoosing ? 0 : -1}
             onClick={(event) => {
               event.stopPropagation();
@@ -300,15 +333,19 @@ const MajorProjectExpandedCard = ({ project, index, onFlip, onHover, onLeave, on
       exit={{ opacity: 0, rotateY: 72, scale: 0.985 }}
       transition={flipTransition}
       tabIndex={0}
+      role="button"
       aria-expanded="true"
       aria-label={`Collapse details for ${project.name}`}
+      data-cursor-label="Click to collapse"
+      data-cursor-variant="project"
       onKeyDown={handleKeyDown}
+      onClick={onFlip}
       onMouseEnter={() => onHover("Click to collapse")}
       onMouseLeave={onLeave}
       className="major-project-expanded cursor-none"
     >
       <div className="grid h-full grid-cols-1 xl:grid-cols-12 gap-7 p-5 md:p-7 lg:p-8">
-        <div className="xl:col-span-4 flex flex-col justify-between gap-6" onClick={onFlip} role="button">
+        <div className="xl:col-span-4 flex flex-col justify-between gap-6">
           <div>
             <span className="text-micro mb-4 block" style={{ color: "var(--fg-muted)" }}>
               {String(index + 5).padStart(2, "0")} / Expanded
@@ -327,13 +364,18 @@ const MajorProjectExpandedCard = ({ project, index, onFlip, onHover, onLeave, on
               </p>
             </div>
           </div>
-        </div>
-        <div className="xl:col-span-8 flex flex-col gap-4">
-          <MockupPair project={project} onOpenPreview={onOpenPreview} onHover={onHover} onLeave={onLeave} />
-          <div className="major-expanded-actions" onClick={(event) => event.stopPropagation()}>
+          <div className="major-expanded-tags" onClick={(event) => event.stopPropagation()}>
             <TagList tags={project.tech} />
-            <ProjectActionLinks project={project} />
           </div>
+        </div>
+        <div className="xl:col-span-8 flex flex-col gap-4" onClick={(event) => event.stopPropagation()}>
+          <MockupPair
+            project={project}
+            onOpenPreview={onOpenPreview}
+            onHover={onHover}
+            onLeave={onLeave}
+            actions={<ProjectActionLinks project={project} />}
+          />
         </div>
       </div>
     </motion.article>
@@ -361,6 +403,8 @@ const MajorProjectCard = ({ project, index, onFlip, onHover, onLeave, dimmed }) 
     tabIndex={dimmed ? -1 : 0}
     aria-expanded="false"
     aria-label={`Expand details for ${project.name}`}
+    data-cursor-label={dimmed ? undefined : "Click to expand"}
+    data-cursor-variant={dimmed ? undefined : "project"}
     onClick={dimmed ? undefined : onFlip}
     onKeyDown={dimmed ? undefined : handleKeyDown}
     onMouseEnter={dimmed ? undefined : () => onHover("Click to expand")}
@@ -396,7 +440,7 @@ export default function ProjectsIndex() {
   const [flippedCards, setFlippedCards] = useState({});
   const [openProject, setOpenProject] = useState(remainingProjects[0]?.slug);
   const [activePreview, setActivePreview] = useState(null);
-  const { setCursorText, setCursorVariant } = useCursor();
+  const { setCursorText, setCursorVariant, requestCursorRefresh } = useCursor();
   const expandedSlug = Object.keys(flippedCards).find((slug) => flippedCards[slug]);
   const majorProjectRows = chunkProjects(majorProjects);
   const previewItems = useMemo(() => (
@@ -411,6 +455,8 @@ export default function ProjectsIndex() {
       const isOpen = Boolean(current[slug]);
       return isOpen ? {} : { [slug]: true };
     });
+    window.setTimeout(requestCursorRefresh, 0);
+    window.setTimeout(requestCursorRefresh, 620);
   };
 
   const setProjectCursor = useCallback((text) => {
@@ -427,7 +473,8 @@ export default function ProjectsIndex() {
   const openPreview = useCallback((project, variant = "desktop") => {
     setActivePreview({ project, variant });
     setProjectCursor("Click to close");
-  }, [setProjectCursor]);
+    window.setTimeout(requestCursorRefresh, 0);
+  }, [requestCursorRefresh, setProjectCursor]);
 
   const navigatePreview = useCallback((direction) => {
     setActivePreview((current) => {
@@ -436,12 +483,14 @@ export default function ProjectsIndex() {
       const nextIndex = (currentIndex + direction + previewItems.length) % previewItems.length;
       return previewItems[nextIndex];
     });
-  }, [previewItems]);
+    window.setTimeout(requestCursorRefresh, 0);
+  }, [previewItems, requestCursorRefresh]);
 
   const closePreview = useCallback(() => {
     setActivePreview(null);
     clearProjectCursor();
-  }, [clearProjectCursor]);
+    window.setTimeout(requestCursorRefresh, 0);
+  }, [clearProjectCursor, requestCursorRefresh]);
 
   return (
     <>
@@ -519,6 +568,8 @@ export default function ProjectsIndex() {
                 key={project.slug}
                 href={`/projects/${project.slug}`}
                 className="group block cursor-none"
+                data-cursor-label="Click for more details"
+                data-cursor-variant="project"
                 onMouseEnter={() => setProjectCursor("Click for more details")}
                 onMouseLeave={clearProjectCursor}
                 onClick={clearProjectCursor}
@@ -634,9 +685,13 @@ export default function ProjectsIndex() {
                   <button
                     type="button"
                     className="w-full py-6 grid grid-cols-1 md:grid-cols-12 gap-4 text-left group cursor-none"
+                    data-cursor-label={isOpen ? "Click to collapse" : "Click to expand"}
+                    data-cursor-variant="project"
                     onClick={() => {
                       setOpenProject(isOpen ? null : project.slug);
                       setProjectCursor(isOpen ? "Click to expand" : "Click to collapse");
+                      window.setTimeout(requestCursorRefresh, 0);
+                      window.setTimeout(requestCursorRefresh, 440);
                     }}
                     onMouseEnter={() => setProjectCursor(isOpen ? "Click to collapse" : "Click to expand")}
                     onMouseLeave={clearProjectCursor}
@@ -675,15 +730,21 @@ export default function ProjectsIndex() {
                           className="grid grid-cols-1 md:grid-cols-12 gap-4 pb-8 cursor-none"
                           role="button"
                           tabIndex={0}
+                          data-cursor-label="Click to collapse"
+                          data-cursor-variant="project"
                           onClick={() => {
                             setOpenProject(null);
                             setProjectCursor("Click to expand");
+                            window.setTimeout(requestCursorRefresh, 0);
+                            window.setTimeout(requestCursorRefresh, 440);
                           }}
                           onKeyDown={(event) => {
                             if (event.key === "Enter" || event.key === " ") {
                               event.preventDefault();
                               setOpenProject(null);
                               setProjectCursor("Click to expand");
+                              window.setTimeout(requestCursorRefresh, 0);
+                              window.setTimeout(requestCursorRefresh, 440);
                             }
                           }}
                           onMouseEnter={() => setProjectCursor("Click to collapse")}

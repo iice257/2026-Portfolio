@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Head from "next/head";
 import { AnimatePresence, motion } from "framer-motion";
@@ -85,35 +85,33 @@ const PROJECT_TITLE_SIZES = {
   "restore-ai": "clamp(7.2rem, 20.5cqw, 13.2rem)",
 };
 
+const IconLoop = () => (
+  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 2.8 21 6.8l-4 4" />
+    <path d="M3 11V9.8a3 3 0 0 1 3-3h15" />
+    <path d="M7 21.2l-4-4 4-4" />
+    <path d="M21 13v1.2a3 3 0 0 1-3 3H3" />
+  </svg>
+);
+
+const IconFullscreen = () => (
+  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5" />
+  </svg>
+);
+
 const ProjectMediaPreview = ({ project, variant = "desktop", priority = false, onOpen, onHover, onLeave }) => {
   const videoRef = useRef(null);
-  const controlsTimerRef = useRef(null);
   const [isPaused, setIsPaused] = useState(false);
   const [isMonochrome, setIsMonochrome] = useState(true);
-  const [areControlsVisible, setAreControlsVisible] = useState(true);
+  const [isLooping, setIsLooping] = useState(true);
+  const [activeControl, setActiveControl] = useState(null);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const videoSrc = variant === "desktop" ? project.desktopVideo : project.mobileVideo;
   const isMobile = variant === "mobile";
 
-  const showControls = useCallback(() => {
-    if (!videoSrc) return;
-
-    window.clearTimeout(controlsTimerRef.current);
-    setAreControlsVisible(true);
-    controlsTimerRef.current = window.setTimeout(() => {
-      setAreControlsVisible(false);
-    }, 2200);
-  }, [videoSrc]);
-
   useEffect(() => {
-    showControls();
-
-    return () => {
-      window.clearTimeout(controlsTimerRef.current);
-    };
-  }, [showControls]);
-
-  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
     const syncMotionPreference = () => {
@@ -130,6 +128,10 @@ const ProjectMediaPreview = ({ project, variant = "desktop", priority = false, o
     return () => motionQuery.removeEventListener("change", syncMotionPreference);
   }, []);
 
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.loop = isLooping;
+  }, [isLooping]);
+
   const togglePlayback = () => {
     const video = videoRef.current;
     if (!video) return;
@@ -142,6 +144,29 @@ const ProjectMediaPreview = ({ project, variant = "desktop", priority = false, o
     }
   };
 
+  const toggleLoop = () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    setIsLooping((current) => {
+      const next = !current;
+      video.loop = next;
+      video.currentTime = 0;
+      if (!isPaused && !prefersReducedMotion) {
+        video.play().catch(() => setIsPaused(true));
+      }
+      return next;
+    });
+  };
+
+  const openFullscreen = () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const fullscreenTarget = video.requestFullscreen || video.webkitRequestFullscreen || video.msRequestFullscreen;
+    fullscreenTarget?.call(video)?.catch?.(() => {});
+  };
+
   const openPreview = () => {
     onOpen?.(variant);
   };
@@ -149,19 +174,17 @@ const ProjectMediaPreview = ({ project, variant = "desktop", priority = false, o
   return (
     <div
       className={`project-media-preview ${isMobile ? "is-mobile" : "is-desktop"}`}
-      onMouseMove={showControls}
       onMouseEnter={() => {
-        showControls();
         onHover?.("Click to open");
       }}
       onMouseLeave={onLeave}
-      onPointerDown={showControls}
-      onFocus={showControls}
     >
       <div
         className={`project-media-frame ${isMonochrome ? "is-monochrome" : ""}`}
         role="button"
         tabIndex={0}
+        data-cursor-label="Click to open"
+        data-cursor-variant="project"
         onClick={openPreview}
         onKeyDown={(event) => {
           if (event.key === "Enter" || event.key === " ") {
@@ -178,7 +201,7 @@ const ProjectMediaPreview = ({ project, variant = "desktop", priority = false, o
             src={videoSrc}
             autoPlay={!prefersReducedMotion}
             muted
-            loop
+            loop={isLooping}
             playsInline
             preload={priority ? "auto" : "metadata"}
           />
@@ -199,11 +222,36 @@ const ProjectMediaPreview = ({ project, variant = "desktop", priority = false, o
         </span>
 
         {videoSrc && (
-          <div className={`project-media-controls ${areControlsVisible ? "is-visible" : ""}`} onClick={(event) => event.stopPropagation()}>
+          <div
+            className={`project-media-controls active-${activeControl || "play"}`}
+            onClick={(event) => event.stopPropagation()}
+            onMouseLeave={() => setActiveControl(null)}
+          >
             <button
               type="button"
-              className="project-media-playback"
+              className="project-media-controls-label"
+              onClick={(event) => event.stopPropagation()}
+              aria-label={`${project.name} video controls`}
+            >
+              <span>Video controls</span>
+            </button>
+            <button
+              type="button"
+              className={`project-media-control-button is-loop ${isLooping ? "is-active" : ""}`}
+              onClick={toggleLoop}
+              onMouseEnter={() => setActiveControl("loop")}
+              onFocus={() => setActiveControl("loop")}
+              aria-label={`${isLooping ? "Disable" : "Enable"} looping for ${project.name} preview`}
+              aria-pressed={isLooping}
+            >
+              <IconLoop />
+            </button>
+            <button
+              type="button"
+              className={`project-media-control-button is-playback ${isPaused ? "is-paused" : "is-playing"}`}
               onClick={togglePlayback}
+              onMouseEnter={() => setActiveControl("play")}
+              onFocus={() => setActiveControl("play")}
               aria-label={`${isPaused ? "Play" : "Pause"} ${project.name} preview`}
               aria-pressed={!isPaused}
             >
@@ -211,12 +259,24 @@ const ProjectMediaPreview = ({ project, variant = "desktop", priority = false, o
             </button>
             <button
               type="button"
-              className={`project-media-control ${isMonochrome ? "is-active" : ""}`}
+              className="project-media-control-button is-fullscreen"
+              onClick={openFullscreen}
+              onMouseEnter={() => setActiveControl("fullscreen")}
+              onFocus={() => setActiveControl("fullscreen")}
+              aria-label={`Open ${project.name} preview fullscreen`}
+            >
+              <IconFullscreen />
+            </button>
+            <button
+              type="button"
+              className={`project-media-control-button is-bw ${isMonochrome ? "is-monochrome" : "is-color"}`}
               onClick={() => setIsMonochrome((value) => !value)}
+              onMouseEnter={() => setActiveControl("bw")}
+              onFocus={() => setActiveControl("bw")}
               aria-pressed={isMonochrome}
               aria-label={`${isMonochrome ? "Disable" : "Enable"} black and white filter for ${project.name} preview`}
             >
-              <span>{isMonochrome ? "Turn B/W Off" : "Turn B/W On"}</span>
+              <span className={`project-media-bw-icon ${isMonochrome ? "is-monochrome" : "is-color"}`} aria-hidden="true" />
             </button>
           </div>
         )}
@@ -243,6 +303,8 @@ const ProjectMediaLightbox = ({ project, variant, onClose, onNavigate, onHover, 
   return (
     <motion.div
       className="mockup-lightbox"
+      data-cursor-label="Click to close"
+      data-cursor-variant="project"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -273,7 +335,19 @@ const ProjectMediaLightbox = ({ project, variant, onClose, onNavigate, onHover, 
             &times;
           </button>
         </div>
-        <div className="mockup-lightbox-stage">
+        <div
+          className="mockup-lightbox-stage"
+          onClick={onClose}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              onClose();
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Close mockup preview"
+        >
           {videoSrc ? (
             <video src={videoSrc} autoPlay muted loop playsInline controls className="h-full w-full object-cover" />
           ) : (
@@ -290,7 +364,7 @@ const ProjectMediaLightbox = ({ project, variant, onClose, onNavigate, onHover, 
 
 export default function ProjectDetail({ project, projectIndex, prevProject, nextProject }) {
   const [activePreview, setActivePreview] = useState(null);
-  const { setCursorText, setCursorVariant } = useCursor();
+  const { setCursorText, setCursorVariant, requestCursorRefresh } = useCursor();
 
   if (!project) return null;
 
@@ -332,6 +406,13 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
       const currentIndex = current === "mobile" ? 0 : 1;
       return ["mobile", "desktop"][(currentIndex + direction + 2) % 2];
     });
+    window.setTimeout(requestCursorRefresh, 0);
+  };
+
+  const openPreview = (variant) => {
+    setActivePreview(variant);
+    setProjectCursor("Click to close");
+    window.setTimeout(requestCursorRefresh, 0);
   };
 
   return (
@@ -394,13 +475,13 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
               </p>
             </div>
             <div className="lg:col-span-4">
-              <ProjectMediaPreview project={project} variant="mobile" priority onOpen={setActivePreview} onHover={setProjectCursor} onLeave={clearProjectCursor} />
+              <ProjectMediaPreview project={project} variant="mobile" priority onOpen={openPreview} onHover={setProjectCursor} onLeave={clearProjectCursor} />
             </div>
           </div>
         </section>
 
         <section className="section-container-wide pb-20">
-          <ProjectMediaPreview project={project} variant="desktop" priority onOpen={setActivePreview} onHover={setProjectCursor} onLeave={clearProjectCursor} />
+          <ProjectMediaPreview project={project} variant="desktop" priority onOpen={openPreview} onHover={setProjectCursor} onLeave={clearProjectCursor} />
         </section>
 
         <section className="section-container pb-24">
@@ -482,6 +563,7 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
             onClose={() => {
               setActivePreview(null);
               clearProjectCursor();
+              window.setTimeout(requestCursorRefresh, 0);
             }}
             onNavigate={navigatePreview}
             onHover={setProjectCursor}

@@ -7,6 +7,13 @@ const CLICKABLE_CURSOR_PATH = "M5.45 3.18 C5.25 2.8 5.78 2.52 6.18 2.84 L24.02 1
 const CURSOR_SIZE = 32;
 const CURSOR_TIP_X = 5.5;
 const CURSOR_TIP_Y = 3;
+const INTERACTIVE_SELECTOR = 'a, button, [role="button"], input, textarea, select, summary, [data-clickable="true"]';
+const LABEL_SELECTOR = "[data-cursor-label]";
+const PREVIEW_LABEL_PATTERN = /^(click to (expand|open|close)|view mockup)$/i;
+
+const getCursorLabelKind = (text) => (
+  PREVIEW_LABEL_PATTERN.test((text || "").trim()) ? "preview" : "standard"
+);
 
 const CustomCursor = () => {
   const cursorRef = useRef(null);
@@ -20,17 +27,115 @@ const CustomCursor = () => {
   const isVisibleRef = useRef(false);
   const isClickableRef = useRef(false);
   const { cursorText, setCursorText, cursorVariant, setCursorVariant, isRouteLoading } = useCursor();
+  const cursorTextRef = useRef(cursorText);
+  const cursorVariantRef = useRef(cursorVariant);
 
   // Use GSAP's quickSetter for performance
   const xSet = useRef(null);
   const ySet = useRef(null);
-  const lastPointerRef = useRef({ x: 0, y: 0 });
+  const lastPointerRef = useRef({ x: 0, y: 0, hasPointer: false });
   const loadingTimelineRef = useRef(null);
+  const refreshFrameRef = useRef(null);
+
+  useEffect(() => {
+    cursorTextRef.current = cursorText;
+  }, [cursorText]);
+
+  useEffect(() => {
+    cursorVariantRef.current = cursorVariant;
+  }, [cursorVariant]);
 
   useEffect(() => {
     // Setup quickSetters
     xSet.current = gsap.quickSetter(cursorRef.current, "x", "px");
     ySet.current = gsap.quickSetter(cursorRef.current, "y", "px");
+
+    const applyClickableState = (nextClickable) => {
+      if (isClickableRef.current === nextClickable) return;
+      isClickableRef.current = nextClickable;
+      setIsClickable(nextClickable);
+    };
+
+    const applyCursorContext = (nextText, nextVariant) => {
+      if (cursorTextRef.current !== nextText) {
+        cursorTextRef.current = nextText;
+        setCursorText(nextText);
+      }
+
+      if (cursorVariantRef.current !== nextVariant) {
+        cursorVariantRef.current = nextVariant;
+        setCursorVariant(nextVariant);
+      }
+    };
+
+    const resolveCursorState = (target) => {
+      if (!target?.closest) {
+        return { text: "", variant: "default", clickable: false };
+      }
+
+      const cursorBoundary = target.closest("[data-cursor-boundary='navigation']");
+      if (cursorBoundary && cursorVariantRef.current === "project") {
+        return { text: "", variant: "default", clickable: false };
+      }
+
+      const interactiveTarget = target.closest(INTERACTIVE_SELECTOR);
+      const interactiveLabel = interactiveTarget?.getAttribute?.("data-cursor-label");
+
+      if (interactiveLabel) {
+        return {
+          text: interactiveLabel,
+          variant: interactiveTarget.getAttribute("data-cursor-variant") || "project",
+          clickable: false,
+        };
+      }
+
+      const labeledTarget = target.closest(LABEL_SELECTOR);
+
+      if (interactiveTarget && labeledTarget && labeledTarget !== interactiveTarget) {
+        return { text: "", variant: "default", clickable: true };
+      }
+
+      if (interactiveTarget) {
+        return { text: "", variant: "default", clickable: true };
+      }
+
+      if (labeledTarget) {
+        return {
+          text: labeledTarget.getAttribute("data-cursor-label") || "",
+          variant: labeledTarget.getAttribute("data-cursor-variant") || "project",
+          clickable: false,
+        };
+      }
+
+      return { text: "", variant: "default", clickable: false };
+    };
+
+    const updateCursorFromPoint = (targetOverride) => {
+      if (!lastPointerRef.current.hasPointer && !targetOverride) return;
+
+      const { x, y } = lastPointerRef.current;
+      const target = targetOverride || document.elementFromPoint(x, y);
+      const nextState = resolveCursorState(target);
+
+      applyCursorContext(nextState.text, nextState.variant);
+      applyClickableState(nextState.clickable);
+
+      if (xSet.current && ySet.current) {
+        xSet.current(x - CURSOR_TIP_X);
+        ySet.current(y - CURSOR_TIP_Y);
+      }
+      if (textRef.current) {
+        gsap.set(textRef.current, { x, y });
+      }
+    };
+
+    const scheduleCursorRefresh = () => {
+      if (refreshFrameRef.current) return;
+      refreshFrameRef.current = window.requestAnimationFrame(() => {
+        refreshFrameRef.current = null;
+        updateCursorFromPoint();
+      });
+    };
 
     const onMouseMove = (e) => {
       // Ensure visible on movement
@@ -38,31 +143,8 @@ const CustomCursor = () => {
         isVisibleRef.current = true;
         setIsVisible(true);
       }
-      lastPointerRef.current = { x: e.clientX, y: e.clientY };
-      const clickableTarget = e.target?.closest?.(
-        'a, button, [role="button"], input, textarea, select, summary, [data-clickable="true"]'
-      );
-      const cursorBoundary = e.target?.closest?.("[data-cursor-boundary='navigation']");
-
-      if (cursorBoundary && cursorVariant === 'project') {
-        setCursorText("");
-        setCursorVariant("default");
-      }
-
-      const nextClickable = Boolean(clickableTarget) && cursorVariant !== 'project';
-
-      if (isClickableRef.current !== nextClickable) {
-        isClickableRef.current = nextClickable;
-        setIsClickable(nextClickable);
-      }
-
-      if (xSet.current && ySet.current) {
-        xSet.current(e.clientX - CURSOR_TIP_X);
-        ySet.current(e.clientY - CURSOR_TIP_Y);
-      }
-      if (textRef.current) {
-        gsap.set(textRef.current, { x: e.clientX, y: e.clientY });
-      }
+      lastPointerRef.current = { x: e.clientX, y: e.clientY, hasPointer: true };
+      updateCursorFromPoint(e.target);
     };
 
     const onMouseLeave = () => {
@@ -70,23 +152,42 @@ const CustomCursor = () => {
       isClickableRef.current = false;
       setIsVisible(false);
       setIsClickable(false);
+      applyCursorContext("", "default");
     };
 
     const onMouseEnter = () => {
       isVisibleRef.current = true;
       setIsVisible(true);
+      scheduleCursorRefresh();
     };
 
     window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('scroll', scheduleCursorRefresh, true);
+    window.addEventListener('resize', scheduleCursorRefresh);
+    window.addEventListener('portfolio:cursor-refresh', scheduleCursorRefresh);
+    document.addEventListener('focusin', scheduleCursorRefresh);
+    document.addEventListener('pointerup', scheduleCursorRefresh);
+    document.addEventListener('transitionend', scheduleCursorRefresh, true);
+    document.addEventListener('animationend', scheduleCursorRefresh, true);
     document.addEventListener('mouseleave', onMouseLeave); // document leave covers window exit mostly
     document.addEventListener('mouseenter', onMouseEnter);
 
     return () => {
       window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('scroll', scheduleCursorRefresh, true);
+      window.removeEventListener('resize', scheduleCursorRefresh);
+      window.removeEventListener('portfolio:cursor-refresh', scheduleCursorRefresh);
+      document.removeEventListener('focusin', scheduleCursorRefresh);
+      document.removeEventListener('pointerup', scheduleCursorRefresh);
+      document.removeEventListener('transitionend', scheduleCursorRefresh, true);
+      document.removeEventListener('animationend', scheduleCursorRefresh, true);
       document.removeEventListener('mouseleave', onMouseLeave);
       document.removeEventListener('mouseenter', onMouseEnter);
+      if (refreshFrameRef.current) {
+        window.cancelAnimationFrame(refreshFrameRef.current);
+      }
     };
-  }, [cursorVariant, setCursorText, setCursorVariant]);
+  }, [setCursorText, setCursorVariant]);
 
   useEffect(() => {
     if (!outlinePathRef.current || !fillPathRef.current || !fillRectRef.current) return;
@@ -179,8 +280,9 @@ const CustomCursor = () => {
   }, [cursorText]);
 
   // Theme colors
-  const isProject = cursorVariant === 'project';
+  const hasCursorLabel = Boolean(cursorText);
   const isMenu = cursorVariant === 'menu';
+  const cursorLabelKind = getCursorLabelKind(cursorText);
 
   return (
     <>
@@ -202,7 +304,7 @@ const CustomCursor = () => {
             width: `${CURSOR_SIZE}px`,
             height: `${CURSOR_SIZE}px`,
             transformOrigin: "50% 50%",
-            transform: isProject ? 'scale(0)' : (isMenu ? 'scale(1.2)' : 'scale(1)'),
+            transform: hasCursorLabel ? 'scale(0)' : (isMenu ? 'scale(1.2)' : 'scale(1)'),
           }}
         >
           <div
@@ -265,7 +367,7 @@ const CustomCursor = () => {
           style={{ willChange: 'transform' }}
         >
           <div
-            className={`custom-cursor-label absolute left-0 top-0 backdrop-blur-sm px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-widest whitespace-nowrap ${cursorVariant === 'project' ? 'is-project' : ''}`}
+            className={`custom-cursor-label absolute left-0 top-0 backdrop-blur-sm px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-widest whitespace-nowrap is-${cursorLabelKind}`}
             style={{ transform: 'translate(-50%, -50%)' }}
           >
             {cursorText}
@@ -279,8 +381,8 @@ const CustomCursor = () => {
         }
 
         .custom-cursor-label {
-          background-color: rgba(0, 0, 0, 0.82);
-          border: 1px solid rgba(255, 255, 255, 0.2);
+          background-color: rgba(0, 0, 0, 0.86);
+          border: 1px solid rgba(255, 255, 255, 0.18);
           color: #fff;
           transition:
             background-color 0.34s cubic-bezier(0.16, 1, 0.3, 1),
@@ -288,10 +390,22 @@ const CustomCursor = () => {
             color 0.34s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .custom-cursor-label.is-project {
-          background-color: var(--fg-primary);
-          border-color: color-mix(in srgb, var(--fg-primary) 42%, var(--border));
-          color: var(--bg-primary);
+        [data-theme="light"] .custom-cursor-label.is-standard {
+          background-color: rgba(255, 255, 255, 0.9);
+          border-color: rgba(0, 0, 0, 0.16);
+          color: #050505;
+        }
+
+        .custom-cursor-label.is-preview {
+          background-color: rgba(255, 255, 255, 0.92);
+          border-color: rgba(0, 0, 0, 0.18);
+          color: #050505;
+        }
+
+        [data-theme="light"] .custom-cursor-label.is-preview {
+          background-color: rgba(0, 0, 0, 0.88);
+          border-color: rgba(255, 255, 255, 0.18);
+          color: #ffffff;
         }
 
       `}</style>
