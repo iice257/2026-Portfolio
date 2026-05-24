@@ -1,10 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { MENULINKS } from "../../constants";
 import { useHeroLock } from "../../context/HeroLockContext";
 import TextPressure from "../ReactBits/TextPressure";
 import styles from "./Hero.module.scss";
+
+const Galaxy = dynamic(() => import("../ReactBits/Galaxy"), { ssr: false });
+const Waves = dynamic(() => import("../ReactBits/Waves"), { ssr: false });
 
 const HERO_CAPABILITY_PHRASES = [
   "digital experiences",
@@ -380,7 +384,36 @@ const Hero = () => {
       style={{ backgroundColor: "var(--bg-primary)" }}
       data-hero-locked={isLocked ? "true" : "false"}
     >
-      <div className="section-container-wide w-full">
+      <div className={styles.galaxyBackdrop} aria-hidden="true">
+        <Galaxy
+          mouseRepulsion={false}
+          mouseInteraction={false}
+          density={0.2}
+          glowIntensity={0.1}
+          saturation={0.8}
+          hueShift={0}
+          twinkleIntensity={0.8}
+          rotationSpeed={0}
+          speed={0.1}
+        />
+      </div>
+      <div className={styles.wavesBackdrop} aria-hidden="true">
+        <Waves
+          lineColor="#a4a4a4"
+          backgroundColor="transparent"
+          waveSpeedX={0.01}
+          waveSpeedY={0.01}
+          waveAmpX={40}
+          waveAmpY={20}
+          friction={0.69}
+          tension={0.005}
+          maxCursorMove={210}
+          xGap={20}
+          yGap={10}
+        />
+      </div>
+
+      <div className="section-container-wide w-full relative z-[1]">
         <div
           ref={nameContainerRef}
           className={`${styles.heroTitleShell} ${interactionPulse ? styles.heroTitleShellPulse : ""} relative flex flex-col items-center`}
@@ -508,7 +541,7 @@ const Hero = () => {
       <div
         ref={scrollIndicatorRef}
         data-hide-when-hero-locked="true"
-        className={`${styles.scrollCue} ${isLocked ? styles.scrollCueHidden : ""} absolute bottom-4 md:bottom-5 left-1/2 -translate-x-1/2`}
+        className={`${styles.scrollCue} ${isLocked ? styles.scrollCueHidden : ""} absolute bottom-4 md:bottom-5 left-1/2 -translate-x-1/2 z-[1]`}
       >
         <div className="flex flex-col items-center gap-3">
           <span

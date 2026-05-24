@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Head from "next/head";
 import Image from "next/image";
@@ -44,6 +44,12 @@ const IconExpand = () => (
   <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5" />
     <path d="M3 3l6 6M21 3l-6 6M21 21l-6-6M3 21l6-6" />
+  </svg>
+);
+
+const IconFullscreen = () => (
+  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5" />
   </svg>
 );
 
@@ -178,7 +184,47 @@ const chunkProjects = (projects, size = 2) => {
   return rows;
 };
 
-const MockupPreviewModal = ({ active, onClose, onNavigate, onHover, onLeave }) => {
+const lightboxStripTransition = {
+  duration: 0.42,
+  ease: [0.16, 1, 0.3, 1],
+};
+
+const lightboxStripVariants = {
+  enter: (direction) => ({
+    x: direction >= 0 ? "100%" : "-100%",
+    opacity: 0.74,
+  }),
+  center: {
+    x: "0%",
+    opacity: 1,
+  },
+  exit: (direction) => ({
+    x: direction >= 0 ? "-100%" : "100%",
+    opacity: 0.74,
+  }),
+};
+
+const lightboxPanelVariants = {
+  enter: (direction) => (
+    direction === 0
+      ? { y: 24, scale: 0.98, opacity: 0 }
+      : { x: direction >= 0 ? "11%" : "-11%", y: 0, scale: 0.985, opacity: 0.76 }
+  ),
+  center: {
+    x: "0%",
+    y: 0,
+    scale: 1,
+    opacity: 1,
+  },
+  exit: (direction) => (
+    direction === 0
+      ? { y: 18, scale: 0.98, opacity: 0 }
+      : { x: direction >= 0 ? "-11%" : "11%", y: 0, scale: 0.985, opacity: 0.76 }
+  ),
+};
+
+const MockupPreviewModal = ({ active, direction = 0, onClose, onNavigate }) => {
+  const videoRef = useRef(null);
   useEffect(() => {
     if (!active) return undefined;
 
@@ -196,6 +242,16 @@ const MockupPreviewModal = ({ active, onClose, onNavigate, onHover, onLeave }) =
 
   const preview = getProjectPreview(active.project, active.variant);
   const isMobile = active.variant === "mobile";
+  const previewKey = `${active.project.slug}-${active.variant}`;
+
+  const openFullscreen = (event) => {
+    event.stopPropagation();
+    const video = videoRef.current;
+    if (!video) return;
+
+    const fullscreenTarget = video.requestFullscreen || video.webkitRequestFullscreen || video.msRequestFullscreen;
+    fullscreenTarget?.call(video)?.catch?.(() => {});
+  };
 
   return (
     <motion.div
@@ -206,8 +262,6 @@ const MockupPreviewModal = ({ active, onClose, onNavigate, onHover, onLeave }) =
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
-      onMouseEnter={() => onHover("Click to close")}
-      onMouseLeave={onLeave}
       role="dialog"
       aria-modal="true"
       aria-label={`${active.project.name} ${previewLabel(active.variant)} mockup preview`}
@@ -215,12 +269,16 @@ const MockupPreviewModal = ({ active, onClose, onNavigate, onHover, onLeave }) =
       <button type="button" className="mockup-lightbox-nav is-prev" onClick={(event) => { event.stopPropagation(); onNavigate(-1); }} aria-label="Previous mockup">
         <span aria-hidden="true">‹</span>
       </button>
+      <AnimatePresence custom={direction}>
       <motion.div
+        key={`panel-${previewKey}`}
         className={`mockup-lightbox-panel ${isMobile ? "is-mobile" : "is-desktop"}`}
-        initial={{ y: 24, scale: 0.98 }}
-        animate={{ y: 0, scale: 1 }}
-        exit={{ y: 18, scale: 0.98 }}
-        transition={{ duration: 0.34, ease: [0.16, 1, 0.3, 1] }}
+        custom={direction}
+        variants={lightboxPanelVariants}
+        initial="enter"
+        animate="center"
+        exit="exit"
+        transition={lightboxStripTransition}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="mockup-lightbox-header">
@@ -228,13 +286,22 @@ const MockupPreviewModal = ({ active, onClose, onNavigate, onHover, onLeave }) =
             <p className="text-micro" style={{ color: "var(--fg-muted)" }}>{previewLabel(active.variant)}</p>
             <h3 className="text-body-xl font-light" style={{ color: "var(--fg-primary)" }}>{active.project.name}</h3>
           </div>
+          <div className="mockup-lightbox-header-actions">
+            {preview.type === "video" && (
+              <button type="button" className="mockup-lightbox-fullscreen" onClick={openFullscreen} aria-label="Open mockup video fullscreen">
+                <IconFullscreen />
+              </button>
+            )}
           <button type="button" className="mockup-lightbox-close" onClick={onClose} aria-label="Close mockup preview">
             ×
           </button>
         </div>
+        </div>
 
         <div
           className="mockup-lightbox-stage"
+          data-cursor-label="Click to close"
+          data-cursor-variant="project"
           onClick={onClose}
           onKeyDown={(event) => {
             if (event.key === "Enter" || event.key === " ") {
@@ -246,17 +313,31 @@ const MockupPreviewModal = ({ active, onClose, onNavigate, onHover, onLeave }) =
           tabIndex={0}
           aria-label="Close mockup preview"
         >
-          {preview.type === "video" && (
-            <video src={preview.src} autoPlay muted loop playsInline controls className="h-full w-full object-cover" />
-          )}
-          {preview.type === "image" && (
-            <Image src={preview.src} alt={`${active.project.name} ${previewLabel(active.variant)} mockup`} fill sizes="90vw" className="object-contain" />
-          )}
-          {preview.type === "mockup" && (
-            <ProjectMockupFrame project={active.project} variant={active.variant} className={isMobile ? "h-full w-full p-5" : "h-full w-full p-6"} />
-          )}
+          <AnimatePresence initial={false} custom={direction}>
+            <motion.div
+              key={previewKey}
+              className="mockup-lightbox-strip-item"
+              custom={direction}
+              variants={lightboxStripVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={lightboxStripTransition}
+            >
+              {preview.type === "video" && (
+                <video ref={videoRef} src={preview.src} autoPlay muted loop playsInline controls className="h-full w-full object-cover" />
+              )}
+              {preview.type === "image" && (
+                <Image src={preview.src} alt={`${active.project.name} ${previewLabel(active.variant)} mockup`} fill sizes="90vw" className="object-contain" />
+              )}
+              {preview.type === "mockup" && (
+                <ProjectMockupFrame project={active.project} variant={active.variant} className={isMobile ? "h-full w-full p-5" : "h-full w-full p-6"} />
+              )}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </motion.div>
+      </AnimatePresence>
       <button type="button" className="mockup-lightbox-nav is-next" onClick={(event) => { event.stopPropagation(); onNavigate(1); }} aria-label="Next mockup">
         <span aria-hidden="true">›</span>
       </button>
@@ -264,7 +345,7 @@ const MockupPreviewModal = ({ active, onClose, onNavigate, onHover, onLeave }) =
   );
 };
 
-const MockupChoiceButton = ({ project, onOpenPreview, onHover, onLeave }) => {
+const MockupChoiceButton = ({ project, onOpenPreview }) => {
   const [isChoosing, setIsChoosing] = useState(false);
 
   useEffect(() => {
@@ -278,14 +359,10 @@ const MockupChoiceButton = ({ project, onOpenPreview, onHover, onLeave }) => {
       <button
         type="button"
         className="project-action-link mockup-choice-main"
-        data-cursor-label="View mockup"
-        data-cursor-variant="project"
         onClick={(event) => {
           event.stopPropagation();
           setIsChoosing((value) => !value);
         }}
-        onMouseEnter={() => onHover(isChoosing ? "Choose mockup" : "View mockup")}
-        onMouseLeave={onLeave}
         aria-expanded={isChoosing}
       >
         <IconExpand />
@@ -297,16 +374,12 @@ const MockupChoiceButton = ({ project, onOpenPreview, onHover, onLeave }) => {
             type="button"
             key={variant}
             className="project-action-link"
-            data-cursor-label="Click to open"
-            data-cursor-variant="project"
             tabIndex={isChoosing ? 0 : -1}
             onClick={(event) => {
               event.stopPropagation();
               onOpenPreview(project, variant);
               setIsChoosing(false);
             }}
-            onMouseEnter={() => onHover(`Open ${variant}`)}
-            onMouseLeave={onLeave}
           >
             {variant === "mobile" ? <IconPhone /> : <IconDesktop />}
             <span>{variant}</span>
@@ -440,6 +513,7 @@ export default function ProjectsIndex() {
   const [flippedCards, setFlippedCards] = useState({});
   const [openProject, setOpenProject] = useState(remainingProjects[0]?.slug);
   const [activePreview, setActivePreview] = useState(null);
+  const [previewDirection, setPreviewDirection] = useState(0);
   const { setCursorText, setCursorVariant, requestCursorRefresh } = useCursor();
   const expandedSlug = Object.keys(flippedCards).find((slug) => flippedCards[slug]);
   const majorProjectRows = chunkProjects(majorProjects);
@@ -471,12 +545,13 @@ export default function ProjectsIndex() {
   }, [setCursorText, setCursorVariant]);
 
   const openPreview = useCallback((project, variant = "desktop") => {
+    setPreviewDirection(0);
     setActivePreview({ project, variant });
-    setProjectCursor("Click to close");
     window.setTimeout(requestCursorRefresh, 0);
-  }, [requestCursorRefresh, setProjectCursor]);
+  }, [requestCursorRefresh]);
 
   const navigatePreview = useCallback((direction) => {
+    setPreviewDirection(direction);
     setActivePreview((current) => {
       if (!current) return current;
       const currentIndex = previewItems.findIndex((item) => item.project.slug === current.project.slug && item.variant === current.variant);
@@ -489,6 +564,7 @@ export default function ProjectsIndex() {
   const closePreview = useCallback(() => {
     setActivePreview(null);
     clearProjectCursor();
+    window.dispatchEvent(new CustomEvent("portfolio:cursor-clear"));
     window.setTimeout(requestCursorRefresh, 0);
   }, [clearProjectCursor, requestCursorRefresh]);
 
@@ -777,14 +853,20 @@ export default function ProjectsIndex() {
         </section>
       </main>
 
-      <AnimatePresence>
+      <AnimatePresence
+        onExitComplete={() => {
+          clearProjectCursor();
+          window.dispatchEvent(new CustomEvent("portfolio:cursor-clear"));
+          requestCursorRefresh();
+          window.setTimeout(requestCursorRefresh, 80);
+        }}
+      >
         {activePreview && (
           <MockupPreviewModal
             active={activePreview}
+            direction={previewDirection}
             onClose={closePreview}
             onNavigate={navigatePreview}
-            onHover={setProjectCursor}
-            onLeave={clearProjectCursor}
           />
         )}
       </AnimatePresence>

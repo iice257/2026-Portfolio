@@ -285,7 +285,48 @@ const ProjectMediaPreview = ({ project, variant = "desktop", priority = false, o
   );
 };
 
-const ProjectMediaLightbox = ({ project, variant, onClose, onNavigate, onHover, onLeave }) => {
+const lightboxStripTransition = {
+  duration: 0.42,
+  ease: [0.16, 1, 0.3, 1],
+};
+
+const lightboxStripVariants = {
+  enter: (direction) => ({
+    x: direction >= 0 ? "100%" : "-100%",
+    opacity: 0.74,
+  }),
+  center: {
+    x: "0%",
+    opacity: 1,
+  },
+  exit: (direction) => ({
+    x: direction >= 0 ? "-100%" : "100%",
+    opacity: 0.74,
+  }),
+};
+
+const lightboxPanelVariants = {
+  enter: (direction) => (
+    direction === 0
+      ? { y: 24, scale: 0.98, opacity: 0 }
+      : { x: direction >= 0 ? "11%" : "-11%", y: 0, scale: 0.985, opacity: 0.76 }
+  ),
+  center: {
+    x: "0%",
+    y: 0,
+    scale: 1,
+    opacity: 1,
+  },
+  exit: (direction) => (
+    direction === 0
+      ? { y: 18, scale: 0.98, opacity: 0 }
+      : { x: direction >= 0 ? "-11%" : "11%", y: 0, scale: 0.985, opacity: 0.76 }
+  ),
+};
+
+const ProjectMediaLightbox = ({ project, variant, direction = 0, onClose, onNavigate }) => {
+  const videoRef = useRef(null);
+
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === "Escape") onClose();
@@ -299,6 +340,16 @@ const ProjectMediaLightbox = ({ project, variant, onClose, onNavigate, onHover, 
 
   const videoSrc = variant === "desktop" ? project.desktopVideo : project.mobileVideo;
   const isMobile = variant === "mobile";
+  const previewKey = `${project.slug}-${variant}`;
+
+  const openFullscreen = (event) => {
+    event.stopPropagation();
+    const video = videoRef.current;
+    if (!video) return;
+
+    const fullscreenTarget = video.requestFullscreen || video.webkitRequestFullscreen || video.msRequestFullscreen;
+    fullscreenTarget?.call(video)?.catch?.(() => {});
+  };
 
   return (
     <motion.div
@@ -309,8 +360,6 @@ const ProjectMediaLightbox = ({ project, variant, onClose, onNavigate, onHover, 
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
-      onMouseEnter={() => onHover("Click to close")}
-      onMouseLeave={onLeave}
       role="dialog"
       aria-modal="true"
       aria-label={`${project.name} ${isMobile ? "mobile" : "desktop"} preview`}
@@ -318,12 +367,16 @@ const ProjectMediaLightbox = ({ project, variant, onClose, onNavigate, onHover, 
       <button type="button" className="mockup-lightbox-nav is-prev" onClick={(event) => { event.stopPropagation(); onNavigate(-1); }} aria-label="Previous mockup">
         <span aria-hidden="true">&lsaquo;</span>
       </button>
+      <AnimatePresence custom={direction}>
       <motion.div
+        key={`panel-${previewKey}`}
         className={`mockup-lightbox-panel ${isMobile ? "is-mobile" : "is-desktop"}`}
-        initial={{ y: 24, scale: 0.98 }}
-        animate={{ y: 0, scale: 1 }}
-        exit={{ y: 18, scale: 0.98 }}
-        transition={{ duration: 0.34, ease: [0.16, 1, 0.3, 1] }}
+        custom={direction}
+        variants={lightboxPanelVariants}
+        initial="enter"
+        animate="center"
+        exit="exit"
+        transition={lightboxStripTransition}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="mockup-lightbox-header">
@@ -331,12 +384,21 @@ const ProjectMediaLightbox = ({ project, variant, onClose, onNavigate, onHover, 
             <p className="text-micro" style={{ color: "var(--fg-muted)" }}>{isMobile ? "Mobile" : "Desktop"}</p>
             <h3 className="text-body-xl font-light" style={{ color: "var(--fg-primary)" }}>{project.name}</h3>
           </div>
-          <button type="button" className="mockup-lightbox-close" onClick={onClose} aria-label="Close mockup preview">
-            &times;
-          </button>
+          <div className="mockup-lightbox-header-actions">
+            {videoSrc && (
+              <button type="button" className="mockup-lightbox-fullscreen" onClick={openFullscreen} aria-label="Open mockup video fullscreen">
+                <IconFullscreen />
+              </button>
+            )}
+            <button type="button" className="mockup-lightbox-close" onClick={onClose} aria-label="Close mockup preview">
+              &times;
+            </button>
+          </div>
         </div>
         <div
           className="mockup-lightbox-stage"
+          data-cursor-label="Click to close"
+          data-cursor-variant="project"
           onClick={onClose}
           onKeyDown={(event) => {
             if (event.key === "Enter" || event.key === " ") {
@@ -348,13 +410,27 @@ const ProjectMediaLightbox = ({ project, variant, onClose, onNavigate, onHover, 
           tabIndex={0}
           aria-label="Close mockup preview"
         >
-          {videoSrc ? (
-            <video src={videoSrc} autoPlay muted loop playsInline controls className="h-full w-full object-cover" />
-          ) : (
-            <ProjectVisual project={project} priority compact={isMobile} />
-          )}
+          <AnimatePresence initial={false} custom={direction}>
+            <motion.div
+              key={previewKey}
+              className="mockup-lightbox-strip-item"
+              custom={direction}
+              variants={lightboxStripVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={lightboxStripTransition}
+            >
+              {videoSrc ? (
+                <video ref={videoRef} src={videoSrc} autoPlay muted loop playsInline controls className="h-full w-full object-cover" />
+              ) : (
+                <ProjectVisual project={project} priority compact={isMobile} />
+              )}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </motion.div>
+      </AnimatePresence>
       <button type="button" className="mockup-lightbox-nav is-next" onClick={(event) => { event.stopPropagation(); onNavigate(1); }} aria-label="Next mockup">
         <span aria-hidden="true">&rsaquo;</span>
       </button>
@@ -364,6 +440,7 @@ const ProjectMediaLightbox = ({ project, variant, onClose, onNavigate, onHover, 
 
 export default function ProjectDetail({ project, projectIndex, prevProject, nextProject }) {
   const [activePreview, setActivePreview] = useState(null);
+  const [previewDirection, setPreviewDirection] = useState(0);
   const { setCursorText, setCursorVariant, requestCursorRefresh } = useCursor();
 
   if (!project) return null;
@@ -402,6 +479,7 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
   };
 
   const navigatePreview = (direction) => {
+    setPreviewDirection(direction);
     setActivePreview((current) => {
       const currentIndex = current === "mobile" ? 0 : 1;
       return ["mobile", "desktop"][(currentIndex + direction + 2) % 2];
@@ -410,8 +488,8 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
   };
 
   const openPreview = (variant) => {
+    setPreviewDirection(0);
     setActivePreview(variant);
-    setProjectCursor("Click to close");
     window.setTimeout(requestCursorRefresh, 0);
   };
 
@@ -555,19 +633,26 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
         </section>
       </main>
 
-      <AnimatePresence>
+      <AnimatePresence
+        onExitComplete={() => {
+          clearProjectCursor();
+          window.dispatchEvent(new CustomEvent("portfolio:cursor-clear"));
+          requestCursorRefresh();
+          window.setTimeout(requestCursorRefresh, 80);
+        }}
+      >
         {activePreview && (
           <ProjectMediaLightbox
             project={project}
             variant={activePreview}
+            direction={previewDirection}
             onClose={() => {
               setActivePreview(null);
               clearProjectCursor();
+              window.dispatchEvent(new CustomEvent("portfolio:cursor-clear"));
               window.setTimeout(requestCursorRefresh, 0);
             }}
             onNavigate={navigatePreview}
-            onHover={setProjectCursor}
-            onLeave={clearProjectCursor}
           />
         )}
       </AnimatePresence>

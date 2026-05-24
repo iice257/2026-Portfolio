@@ -106,6 +106,8 @@ const Projects = ({ isDesktop }) => {
               key={project.name}
               href={`/projects/${project.slug}`}
               className="project-panel min-h-screen grid grid-cols-1 lg:grid-cols-2 group cursor-none"
+              data-cursor-label="Click for more details"
+              data-cursor-variant="project"
               onMouseEnter={setProjectCursor}
               onFocus={setProjectCursor}
               onMouseLeave={clearProjectCursor}

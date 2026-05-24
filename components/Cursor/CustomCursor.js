@@ -9,7 +9,19 @@ const CURSOR_TIP_X = 5.5;
 const CURSOR_TIP_Y = 3;
 const INTERACTIVE_SELECTOR = 'a, button, [role="button"], input, textarea, select, summary, [data-clickable="true"]';
 const LABEL_SELECTOR = "[data-cursor-label]";
-const PREVIEW_LABEL_PATTERN = /^(click to (expand|open|close)|view mockup)$/i;
+const PREVIEW_LABEL_PATTERN = /^click to (open|close)$/i;
+const INTERACTIVE_BRIDGE_RADIUS = 14;
+const INTERACTIVE_BRIDGE_OFFSETS = [
+  [0, 0],
+  [INTERACTIVE_BRIDGE_RADIUS, 0],
+  [-INTERACTIVE_BRIDGE_RADIUS, 0],
+  [0, INTERACTIVE_BRIDGE_RADIUS],
+  [0, -INTERACTIVE_BRIDGE_RADIUS],
+  [INTERACTIVE_BRIDGE_RADIUS, INTERACTIVE_BRIDGE_RADIUS],
+  [-INTERACTIVE_BRIDGE_RADIUS, INTERACTIVE_BRIDGE_RADIUS],
+  [INTERACTIVE_BRIDGE_RADIUS, -INTERACTIVE_BRIDGE_RADIUS],
+  [-INTERACTIVE_BRIDGE_RADIUS, -INTERACTIVE_BRIDGE_RADIUS],
+];
 
 const getCursorLabelKind = (text) => (
   PREVIEW_LABEL_PATTERN.test((text || "").trim()) ? "preview" : "standard"
@@ -36,6 +48,7 @@ const CustomCursor = () => {
   const lastPointerRef = useRef({ x: 0, y: 0, hasPointer: false });
   const loadingTimelineRef = useRef(null);
   const refreshFrameRef = useRef(null);
+  const resolvedStateRef = useRef({ text: "", variant: "default", clickable: false });
 
   useEffect(() => {
     cursorTextRef.current = cursorText;
@@ -68,7 +81,31 @@ const CustomCursor = () => {
       }
     };
 
-    const resolveCursorState = (target) => {
+    const isUsableInteractive = (element) => {
+      if (!element?.matches?.(INTERACTIVE_SELECTOR)) return false;
+      if (element.matches("[disabled], [aria-disabled='true']")) return false;
+      return true;
+    };
+
+    const findNearbyInteractive = (x, y, labeledTarget) => {
+      if (!resolvedStateRef.current.clickable || !labeledTarget) return null;
+
+      for (const [offsetX, offsetY] of INTERACTIVE_BRIDGE_OFFSETS) {
+        const sampleX = Math.min(window.innerWidth - 1, Math.max(0, x + offsetX));
+        const sampleY = Math.min(window.innerHeight - 1, Math.max(0, y + offsetY));
+        const stack = document.elementsFromPoint(sampleX, sampleY);
+        const nearby = stack.find((element) => {
+          const interactive = element.closest?.(INTERACTIVE_SELECTOR);
+          return interactive && isUsableInteractive(interactive) && labeledTarget.contains(interactive);
+        });
+
+        if (nearby) return nearby.closest(INTERACTIVE_SELECTOR);
+      }
+
+      return null;
+    };
+
+    const resolveCursorState = (target, point = lastPointerRef.current) => {
       if (!target?.closest) {
         return { text: "", variant: "default", clickable: false };
       }
@@ -100,6 +137,11 @@ const CustomCursor = () => {
       }
 
       if (labeledTarget) {
+        const bridgedInteractive = findNearbyInteractive(point.x, point.y, labeledTarget);
+        if (bridgedInteractive) {
+          return { text: "", variant: "default", clickable: true };
+        }
+
         return {
           text: labeledTarget.getAttribute("data-cursor-label") || "",
           variant: labeledTarget.getAttribute("data-cursor-variant") || "project",
@@ -115,8 +157,9 @@ const CustomCursor = () => {
 
       const { x, y } = lastPointerRef.current;
       const target = targetOverride || document.elementFromPoint(x, y);
-      const nextState = resolveCursorState(target);
+      const nextState = resolveCursorState(target, { x, y, hasPointer: true });
 
+      resolvedStateRef.current = nextState;
       applyCursorContext(nextState.text, nextState.variant);
       applyClickableState(nextState.clickable);
 
@@ -137,6 +180,13 @@ const CustomCursor = () => {
       });
     };
 
+    const clearCursorState = () => {
+      isClickableRef.current = false;
+      resolvedStateRef.current = { text: "", variant: "default", clickable: false };
+      setIsClickable(false);
+      applyCursorContext("", "default");
+    };
+
     const onMouseMove = (e) => {
       // Ensure visible on movement
       if (!isVisibleRef.current) {
@@ -150,6 +200,7 @@ const CustomCursor = () => {
     const onMouseLeave = () => {
       isVisibleRef.current = false;
       isClickableRef.current = false;
+      resolvedStateRef.current = { text: "", variant: "default", clickable: false };
       setIsVisible(false);
       setIsClickable(false);
       applyCursorContext("", "default");
@@ -165,6 +216,7 @@ const CustomCursor = () => {
     window.addEventListener('scroll', scheduleCursorRefresh, true);
     window.addEventListener('resize', scheduleCursorRefresh);
     window.addEventListener('portfolio:cursor-refresh', scheduleCursorRefresh);
+    window.addEventListener('portfolio:cursor-clear', clearCursorState);
     document.addEventListener('focusin', scheduleCursorRefresh);
     document.addEventListener('pointerup', scheduleCursorRefresh);
     document.addEventListener('transitionend', scheduleCursorRefresh, true);
@@ -177,6 +229,7 @@ const CustomCursor = () => {
       window.removeEventListener('scroll', scheduleCursorRefresh, true);
       window.removeEventListener('resize', scheduleCursorRefresh);
       window.removeEventListener('portfolio:cursor-refresh', scheduleCursorRefresh);
+      window.removeEventListener('portfolio:cursor-clear', clearCursorState);
       document.removeEventListener('focusin', scheduleCursorRefresh);
       document.removeEventListener('pointerup', scheduleCursorRefresh);
       document.removeEventListener('transitionend', scheduleCursorRefresh, true);
@@ -193,80 +246,90 @@ const CustomCursor = () => {
     if (!outlinePathRef.current || !fillPathRef.current || !fillRectRef.current) return;
     if (isRouteLoading) return;
 
-    const targetPath = isClickable ? CLICKABLE_CURSOR_PATH : DEFAULT_CURSOR_PATH;
+    const shouldUseClickableShape = isClickable || Boolean(cursorText);
+    const targetPath = shouldUseClickableShape ? CLICKABLE_CURSOR_PATH : DEFAULT_CURSOR_PATH;
 
     gsap.to([outlinePathRef.current, fillPathRef.current], {
       attr: { d: targetPath },
-      duration: 0.34,
+      duration: 0.28,
       ease: "power3.out",
+      overwrite: "auto",
     });
 
     gsap.to(fillRectRef.current, {
       attr: {
-        y: isClickable ? 0 : 32,
-        height: isClickable ? 32 : 0,
+        y: shouldUseClickableShape ? 0 : 32,
+        height: shouldUseClickableShape ? 32 : 0,
       },
-      duration: 0.38,
+      duration: 0.3,
       ease: "power3.out",
+      overwrite: "auto",
     });
-  }, [isClickable, isRouteLoading]);
+  }, [cursorText, isClickable, isRouteLoading]);
 
   useEffect(() => {
     if (!outlinePathRef.current || !fillPathRef.current || !fillRectRef.current) return undefined;
 
+    const outlinePath = outlinePathRef.current;
+    const fillPath = fillPathRef.current;
+    const fillRect = fillRectRef.current;
+
     loadingTimelineRef.current?.kill();
 
     if (!isRouteLoading) {
-      const targetPath = isClickableRef.current ? CLICKABLE_CURSOR_PATH : DEFAULT_CURSOR_PATH;
+      const shouldUseClickableShape = isClickableRef.current || Boolean(cursorTextRef.current);
+      const targetPath = shouldUseClickableShape ? CLICKABLE_CURSOR_PATH : DEFAULT_CURSOR_PATH;
 
-      gsap.to([outlinePathRef.current, fillPathRef.current], {
+      gsap.to(fillPath, {
+        opacity: 1,
+        duration: 0.16,
+        ease: "power2.out",
+      });
+
+      gsap.to([outlinePath, fillPath], {
         attr: { d: targetPath },
         duration: 0.22,
         ease: "power3.out",
+        overwrite: "auto",
       });
 
-      gsap.to(fillRectRef.current, {
+      gsap.to(fillRect, {
         attr: {
-          y: isClickableRef.current ? 0 : 32,
-          height: isClickableRef.current ? 32 : 0,
+          y: shouldUseClickableShape ? 0 : 32,
+          height: shouldUseClickableShape ? 32 : 0,
         },
         duration: 0.24,
         ease: "power3.out",
+        overwrite: "auto",
       });
 
       return undefined;
     }
 
+    gsap.set([outlinePath, fillPath], {
+      attr: { d: CLICKABLE_CURSOR_PATH },
+    });
+
+    gsap.set(fillRect, {
+      attr: { y: 0, height: 32 },
+    });
+
     loadingTimelineRef.current = gsap.timeline({
       repeat: -1,
+      yoyo: true,
       defaults: { overwrite: "auto" },
     });
 
-    loadingTimelineRef.current
-      .to([outlinePathRef.current, fillPathRef.current], {
-        attr: { d: CLICKABLE_CURSOR_PATH },
-        duration: 0.18,
-        ease: "power3.inOut",
-      }, 0)
-      .to(fillRectRef.current, {
-        attr: { y: 0, height: 32 },
-        duration: 0.18,
-        ease: "power3.inOut",
-      }, 0)
-      .to([outlinePathRef.current, fillPathRef.current], {
-        attr: { d: DEFAULT_CURSOR_PATH },
-        duration: 0.18,
-        ease: "power3.inOut",
-      }, 0.23)
-      .to(fillRectRef.current, {
-        attr: { y: 32, height: 0 },
-        duration: 0.18,
-        ease: "power3.inOut",
-      }, 0.23);
+    loadingTimelineRef.current.to(fillPath, {
+      opacity: 0.38,
+      duration: 0.42,
+      ease: "power2.inOut",
+    });
 
     return () => {
       loadingTimelineRef.current?.kill();
       loadingTimelineRef.current = null;
+      gsap.set(fillPath, { opacity: 1 });
     };
   }, [isRouteLoading]);
 
@@ -299,12 +362,14 @@ const CustomCursor = () => {
         {/* Cursor Container */}
         <div
           ref={shapeRef}
-          className="relative transition-all duration-300 ease-out"
+          className="relative"
           style={{
             width: `${CURSOR_SIZE}px`,
             height: `${CURSOR_SIZE}px`,
             transformOrigin: "50% 50%",
-            transform: hasCursorLabel ? 'scale(0)' : (isMenu ? 'scale(1.2)' : 'scale(1)'),
+            transform: hasCursorLabel ? 'scale(0.18)' : (isMenu ? 'scale(1.2)' : 'scale(1)'),
+            opacity: hasCursorLabel ? 0 : 1,
+            transition: "transform 180ms cubic-bezier(0.16, 1, 0.3, 1), opacity 130ms ease",
           }}
         >
           <div
@@ -360,20 +425,18 @@ const CustomCursor = () => {
       </div>
 
       {/* Floating Text - Glass Pill Style */}
-      {cursorText && (
+      <div
+        ref={textRef}
+        className={`fixed top-0 left-0 pointer-events-none z-[999999] overflow-visible ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+        style={{ willChange: 'transform' }}
+        aria-hidden={!hasCursorLabel}
+      >
         <div
-          ref={textRef}
-          className={`fixed top-0 left-0 pointer-events-none z-[999999] overflow-visible transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
-          style={{ willChange: 'transform' }}
+          className={`custom-cursor-label absolute left-0 top-0 backdrop-blur-sm px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-widest whitespace-nowrap is-${cursorLabelKind} ${hasCursorLabel ? 'is-visible' : 'is-hidden'}`}
         >
-          <div
-            className={`custom-cursor-label absolute left-0 top-0 backdrop-blur-sm px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-widest whitespace-nowrap is-${cursorLabelKind}`}
-            style={{ transform: 'translate(-50%, -50%)' }}
-          >
-            {cursorText}
-          </div>
+          {cursorText || " "}
         </div>
-      )}
+      </div>
 
       <style jsx global>{`
         body, a, button, input, textarea {
@@ -387,7 +450,19 @@ const CustomCursor = () => {
           transition:
             background-color 0.34s cubic-bezier(0.16, 1, 0.3, 1),
             border-color 0.34s cubic-bezier(0.16, 1, 0.3, 1),
-            color 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+            color 0.34s cubic-bezier(0.16, 1, 0.3, 1),
+            opacity 0.14s ease,
+            transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .custom-cursor-label.is-hidden {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(0.92);
+        }
+
+        .custom-cursor-label.is-visible {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1);
         }
 
         [data-theme="light"] .custom-cursor-label.is-standard {
