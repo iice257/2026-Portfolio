@@ -2,6 +2,31 @@
   isolation: isolate;
 }
 
+.galaxyBackdrop,
+.wavesBackdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
+.galaxyBackdrop {
+  opacity: 0.68;
+}
+
+.wavesBackdrop {
+  opacity: 0.42;
+}
+
+.galaxyBackdrop canvas,
+.wavesBackdrop canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .heroSectionLocked {
   touch-action: none;
 }

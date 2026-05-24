@@ -134,7 +134,7 @@ const MockupPair = ({ project, onOpenPreview, onHover, onLeave, actions = null }
         <ProjectMockupFrame project={project} variant="desktop" className="aspect-[16/10] p-5" />
       </PreviewSurface>
       {actions && (
-        <div className="major-expanded-buttons" onClick={(event) => event.stopPropagation()}>
+        <div className="major-expanded-buttons" data-cursor-bridge="true" onClick={(event) => event.stopPropagation()}>
           {actions}
         </div>
       )}
@@ -159,7 +159,7 @@ const ProjectActionLinks = ({ project, className = "" }) => {
   if (!actions.length) return null;
 
   return (
-    <div className={`flex flex-wrap items-center gap-3 ${className}`}>
+    <div className={`flex flex-wrap items-center gap-3 ${className}`} data-cursor-bridge="true">
       {actions.map((action) => (
         <a
           key={action.label}
@@ -167,6 +167,7 @@ const ProjectActionLinks = ({ project, className = "" }) => {
           target="_blank"
           rel="noopener noreferrer"
           className="project-action-link"
+          data-clickable="true"
           onClick={(event) => event.stopPropagation()}
         >
           <span>{action.label}</span>
@@ -189,21 +190,6 @@ const lightboxStripTransition = {
   ease: [0.16, 1, 0.3, 1],
 };
 
-const lightboxStripVariants = {
-  enter: (direction) => ({
-    x: direction >= 0 ? "100%" : "-100%",
-    opacity: 0.74,
-  }),
-  center: {
-    x: "0%",
-    opacity: 1,
-  },
-  exit: (direction) => ({
-    x: direction >= 0 ? "-100%" : "100%",
-    opacity: 0.74,
-  }),
-};
-
 const lightboxPanelVariants = {
   enter: (direction) => (
     direction === 0
@@ -223,8 +209,8 @@ const lightboxPanelVariants = {
   ),
 };
 
-const MockupPreviewModal = ({ active, direction = 0, onClose, onNavigate }) => {
-  const videoRef = useRef(null);
+const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, onClose, onNavigate }) => {
+  const fullscreenRef = useRef(null);
   useEffect(() => {
     if (!active) return undefined;
 
@@ -240,17 +226,17 @@ const MockupPreviewModal = ({ active, direction = 0, onClose, onNavigate }) => {
 
   if (!active) return null;
 
-  const preview = getProjectPreview(active.project, active.variant);
   const isMobile = active.variant === "mobile";
-  const previewKey = `${active.project.slug}-${active.variant}`;
+  const activeKey = `${active.project.slug}-${active.variant}`;
+  const safeActiveIndex = Math.max(0, activeIndex);
 
   const openFullscreen = (event) => {
     event.stopPropagation();
-    const video = videoRef.current;
-    if (!video) return;
+    const target = fullscreenRef.current;
+    if (!target) return;
 
-    const fullscreenTarget = video.requestFullscreen || video.webkitRequestFullscreen || video.msRequestFullscreen;
-    fullscreenTarget?.call(video)?.catch?.(() => {});
+    const fullscreenTarget = target.requestFullscreen || target.webkitRequestFullscreen || target.msRequestFullscreen;
+    fullscreenTarget?.call(target)?.catch?.(() => {});
   };
 
   return (
@@ -260,7 +246,7 @@ const MockupPreviewModal = ({ active, direction = 0, onClose, onNavigate }) => {
       data-cursor-variant="project"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      exit={{ opacity: 0, pointerEvents: "none" }}
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -269,13 +255,11 @@ const MockupPreviewModal = ({ active, direction = 0, onClose, onNavigate }) => {
       <button type="button" className="mockup-lightbox-nav is-prev" onClick={(event) => { event.stopPropagation(); onNavigate(-1); }} aria-label="Previous mockup">
         <span aria-hidden="true">‹</span>
       </button>
-      <AnimatePresence custom={direction}>
       <motion.div
-        key={`panel-${previewKey}`}
         className={`mockup-lightbox-panel ${isMobile ? "is-mobile" : "is-desktop"}`}
         custom={direction}
         variants={lightboxPanelVariants}
-        initial="enter"
+        initial={direction === 0 ? "enter" : false}
         animate="center"
         exit="exit"
         transition={lightboxStripTransition}
@@ -286,13 +270,11 @@ const MockupPreviewModal = ({ active, direction = 0, onClose, onNavigate }) => {
             <p className="text-micro" style={{ color: "var(--fg-muted)" }}>{previewLabel(active.variant)}</p>
             <h3 className="text-body-xl font-light" style={{ color: "var(--fg-primary)" }}>{active.project.name}</h3>
           </div>
-          <div className="mockup-lightbox-header-actions">
-            {preview.type === "video" && (
-              <button type="button" className="mockup-lightbox-fullscreen" onClick={openFullscreen} aria-label="Open mockup video fullscreen">
-                <IconFullscreen />
-              </button>
-            )}
-          <button type="button" className="mockup-lightbox-close" onClick={onClose} aria-label="Close mockup preview">
+          <div className="mockup-lightbox-header-actions" data-cursor-bridge="true">
+            <button type="button" className="mockup-lightbox-fullscreen" data-clickable="true" onClick={openFullscreen} aria-label="Open mockup fullscreen">
+              <IconFullscreen />
+            </button>
+          <button type="button" className="mockup-lightbox-close" data-clickable="true" onClick={onClose} aria-label="Close mockup preview">
             ×
           </button>
         </div>
@@ -303,41 +285,41 @@ const MockupPreviewModal = ({ active, direction = 0, onClose, onNavigate }) => {
           data-cursor-label="Click to close"
           data-cursor-variant="project"
           onClick={onClose}
-          onKeyDown={(event) => {
-            if (event.key === "Enter" || event.key === " ") {
-              event.preventDefault();
-              onClose();
-            }
-          }}
-          role="button"
-          tabIndex={0}
-          aria-label="Close mockup preview"
+          aria-label="Mockup preview"
         >
-          <AnimatePresence initial={false} custom={direction}>
-            <motion.div
-              key={previewKey}
-              className="mockup-lightbox-strip-item"
-              custom={direction}
-              variants={lightboxStripVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={lightboxStripTransition}
-            >
-              {preview.type === "video" && (
-                <video ref={videoRef} src={preview.src} autoPlay muted loop playsInline controls className="h-full w-full object-cover" />
-              )}
-              {preview.type === "image" && (
-                <Image src={preview.src} alt={`${active.project.name} ${previewLabel(active.variant)} mockup`} fill sizes="90vw" className="object-contain" />
-              )}
-              {preview.type === "mockup" && (
-                <ProjectMockupFrame project={active.project} variant={active.variant} className={isMobile ? "h-full w-full p-5" : "h-full w-full p-6"} />
-              )}
-            </motion.div>
-          </AnimatePresence>
+          <motion.div
+            className="mockup-lightbox-track"
+            animate={{ x: `${safeActiveIndex * -(100 / items.length)}%` }}
+            transition={lightboxStripTransition}
+            style={{ width: `${items.length * 100}%` }}
+          >
+            {items.map((item) => {
+              const itemPreview = getProjectPreview(item.project, item.variant);
+              const itemIsMobile = item.variant === "mobile";
+              const itemKey = `${item.project.slug}-${item.variant}`;
+
+              return (
+                <div
+                  key={itemKey}
+                  ref={itemKey === activeKey ? fullscreenRef : null}
+                  className="mockup-lightbox-strip-item"
+                  style={{ width: `${100 / items.length}%` }}
+                >
+                  {itemPreview.type === "video" && (
+                    <video src={itemPreview.src} autoPlay={itemKey === activeKey} muted loop playsInline controls className="h-full w-full object-cover" />
+                  )}
+                  {itemPreview.type === "image" && (
+                    <Image src={itemPreview.src} alt={`${item.project.name} ${previewLabel(item.variant)} mockup`} fill sizes="90vw" className="object-contain" />
+                  )}
+                  {itemPreview.type === "mockup" && (
+                    <ProjectMockupFrame project={item.project} variant={item.variant} className={itemIsMobile ? "h-full w-full p-5" : "h-full w-full p-6"} />
+                  )}
+                </div>
+              );
+            })}
+          </motion.div>
         </div>
       </motion.div>
-      </AnimatePresence>
       <button type="button" className="mockup-lightbox-nav is-next" onClick={(event) => { event.stopPropagation(); onNavigate(1); }} aria-label="Next mockup">
         <span aria-hidden="true">›</span>
       </button>
@@ -345,7 +327,7 @@ const MockupPreviewModal = ({ active, direction = 0, onClose, onNavigate }) => {
   );
 };
 
-const MockupChoiceButton = ({ project, onOpenPreview }) => {
+const MockupChoiceButton = ({ project, onOpenPreview, onHover, onLeave }) => {
   const [isChoosing, setIsChoosing] = useState(false);
 
   useEffect(() => {
@@ -355,14 +337,23 @@ const MockupChoiceButton = ({ project, onOpenPreview }) => {
   }, [isChoosing]);
 
   return (
-    <div className={`mockup-choice ${isChoosing ? "is-open" : ""}`} onMouseLeave={() => setIsChoosing(false)}>
+    <div
+      className={`mockup-choice ${isChoosing ? "is-open" : ""}`}
+      data-cursor-bridge="true"
+      onMouseLeave={() => {
+        setIsChoosing(false);
+        onLeave?.();
+      }}
+    >
       <button
         type="button"
         className="project-action-link mockup-choice-main"
+        data-clickable="true"
         onClick={(event) => {
           event.stopPropagation();
           setIsChoosing((value) => !value);
         }}
+        onMouseEnter={() => onHover?.("")}
         aria-expanded={isChoosing}
       >
         <IconExpand />
@@ -374,12 +365,14 @@ const MockupChoiceButton = ({ project, onOpenPreview }) => {
             type="button"
             key={variant}
             className="project-action-link"
+            data-clickable="true"
             tabIndex={isChoosing ? 0 : -1}
             onClick={(event) => {
               event.stopPropagation();
               onOpenPreview(project, variant);
               setIsChoosing(false);
             }}
+            onMouseEnter={() => onHover?.("")}
           >
             {variant === "mobile" ? <IconPhone /> : <IconDesktop />}
             <span>{variant}</span>
@@ -391,13 +384,6 @@ const MockupChoiceButton = ({ project, onOpenPreview }) => {
 };
 
 const MajorProjectExpandedCard = ({ project, index, onFlip, onHover, onLeave, onOpenPreview }) => {
-  const handleKeyDown = (event) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      onFlip();
-    }
-  };
-
   return (
     <motion.article
       key={`${project.slug}-expanded`}
@@ -405,13 +391,10 @@ const MajorProjectExpandedCard = ({ project, index, onFlip, onHover, onLeave, on
       animate={{ opacity: 1, rotateY: 0, scale: 1 }}
       exit={{ opacity: 0, rotateY: 72, scale: 0.985 }}
       transition={flipTransition}
-      tabIndex={0}
-      role="button"
-      aria-expanded="true"
+      role="region"
       aria-label={`Collapse details for ${project.name}`}
       data-cursor-label="Click to collapse"
       data-cursor-variant="project"
-      onKeyDown={handleKeyDown}
       onClick={onFlip}
       onMouseEnter={() => onHover("Click to collapse")}
       onMouseLeave={onLeave}
@@ -441,7 +424,7 @@ const MajorProjectExpandedCard = ({ project, index, onFlip, onHover, onLeave, on
             <TagList tags={project.tech} />
           </div>
         </div>
-        <div className="xl:col-span-8 flex flex-col gap-4" onClick={(event) => event.stopPropagation()}>
+        <div className="xl:col-span-8 flex flex-col gap-4">
           <MockupPair
             project={project}
             onOpenPreview={onOpenPreview}
@@ -499,7 +482,7 @@ const MajorProjectCard = ({ project, index, onFlip, onHover, onLeave, dimmed }) 
         <p className="text-body-md major-card-subtitle" style={{ color: "var(--fg-secondary)" }}>
           {project.subtitle}
         </p>
-        <div className="major-card-actions" onClick={(event) => event.stopPropagation()}>
+        <div className="major-card-actions" data-cursor-bridge="true" onClick={(event) => event.stopPropagation()}>
           <TagList tags={project.tech} />
           <ProjectActionLinks project={project} />
         </div>
@@ -523,6 +506,9 @@ export default function ProjectsIndex() {
       { project, variant: "desktop" },
     ])
   ), []);
+  const activePreviewIndex = activePreview
+    ? previewItems.findIndex((item) => item.project.slug === activePreview.project.slug && item.variant === activePreview.variant)
+    : -1;
 
   const toggleFlip = (slug) => {
     setFlippedCards((current) => {
@@ -804,8 +790,7 @@ export default function ProjectsIndex() {
                       >
                         <div
                           className="grid grid-cols-1 md:grid-cols-12 gap-4 pb-8 cursor-none"
-                          role="button"
-                          tabIndex={0}
+                          role="region"
                           data-cursor-label="Click to collapse"
                           data-cursor-variant="project"
                           onClick={() => {
@@ -813,15 +798,6 @@ export default function ProjectsIndex() {
                             setProjectCursor("Click to expand");
                             window.setTimeout(requestCursorRefresh, 0);
                             window.setTimeout(requestCursorRefresh, 440);
-                          }}
-                          onKeyDown={(event) => {
-                            if (event.key === "Enter" || event.key === " ") {
-                              event.preventDefault();
-                              setOpenProject(null);
-                              setProjectCursor("Click to expand");
-                              window.setTimeout(requestCursorRefresh, 0);
-                              window.setTimeout(requestCursorRefresh, 440);
-                            }
                           }}
                           onMouseEnter={() => setProjectCursor("Click to collapse")}
                           onMouseLeave={clearProjectCursor}
@@ -833,7 +809,7 @@ export default function ProjectsIndex() {
                             </p>
                             <div className="archive-project-actions">
                               <TagList tags={project.tech} />
-                              <div className="flex flex-wrap items-center gap-3" onClick={(event) => event.stopPropagation()}>
+                              <div className="flex flex-wrap items-center gap-3" data-cursor-bridge="true" onClick={(event) => event.stopPropagation()}>
                                 <ProjectActionLinks project={project} />
                                 <MockupChoiceButton project={project} onOpenPreview={openPreview} onHover={setProjectCursor} onLeave={clearProjectCursor} />
                               </div>
@@ -864,6 +840,8 @@ export default function ProjectsIndex() {
         {activePreview && (
           <MockupPreviewModal
             active={activePreview}
+            activeIndex={activePreviewIndex}
+            items={previewItems}
             direction={previewDirection}
             onClose={closePreview}
             onNavigate={navigatePreview}

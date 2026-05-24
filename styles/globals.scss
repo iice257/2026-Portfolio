@@ -1226,11 +1226,17 @@ a {
   background: var(--bg-secondary);
 }
 
-.mockup-lightbox-strip-item {
-  position: absolute;
-  inset: 0;
-  width: 100%;
+.mockup-lightbox-track {
+  display: flex;
   height: 100%;
+  will-change: transform;
+}
+
+.mockup-lightbox-strip-item {
+  position: relative;
+  flex: 0 0 auto;
+  height: 100%;
+  overflow: hidden;
 }
 
 .mockup-lightbox-panel.is-mobile .mockup-lightbox-stage {
@@ -1256,6 +1262,8 @@ a {
 .mockup-lightbox-close {
   width: 2.35rem;
   height: 2.35rem;
+  background: color-mix(in srgb, #ef4444 18%, var(--bg-primary));
+  color: color-mix(in srgb, #ef4444 70%, var(--fg-primary));
   font-size: 1.35rem;
   line-height: 1;
 }
@@ -1278,8 +1286,6 @@ a {
   line-height: 0;
 }
 
-.mockup-lightbox-close:hover,
-.mockup-lightbox-close:focus-visible,
 .mockup-lightbox-fullscreen:hover,
 .mockup-lightbox-fullscreen:focus-visible,
 .mockup-lightbox-nav:hover,
@@ -1289,13 +1295,27 @@ a {
   color: var(--bg-primary);
 }
 
+.mockup-lightbox-close:hover,
+.mockup-lightbox-close:focus-visible {
+  background: color-mix(in srgb, #ef4444 46%, var(--bg-primary));
+  color: #ffffff;
+}
+
 .mockup-choice {
   position: relative;
   display: inline-flex;
   align-items: center;
+  min-height: 2.75rem;
+}
+
+.mockup-choice.is-open {
+  min-width: 12.5rem;
 }
 
 .mockup-choice-options {
+  position: absolute;
+  top: 0;
+  left: 0;
   display: inline-flex;
   width: 0;
   max-width: 0;

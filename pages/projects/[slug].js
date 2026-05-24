@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Head from "next/head";
 import { AnimatePresence, motion } from "framer-motion";
@@ -224,6 +224,7 @@ const ProjectMediaPreview = ({ project, variant = "desktop", priority = false, o
         {videoSrc && (
           <div
             className={`project-media-controls active-${activeControl || "play"}`}
+            data-cursor-bridge="true"
             onClick={(event) => event.stopPropagation()}
             onMouseLeave={() => setActiveControl(null)}
           >
@@ -290,21 +291,6 @@ const lightboxStripTransition = {
   ease: [0.16, 1, 0.3, 1],
 };
 
-const lightboxStripVariants = {
-  enter: (direction) => ({
-    x: direction >= 0 ? "100%" : "-100%",
-    opacity: 0.74,
-  }),
-  center: {
-    x: "0%",
-    opacity: 1,
-  },
-  exit: (direction) => ({
-    x: direction >= 0 ? "-100%" : "100%",
-    opacity: 0.74,
-  }),
-};
-
 const lightboxPanelVariants = {
   enter: (direction) => (
     direction === 0
@@ -324,8 +310,8 @@ const lightboxPanelVariants = {
   ),
 };
 
-const ProjectMediaLightbox = ({ project, variant, direction = 0, onClose, onNavigate }) => {
-  const videoRef = useRef(null);
+const ProjectMediaLightbox = ({ active, activeIndex, items, direction = 0, onClose, onNavigate }) => {
+  const fullscreenRef = useRef(null);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -338,17 +324,17 @@ const ProjectMediaLightbox = ({ project, variant, direction = 0, onClose, onNavi
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onClose, onNavigate]);
 
-  const videoSrc = variant === "desktop" ? project.desktopVideo : project.mobileVideo;
-  const isMobile = variant === "mobile";
-  const previewKey = `${project.slug}-${variant}`;
+  const isMobile = active.variant === "mobile";
+  const activeKey = `${active.project.slug}-${active.variant}`;
+  const safeActiveIndex = Math.max(0, activeIndex);
 
   const openFullscreen = (event) => {
     event.stopPropagation();
-    const video = videoRef.current;
-    if (!video) return;
+    const target = fullscreenRef.current;
+    if (!target) return;
 
-    const fullscreenTarget = video.requestFullscreen || video.webkitRequestFullscreen || video.msRequestFullscreen;
-    fullscreenTarget?.call(video)?.catch?.(() => {});
+    const fullscreenTarget = target.requestFullscreen || target.webkitRequestFullscreen || target.msRequestFullscreen;
+    fullscreenTarget?.call(target)?.catch?.(() => {});
   };
 
   return (
@@ -358,22 +344,20 @@ const ProjectMediaLightbox = ({ project, variant, direction = 0, onClose, onNavi
       data-cursor-variant="project"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      exit={{ opacity: 0, pointerEvents: "none" }}
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label={`${project.name} ${isMobile ? "mobile" : "desktop"} preview`}
+      aria-label={`${active.project.name} ${isMobile ? "mobile" : "desktop"} preview`}
     >
       <button type="button" className="mockup-lightbox-nav is-prev" onClick={(event) => { event.stopPropagation(); onNavigate(-1); }} aria-label="Previous mockup">
         <span aria-hidden="true">&lsaquo;</span>
       </button>
-      <AnimatePresence custom={direction}>
       <motion.div
-        key={`panel-${previewKey}`}
         className={`mockup-lightbox-panel ${isMobile ? "is-mobile" : "is-desktop"}`}
         custom={direction}
         variants={lightboxPanelVariants}
-        initial="enter"
+        initial={direction === 0 ? "enter" : false}
         animate="center"
         exit="exit"
         transition={lightboxStripTransition}
@@ -382,15 +366,13 @@ const ProjectMediaLightbox = ({ project, variant, direction = 0, onClose, onNavi
         <div className="mockup-lightbox-header">
           <div>
             <p className="text-micro" style={{ color: "var(--fg-muted)" }}>{isMobile ? "Mobile" : "Desktop"}</p>
-            <h3 className="text-body-xl font-light" style={{ color: "var(--fg-primary)" }}>{project.name}</h3>
+            <h3 className="text-body-xl font-light" style={{ color: "var(--fg-primary)" }}>{active.project.name}</h3>
           </div>
-          <div className="mockup-lightbox-header-actions">
-            {videoSrc && (
-              <button type="button" className="mockup-lightbox-fullscreen" onClick={openFullscreen} aria-label="Open mockup video fullscreen">
-                <IconFullscreen />
-              </button>
-            )}
-            <button type="button" className="mockup-lightbox-close" onClick={onClose} aria-label="Close mockup preview">
+          <div className="mockup-lightbox-header-actions" data-cursor-bridge="true">
+            <button type="button" className="mockup-lightbox-fullscreen" data-clickable="true" onClick={openFullscreen} aria-label="Open mockup fullscreen">
+              <IconFullscreen />
+            </button>
+            <button type="button" className="mockup-lightbox-close" data-clickable="true" onClick={onClose} aria-label="Close mockup preview">
               &times;
             </button>
           </div>
@@ -400,37 +382,37 @@ const ProjectMediaLightbox = ({ project, variant, direction = 0, onClose, onNavi
           data-cursor-label="Click to close"
           data-cursor-variant="project"
           onClick={onClose}
-          onKeyDown={(event) => {
-            if (event.key === "Enter" || event.key === " ") {
-              event.preventDefault();
-              onClose();
-            }
-          }}
-          role="button"
-          tabIndex={0}
-          aria-label="Close mockup preview"
+          aria-label="Mockup preview"
         >
-          <AnimatePresence initial={false} custom={direction}>
-            <motion.div
-              key={previewKey}
-              className="mockup-lightbox-strip-item"
-              custom={direction}
-              variants={lightboxStripVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={lightboxStripTransition}
-            >
-              {videoSrc ? (
-                <video ref={videoRef} src={videoSrc} autoPlay muted loop playsInline controls className="h-full w-full object-cover" />
-              ) : (
-                <ProjectVisual project={project} priority compact={isMobile} />
-              )}
-            </motion.div>
-          </AnimatePresence>
+          <motion.div
+            className="mockup-lightbox-track"
+            animate={{ x: `${safeActiveIndex * -(100 / items.length)}%` }}
+            transition={lightboxStripTransition}
+            style={{ width: `${items.length * 100}%` }}
+          >
+            {items.map((item) => {
+              const itemVideoSrc = item.variant === "desktop" ? item.project.desktopVideo : item.project.mobileVideo;
+              const itemIsMobile = item.variant === "mobile";
+              const itemKey = `${item.project.slug}-${item.variant}`;
+
+              return (
+                <div
+                  key={itemKey}
+                  ref={itemKey === activeKey ? fullscreenRef : null}
+                  className="mockup-lightbox-strip-item"
+                  style={{ width: `${100 / items.length}%` }}
+                >
+                  {itemVideoSrc ? (
+                    <video src={itemVideoSrc} autoPlay={itemKey === activeKey} muted loop playsInline controls className="h-full w-full object-cover" />
+                  ) : (
+                    <ProjectVisual project={item.project} priority={itemKey === activeKey} compact={itemIsMobile} />
+                  )}
+                </div>
+              );
+            })}
+          </motion.div>
         </div>
       </motion.div>
-      </AnimatePresence>
       <button type="button" className="mockup-lightbox-nav is-next" onClick={(event) => { event.stopPropagation(); onNavigate(1); }} aria-label="Next mockup">
         <span aria-hidden="true">&rsaquo;</span>
       </button>
@@ -442,6 +424,15 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
   const [activePreview, setActivePreview] = useState(null);
   const [previewDirection, setPreviewDirection] = useState(0);
   const { setCursorText, setCursorVariant, requestCursorRefresh } = useCursor();
+  const previewItems = useMemo(() => (
+    featuredProjects.flatMap((item) => [
+      { project: item, variant: "mobile" },
+      { project: item, variant: "desktop" },
+    ])
+  ), []);
+  const activePreviewIndex = activePreview
+    ? previewItems.findIndex((item) => item.project.slug === activePreview.project.slug && item.variant === activePreview.variant)
+    : -1;
 
   if (!project) return null;
 
@@ -481,15 +472,17 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
   const navigatePreview = (direction) => {
     setPreviewDirection(direction);
     setActivePreview((current) => {
-      const currentIndex = current === "mobile" ? 0 : 1;
-      return ["mobile", "desktop"][(currentIndex + direction + 2) % 2];
+      if (!current) return current;
+      const currentIndex = previewItems.findIndex((item) => item.project.slug === current.project.slug && item.variant === current.variant);
+      const nextIndex = (currentIndex + direction + previewItems.length) % previewItems.length;
+      return previewItems[nextIndex];
     });
     window.setTimeout(requestCursorRefresh, 0);
   };
 
   const openPreview = (variant) => {
     setPreviewDirection(0);
-    setActivePreview(variant);
+    setActivePreview({ project, variant });
     window.setTimeout(requestCursorRefresh, 0);
   };
 
@@ -518,7 +511,7 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
       <main id="main-content" className="min-h-screen" style={{ backgroundColor: "var(--bg-primary)" }}>
         <section className="section-container pt-32 pb-12">
           <div className="mb-7 flex flex-wrap items-center justify-between gap-3">
-            <Link href="/projects" className="project-action-link">
+            <Link href="/projects" className="project-action-link" data-clickable="true">
               <span>All projects</span>
             </Link>
             <div className="ml-auto flex flex-wrap items-center justify-end gap-3">
@@ -529,6 +522,7 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
                   target="_blank"
                   rel="noopener noreferrer"
                   className="project-action-link"
+                  data-clickable="true"
                 >
                   <span>{action.label}</span>
                 </a>
@@ -599,7 +593,7 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
         <section className="section-container py-16" style={{ borderTop: "1px solid var(--border)" }}>
           <div className="grid grid-cols-2 gap-8">
             {prevProject ? (
-              <Link href={`/projects/${prevProject.slug}`} className="project-nav-link group is-prev justify-self-start items-center gap-4">
+              <Link href={`/projects/${prevProject.slug}`} className="project-nav-link group is-prev justify-self-start items-center gap-4" data-clickable="true">
                 <span className="project-nav-caret" aria-hidden="true">
                   &lsaquo;
                 </span>
@@ -615,7 +609,7 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
             )}
 
             {nextProject ? (
-              <Link href={`/projects/${nextProject.slug}`} className="project-nav-link group is-next justify-self-end items-center justify-end gap-4 text-right">
+              <Link href={`/projects/${nextProject.slug}`} className="project-nav-link group is-next justify-self-end items-center justify-end gap-4 text-right" data-clickable="true">
                 <span>
                   <span className="text-micro block mb-2 opacity-60">Next</span>
                   <span className="text-body-xl font-light transition-transform duration-300 inline-block">
@@ -643,8 +637,9 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
       >
         {activePreview && (
           <ProjectMediaLightbox
-            project={project}
-            variant={activePreview}
+            active={activePreview}
+            activeIndex={activePreviewIndex}
+            items={previewItems}
             direction={previewDirection}
             onClose={() => {
               setActivePreview(null);

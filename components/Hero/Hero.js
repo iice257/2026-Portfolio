@@ -1,10 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { MENULINKS } from "../../constants";
 import { useHeroLock } from "../../context/HeroLockContext";
+import { useTheme } from "../../context/ThemeContext";
 import TextPressure from "../ReactBits/TextPressure";
 import styles from "./Hero.module.scss";
+
+const Galaxy = dynamic(() => import("../ReactBits/Galaxy"), { ssr: false });
+const Waves = dynamic(() => import("../ReactBits/Waves"), { ssr: false });
 
 const HERO_CAPABILITY_PHRASES = [
   "digital experiences",
@@ -63,10 +68,12 @@ const LockIcon = ({ unlocked = false }) => (
 
 const Hero = () => {
   const { setIsHeroLocked } = useHeroLock();
+  const { theme } = useTheme();
   const [isLockViewport, setIsLockViewport] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const [hasUnlocked, setHasUnlocked] = useState(false);
   const [isHeroInView, setIsHeroInView] = useState(true);
+  const [canRenderHeroBackdrop, setCanRenderHeroBackdrop] = useState(false);
   const [showUnlockTooltip, setShowUnlockTooltip] = useState(false);
   const [interactionPulse, setInteractionPulse] = useState(0);
   const [activeCapabilityIndex, setActiveCapabilityIndex] = useState(0);
@@ -266,6 +273,42 @@ const Hero = () => {
   }, []);
 
   useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return undefined;
+
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let isVisible = true;
+
+    const syncBackdrop = () => {
+      setCanRenderHeroBackdrop(
+        isVisible &&
+        !motionQuery.matches &&
+        document.visibilityState !== "hidden"
+      );
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+        syncBackdrop();
+      },
+      { rootMargin: "180px 0px", threshold: [0, 0.01] }
+    );
+
+    observer.observe(section);
+    syncBackdrop();
+
+    motionQuery.addEventListener("change", syncBackdrop);
+    document.addEventListener("visibilitychange", syncBackdrop);
+
+    return () => {
+      observer.disconnect();
+      motionQuery.removeEventListener("change", syncBackdrop);
+      document.removeEventListener("visibilitychange", syncBackdrop);
+    };
+  }, []);
+
+  useEffect(() => {
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (motionQuery.matches) return undefined;
 
@@ -380,6 +423,44 @@ const Hero = () => {
       style={{ backgroundColor: "var(--bg-primary)" }}
       data-hero-locked={isLocked ? "true" : "false"}
     >
+      {canRenderHeroBackdrop && theme === "dark" && (
+        <div className={styles.galaxyBackdrop} aria-hidden="true">
+          <Galaxy
+            mouseRepulsion={false}
+            mouseInteraction={false}
+            density={0.18}
+            glowIntensity={0.08}
+            saturation={0.65}
+            hueShift={0}
+            twinkleIntensity={0.45}
+            rotationSpeed={0}
+            speed={0.08}
+            pixelRatio={0.5}
+            targetFps={24}
+          />
+        </div>
+      )}
+
+      {canRenderHeroBackdrop && theme === "light" && (
+        <div className={styles.wavesBackdrop} aria-hidden="true">
+          <Waves
+            lineColor="#a4a4a4"
+            backgroundColor="transparent"
+            waveSpeedX={0.008}
+            waveSpeedY={0.008}
+            waveAmpX={28}
+            waveAmpY={14}
+            friction={0.72}
+            tension={0.005}
+            maxCursorMove={160}
+            xGap={28}
+            yGap={16}
+            pixelRatio={0.5}
+            targetFps={24}
+          />
+        </div>
+      )}
+
       <div className="section-container-wide w-full relative z-[1]">
         <div
           ref={nameContainerRef}

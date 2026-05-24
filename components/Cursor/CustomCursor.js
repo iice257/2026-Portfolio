@@ -9,8 +9,9 @@ const CURSOR_TIP_X = 5.5;
 const CURSOR_TIP_Y = 3;
 const INTERACTIVE_SELECTOR = 'a, button, [role="button"], input, textarea, select, summary, [data-clickable="true"]';
 const LABEL_SELECTOR = "[data-cursor-label]";
+const BRIDGE_SELECTOR = "[data-cursor-bridge='true']";
 const PREVIEW_LABEL_PATTERN = /^click to (open|close)$/i;
-const INTERACTIVE_BRIDGE_RADIUS = 14;
+const INTERACTIVE_BRIDGE_RADIUS = 30;
 const INTERACTIVE_BRIDGE_OFFSETS = [
   [0, 0],
   [INTERACTIVE_BRIDGE_RADIUS, 0],
@@ -89,6 +90,7 @@ const CustomCursor = () => {
 
     const findNearbyInteractive = (x, y, labeledTarget) => {
       if (!resolvedStateRef.current.clickable || !labeledTarget) return null;
+      const bridgeRoot = labeledTarget.closest?.(BRIDGE_SELECTOR) || labeledTarget;
 
       for (const [offsetX, offsetY] of INTERACTIVE_BRIDGE_OFFSETS) {
         const sampleX = Math.min(window.innerWidth - 1, Math.max(0, x + offsetX));
@@ -96,7 +98,7 @@ const CustomCursor = () => {
         const stack = document.elementsFromPoint(sampleX, sampleY);
         const nearby = stack.find((element) => {
           const interactive = element.closest?.(INTERACTIVE_SELECTOR);
-          return interactive && isUsableInteractive(interactive) && labeledTarget.contains(interactive);
+          return interactive && isUsableInteractive(interactive) && bridgeRoot.contains(interactive);
         });
 
         if (nearby) return nearby.closest(INTERACTIVE_SELECTOR);
