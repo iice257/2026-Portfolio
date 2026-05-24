@@ -1,51 +1,37 @@
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef } from "react";
 import gsap, { Power1, Circ } from "gsap";
 import Button from "@/components/Button/Button";
-import Cursor from "@/components/Cursor/Cursor";
 
 const Custom404 = () => {
-  const router = useRouter();
-  const [isDesktop, setIsDesktop] = useState(true);
   const milkSpillLargeRef = useRef(null);
   const faceRef = useRef(null);
   const leftEyeRef = useRef(null);
   const rightEyeRef = useRef(null);
 
   useEffect(() => {
-    const { orientation } = window;
+    window.history.scrollRestoration = "manual";
 
-    const result =
-      typeof orientation === "undefined" &&
-      navigator.userAgent.indexOf("IEMobile") === -1;
-    history.scrollRestoration = "manual";
+    const ctx = gsap.context(() => {
+      gsap.to(milkSpillLargeRef.current, {
+        duration: 30,
+        scale: 1.25,
+        transformOrigin: "right",
+        ease: Power1.easeInOut,
+      });
 
-    setIsDesktop(result);
+      gsap.to(faceRef.current, {
+        yoyo: true,
+        repeat: -1,
+        duration: 10,
+        yPercent: -15,
+        ease: Power1.easeInOut,
+      });
 
-    // Milk Spill
-    gsap.to(milkSpillLargeRef.current, {
-      duration: 30,
-      scale: 1.25,
-      transformOrigin: "right",
-      ease: Power1.easeInOut,
-    });
+      gsap.set([leftEyeRef.current, rightEyeRef.current], {
+        transformOrigin: "center",
+        scaleY: 0,
+      });
 
-    // Face Hover
-    gsap.to(faceRef.current, {
-      yoyo: true,
-      repeat: -1,
-      duration: 10,
-      yPercent: -15,
-      ease: Power1.easeInOut,
-    });
-
-    // Blink Eyes
-    gsap.set([leftEyeRef.current, rightEyeRef.current], {
-      transformOrigin: "center",
-      scaleY: 0,
-    });
-
-    const blink = () => {
       gsap
         .timeline({
           repeat: -1,
@@ -54,15 +40,14 @@ const Custom404 = () => {
         })
         .add("blink")
         .to([leftEyeRef.current, rightEyeRef.current], { scaleY: 1 });
-    };
+    });
 
-    blink();
+    return () => ctx.revert();
   }, []);
 
   return (
     <>
-      <Cursor isDesktop={isDesktop} />
-      <div className="flex justify-center items-center flex-wrap h-screen">
+      <main id="main-content" className="flex justify-center items-center flex-wrap min-h-[100dvh]">
         <svg className="max-h-screen" viewBox="0 0 600 600">
           <g id="milk-spill" fill="#fff">
             <path
@@ -157,11 +142,11 @@ const Custom404 = () => {
           </g>
         </svg>
         <div className="link">
-          <Button type="primary" onClick={() => router.push("/")}>
+          <Button type="primary" href="/">
             Back to Home
           </Button>
         </div>
-      </div>
+      </main>
     </>
   );
 };

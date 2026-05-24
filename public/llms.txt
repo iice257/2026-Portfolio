@@ -1,0 +1,30 @@
+# Kingsley Afolabi Aremu
+
+> Portfolio for Kingsley Afolabi Aremu, a full-stack developer and creative engineer based in Lagos, Nigeria.
+
+## Canonical Site
+
+- Homepage: https://kingsleyaremu.vercel.app/
+- Projects: https://kingsleyaremu.vercel.app/projects
+- GitHub: https://github.com/kingsleyaremu
+- LinkedIn: https://linkedin.com/in/kingsley-aremu
+- Email: kingsley.aremu@gmail.com
+
+## Focus Areas
+
+- Full-stack web development
+- React, Next.js, and React Native
+- Frontend performance and accessibility
+- AI agent tooling and automation workflows
+- Creative engineering and polished product interfaces
+
+## Featured Work
+
+- FormMate AI: AI-assisted form completion with reviewable voice or text guidance.
+- PasteVault: a private, installable clipboard for saving, searching, and sharing text, code, links, and JSON across devices.
+- AI Agent Skills: reusable workflows for AI-agent research, planning, parsing, publishing, and build work.
+- Restore AI: mobile concept for restoring, upscaling, resizing, and recoloring images.
+
+## Crawling Notes
+
+Use `sitemap.xml` for canonical URLs. Prefer public project pages and GitHub repositories for project-specific evidence.

@@ -55,7 +55,7 @@ const Skills = () => {
     },
     {
       name: "Practices",
-      skills: ["Performance Optimization", "Responsive Design", "UI/UX Awareness", "System Maintenance"],
+      skills: ["Performance Optimization", "Responsive Design", "UI/UX Awareness", "System Maintenance", "Problem Solving"],
       description: "Applying industry best practices for maintainable, high-quality code."
     }
   ];
@@ -112,6 +112,10 @@ const Skills = () => {
               {/* Category Header - Clickable */}
               <button
                 onClick={() => handleCategoryClick(category.name)}
+                onMouseEnter={() => setExpandedCategory(category.name)}
+                onFocus={() => setExpandedCategory(category.name)}
+                aria-expanded={expandedCategory === category.name}
+                aria-controls={`skills-panel-${category.name.toLowerCase().replace(/\s+/g, "-")}`}
                 className="w-full flex items-center justify-between py-6 group text-left"
                 style={{ borderTop: index === 0 ? 'none' : '1px solid var(--border)' }}
               >
@@ -141,6 +145,7 @@ const Skills = () => {
                     className={`text-body-lg transition-transform duration-300 ${expandedCategory === category.name ? 'rotate-45' : ''
                       }`}
                     style={{ color: 'var(--fg-primary)' }}
+                    aria-hidden="true"
                   >
                     +
                   </span>
@@ -151,6 +156,7 @@ const Skills = () => {
               <AnimatePresence>
                 {expandedCategory === category.name && (
                   <motion.div
+                    id={`skills-panel-${category.name.toLowerCase().replace(/\s+/g, "-")}`}
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}

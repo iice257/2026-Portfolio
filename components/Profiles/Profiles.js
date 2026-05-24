@@ -23,13 +23,13 @@ const Profiles = () => {
   return (
     <div className="flex items-center gap-2 justify-start">
       {SOCIAL_LINKS &&
-        SOCIAL_LINKS.map(({ name, url }) => (
+        SOCIAL_LINKS.map(({ name, label, url }) => (
           <a
             href={url}
             key={name}
-            rel="noreferrer"
-            target="_blank"
-            aria-label={name}
+            rel={url.startsWith("mailto:") ? undefined : "noreferrer"}
+            target={url.startsWith("mailto:") ? undefined : "_blank"}
+            aria-label={label || name}
             className="p-2 transition-opacity hover:opacity-60"
             style={{ color: 'var(--fg-primary)' }}
           >

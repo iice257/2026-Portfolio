@@ -1,39 +1,36 @@
 {
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "node scripts/next-dev.mjs",
+    "build": "node scripts/next-build.mjs",
+    "start": "node scripts/next-start.mjs",
+    "lint": "next lint",
+    "validate:data": "node scripts/validate-project-data.mjs",
+    "check": "npm run validate:data && npm run lint && npm run build"
   },
   "dependencies": {
-    "@emailjs/browser": "^4.3.3",
-    "@next/third-parties": "^14.2.13",
-    "bad-words": "^3.0.4",
+    "@next/third-parties": "^14.2.35",
     "clsx": "^2.1.1",
     "framer-motion": "^11.1.9",
     "gsap": "^3.12.5",
-    "howler": "^2.2.4",
-    "lottie-web": "^5.12.2",
-    "next": "^14.2.30",
+    "next": "^14.2.35",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.1",
-    "react-reveal": "^1.2.2",
     "react-snowfall": "^2.4.0",
     "sass": "^1.77.1",
     "tailwind-merge": "^2.3.0",
-    "three": "^0.182.0",
-    "typed.js": "^2.1.0",
-    "url-loader": "^4.1.1",
-    "vanilla-tilt": "^1.8.1"
+    "three": "^0.182.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.15",
-    "eslint": "8.1.0",
-    "eslint-config-next": "^14.2.13",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.35",
     "postcss": "^8.4.28",
     "tailwindcss": "^3.3.3"
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "packageManager": "npm@10.9.2"
 }

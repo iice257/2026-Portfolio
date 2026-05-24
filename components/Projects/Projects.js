@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import { MENULINKS } from "../../constants";
 import { featuredProjects } from "../../data/projects";
 import gsap from "gsap";
@@ -10,12 +9,9 @@ import { useCursor } from "../../context/CursorContext";
 import ShuffleText from "../ReactBits/ShuffleText";
 
 const Projects = ({ isDesktop }) => {
-  const router = useRouter();
   const sectionRef = useRef(null);
   const titleRef = useRef(null);
   const projectsContainerRef = useRef(null);
-  const lastPointerRef = useRef({ x: null, y: null });
-  const projectCursorActiveRef = useRef(false);
   const { setCursorText, setCursorVariant } = useCursor();
 
   useEffect(() => {
@@ -67,78 +63,15 @@ const Projects = ({ isDesktop }) => {
   ), []);
 
   const clearProjectCursor = useCallback(() => {
-    if (!projectCursorActiveRef.current) return;
-    projectCursorActiveRef.current = false;
     setCursorText("");
     setCursorVariant("default");
   }, [setCursorText, setCursorVariant]);
 
   const setProjectCursor = useCallback(() => {
-    if (projectCursorActiveRef.current) return;
-    projectCursorActiveRef.current = true;
+    if (!canUseHoverCursor()) return;
     setCursorText("Click for more details");
     setCursorVariant("project");
-  }, [setCursorText, setCursorVariant]);
-
-  const updateProjectCursorFromPointer = useCallback(() => {
-    if (!canUseHoverCursor()) {
-      clearProjectCursor();
-      return;
-    }
-
-    const { x, y } = lastPointerRef.current;
-    if (x === null || y === null) {
-      clearProjectCursor();
-      return;
-    }
-
-    const panels = projectsContainerRef.current?.querySelectorAll(".project-panel");
-    const isOverProject = Array.from(panels || []).some((panel) => {
-      const rect = panel.getBoundingClientRect();
-      return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
-    });
-
-    if (isOverProject) {
-      setProjectCursor();
-    } else {
-      clearProjectCursor();
-    }
-  }, [canUseHoverCursor, clearProjectCursor, setProjectCursor]);
-
-  useEffect(() => {
-    const handlePointerMove = (event) => {
-      lastPointerRef.current = { x: event.clientX, y: event.clientY };
-      updateProjectCursorFromPointer();
-    };
-
-    const handleScrollOrResize = () => {
-      updateProjectCursorFromPointer();
-    };
-
-    const handlePointerLeave = () => {
-      lastPointerRef.current = { x: null, y: null };
-      clearProjectCursor();
-    };
-
-    const handleRouteStart = () => {
-      clearProjectCursor();
-    };
-
-    window.addEventListener("pointermove", handlePointerMove, { passive: true });
-    window.addEventListener("scroll", handleScrollOrResize, { passive: true });
-    window.addEventListener("resize", handleScrollOrResize);
-    document.addEventListener("pointerleave", handlePointerLeave);
-    router.events.on("routeChangeStart", handleRouteStart);
-
-    return () => {
-      window.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("scroll", handleScrollOrResize);
-      window.removeEventListener("resize", handleScrollOrResize);
-      document.removeEventListener("pointerleave", handlePointerLeave);
-      router.events.off("routeChangeStart", handleRouteStart);
-      clearProjectCursor();
-    };
-  }, [clearProjectCursor, router.events, updateProjectCursorFromPointer]);
+  }, [canUseHoverCursor, setCursorText, setCursorVariant]);
 
   return (
     <section
@@ -169,13 +102,17 @@ const Projects = ({ isDesktop }) => {
           const isEven = index % 2 === 0;
 
           return (
-            <div
+            <Link
               key={project.name}
+              href={`/projects/${project.slug}`}
               className="project-panel min-h-screen grid grid-cols-1 lg:grid-cols-2 group cursor-none"
-              onClick={() => {
-                clearProjectCursor();
-                router.push(`/projects/${project.slug}`);
-              }}
+              data-cursor-label="Click for more details"
+              data-cursor-variant="project"
+              onMouseEnter={setProjectCursor}
+              onFocus={setProjectCursor}
+              onMouseLeave={clearProjectCursor}
+              onBlur={clearProjectCursor}
+              onClick={clearProjectCursor}
             >
               {/* Image Side - Full height image */}
               <div
@@ -199,7 +136,7 @@ const Projects = ({ isDesktop }) => {
                   }`}
                 style={{ backgroundColor: 'var(--bg-primary)' }}
               >
-                <div className="w-full max-w-[34rem] min-h-[min(56vh,38rem)] flex flex-col items-center justify-center text-center mx-auto">
+                <div className="w-full max-w-[40rem] min-h-[min(56vh,38rem)] flex flex-col items-center justify-center text-center mx-auto">
 
                   {/* Project Number (top-right of content?) or keep at bottom? User said "bring them to the center into a square" */}
                   {/* I'll put project name on top, then desc, then tags. */}
@@ -225,9 +162,9 @@ const Projects = ({ isDesktop }) => {
                   </p>
 
                   {/* Tech Stack */}
-                  <div className="w-full flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+                  <div className="w-full flex flex-wrap md:flex-nowrap items-center justify-center gap-x-2 gap-y-2">
                     {project.tech.map((tech, i) => (
-                      <span key={tech} className="inline-flex items-center">
+                      <span key={tech} className="inline-flex items-center whitespace-nowrap">
                         <span
                           className="text-body-md font-bold uppercase tracking-wide"
                           style={{ color: 'var(--fg-primary)' }}
@@ -242,7 +179,7 @@ const Projects = ({ isDesktop }) => {
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>
