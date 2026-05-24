@@ -57,8 +57,10 @@ const TextPressure = ({
 
     const { width: containerW, height: containerH } = containerRef.current.getBoundingClientRect();
 
-    let newFontSize = containerW / (chars.length / 2);
-    newFontSize = Math.max(newFontSize, minFontSize);
+    const widthFontSize = containerW / (chars.length / 2);
+    const heightFontSize = containerH > 0 ? containerH * 0.78 : widthFontSize;
+    let newFontSize = Math.min(widthFontSize, heightFontSize);
+    newFontSize = Math.max(newFontSize, Math.min(minFontSize, heightFontSize));
 
     setFontSize(newFontSize);
     setScaleY(1);

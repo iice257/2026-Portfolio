@@ -16,8 +16,6 @@ import "../styles/globals.scss";
 import "../components/ReactBits/ShuffleText.css";
 import "../components/ReactBits/TextPressure.css";
 import "../components/ReactBits/StaggeredMenu.css";
-import "../components/ReactBits/Galaxy.css";
-import "../components/ReactBits/Waves.css";
 import { GTAG } from "../constants";
 
 const inter = Inter({

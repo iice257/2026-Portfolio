@@ -1,14 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import dynamic from "next/dynamic";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { MENULINKS } from "../../constants";
 import { useHeroLock } from "../../context/HeroLockContext";
 import TextPressure from "../ReactBits/TextPressure";
 import styles from "./Hero.module.scss";
-
-const Galaxy = dynamic(() => import("../ReactBits/Galaxy"), { ssr: false });
-const Waves = dynamic(() => import("../ReactBits/Waves"), { ssr: false });
 
 const HERO_CAPABILITY_PHRASES = [
   "digital experiences",
@@ -384,35 +380,6 @@ const Hero = () => {
       style={{ backgroundColor: "var(--bg-primary)" }}
       data-hero-locked={isLocked ? "true" : "false"}
     >
-      <div className={styles.galaxyBackdrop} aria-hidden="true">
-        <Galaxy
-          mouseRepulsion={false}
-          mouseInteraction={false}
-          density={0.2}
-          glowIntensity={0.1}
-          saturation={0.8}
-          hueShift={0}
-          twinkleIntensity={0.8}
-          rotationSpeed={0}
-          speed={0.1}
-        />
-      </div>
-      <div className={styles.wavesBackdrop} aria-hidden="true">
-        <Waves
-          lineColor="#a4a4a4"
-          backgroundColor="transparent"
-          waveSpeedX={0.01}
-          waveSpeedY={0.01}
-          waveAmpX={40}
-          waveAmpY={20}
-          friction={0.69}
-          tension={0.005}
-          maxCursorMove={210}
-          xGap={20}
-          yGap={10}
-        />
-      </div>
-
       <div className="section-container-wide w-full relative z-[1]">
         <div
           ref={nameContainerRef}
@@ -458,7 +425,7 @@ const Hero = () => {
                 stroke={false}
                 scale={false}
                 textColor="var(--fg-primary)"
-                minFontSize={44}
+                minFontSize={42}
               />
             </div>
 
@@ -475,7 +442,7 @@ const Hero = () => {
                 stroke={false}
                 scale={false}
                 textColor="var(--fg-primary)"
-                minFontSize={44}
+                minFontSize={42}
               />
             </div>
           </div>

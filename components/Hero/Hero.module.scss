@@ -2,44 +2,6 @@
   isolation: isolate;
 }
 
-.galaxyBackdrop {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 260ms ease;
-}
-
-.wavesBackdrop {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 260ms ease;
-}
-
-:global([data-theme="dark"]) .galaxyBackdrop {
-  opacity: 1;
-}
-
-:global([data-theme="light"]) .wavesBackdrop {
-  opacity: 1;
-}
-
-.galaxyBackdrop canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.wavesBackdrop canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
 .heroSectionLocked {
   touch-action: none;
 }
