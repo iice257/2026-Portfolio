@@ -31,7 +31,8 @@ const HERO_CAPABILITY_PHRASES = [
 
 const HERO_CAPABILITY_TRANSITION_MS = 640;
 const LOCK_VIEWPORT_QUERY = "(max-width: 1023px)";
-const TOOLTIP_DELAY_MS = 4000;
+const TOOLTIP_DELAY_MS = 5000;
+const TOOLTIP_VISIBLE_MS = 3200;
 
 const LockIcon = ({ unlocked = false }) => (
   <svg
@@ -97,6 +98,14 @@ const Hero = () => {
     tooltipTimerRef.current = null;
   }, []);
 
+  const showTimedUnlockTooltip = useCallback(() => {
+    setShowUnlockTooltip(true);
+    clearTooltipTimer();
+    tooltipTimerRef.current = window.setTimeout(() => {
+      setShowUnlockTooltip(false);
+    }, TOOLTIP_VISIBLE_MS);
+  }, [clearTooltipTimer]);
+
   const triggerTextPressureInteraction = useCallback((x, y) => {
     window.dispatchEvent(
       new CustomEvent("portfolio:hero-locked-pointer", {
@@ -115,10 +124,10 @@ const Hero = () => {
 
     tooltipTimerRef.current = window.setTimeout(() => {
       if (isLockedRef.current) {
-        setShowUnlockTooltip(true);
+        showTimedUnlockTooltip();
       }
     }, TOOLTIP_DELAY_MS);
-  }, [clearTooltipTimer, triggerTextPressureInteraction]);
+  }, [clearTooltipTimer, showTimedUnlockTooltip, triggerTextPressureInteraction]);
 
   const unlockHero = useCallback(() => {
     hasUnlockedRef.current = true;
@@ -127,6 +136,21 @@ const Hero = () => {
     setShowUnlockTooltip(false);
     clearTooltipTimer();
   }, [clearTooltipTimer]);
+
+  const lockHero = useCallback(() => {
+    if (!isLockViewportRef.current) return;
+    setIsLocked(true);
+    window.setTimeout(showTimedUnlockTooltip, TOOLTIP_DELAY_MS);
+  }, [showTimedUnlockTooltip]);
+
+  const toggleHeroLock = useCallback(() => {
+    if (isLockedRef.current) {
+      unlockHero();
+      return;
+    }
+
+    lockHero();
+  }, [lockHero, unlockHero]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia(LOCK_VIEWPORT_QUERY);
@@ -139,6 +163,7 @@ const Hero = () => {
 
       if (!matches) {
         setIsLocked(false);
+        setShowUnlockTooltip(false);
         return;
       }
 
@@ -151,12 +176,17 @@ const Hero = () => {
     mediaQuery.addEventListener("change", updateLockViewport);
 
     return () => mediaQuery.removeEventListener("change", updateLockViewport);
-  }, []);
+  }, [showTimedUnlockTooltip]);
 
   useEffect(() => {
     isLockedRef.current = isLocked;
     setIsHeroLocked(isLocked);
-  }, [isLocked, setIsHeroLocked]);
+
+    if (isLocked && isLockViewportRef.current) {
+      clearTooltipTimer();
+      tooltipTimerRef.current = window.setTimeout(showTimedUnlockTooltip, TOOLTIP_DELAY_MS);
+    }
+  }, [clearTooltipTimer, isLocked, setIsHeroLocked, showTimedUnlockTooltip]);
 
   useEffect(() => {
     return () => {
@@ -435,8 +465,9 @@ const Hero = () => {
             twinkleIntensity={0.45}
             rotationSpeed={0}
             speed={0.08}
-            pixelRatio={0.5}
-            targetFps={24}
+            pixelRatio={0.48}
+            targetFps={22}
+            maxPixelCount={520000}
           />
         </div>
       )}
@@ -455,11 +486,15 @@ const Hero = () => {
             maxCursorMove={160}
             xGap={28}
             yGap={16}
-            pixelRatio={0.5}
-            targetFps={24}
+            pixelRatio={0.48}
+            targetFps={22}
+            maxPixelCount={520000}
+            mouseInteraction={!isLockViewport || isLocked}
           />
         </div>
       )}
+
+      {theme === "light" && <div className={styles.heroBottomFeather} aria-hidden="true" />}
 
       <div className="section-container-wide w-full relative z-[1]">
         <div
@@ -474,9 +509,9 @@ const Hero = () => {
               <button
                 type="button"
                 data-hero-lock-control="true"
-                className={styles.lockButton}
-                onClick={isLocked ? unlockHero : undefined}
-                aria-label={isLocked ? "Unlock page scrolling" : "Page scrolling unlocked"}
+                className={`${styles.lockButton} ${!isLocked && hasUnlocked ? styles.lockButtonUnlocked : ""}`}
+                onClick={toggleHeroLock}
+                aria-label={isLocked ? "Unlock page scrolling" : "Relock interactive hero"}
                 aria-pressed={!isLocked}
               >
                 <LockIcon unlocked={!isLocked && hasUnlocked} />
@@ -487,7 +522,7 @@ const Hero = () => {
                 aria-live="polite"
                 className={`${styles.unlockTooltip} ${showUnlockTooltip ? styles.unlockTooltipVisible : ""}`}
               >
-                Unlock to scroll
+                {isLocked ? "Unlock to scroll" : "Relock for hero interaction"}
               </div>
             </div>
           )}
@@ -532,14 +567,15 @@ const Hero = () => {
         <div
           ref={subtitleRef}
           data-hide-when-hero-locked="true"
-          className={`${styles.heroDetails} ${isLocked ? styles.heroDetailsHidden : ""} mt-12 md:mt-16 lg:mt-24 text-center max-w-4xl mx-auto`}
+          className={`${styles.heroDetails} ${isLocked ? styles.heroDetailsHidden : ""} mt-8 md:mt-8 lg:mt-[-1.25rem] text-center max-w-4xl mx-auto`}
         >
           <p
             className="text-editorial font-light"
             style={{ color: "var(--fg-secondary)" }}
           >
-            <span className="block text-center">
-              Full-Stack Engineer crafting{" "}
+            <span className={`${styles.heroIntroLine} block text-center`}>
+              <span className={styles.heroLead}>Full-Stack Engineer</span>{" "}
+              <span className={styles.heroCrafting}>crafting{" "}
               <span
                 className="hero-capability-cycle"
                 aria-live="off"
@@ -569,8 +605,9 @@ const Hero = () => {
                   {HERO_CAPABILITY_PHRASES[activeCapabilityIndex]}
                 </span>
               </span>
+              </span>
             </span>
-            <span className="block">
+            <span className={styles.heroPrecisionLine}>
               with precision, performance, and intentional design.
             </span>
           </p>
@@ -578,7 +615,7 @@ const Hero = () => {
           <div className="hero-subtitle-divider" aria-hidden="true" />
 
           <p
-            className="text-micro mt-6"
+            className="text-micro mt-4"
             style={{ color: "var(--fg-muted)" }}
           >
             BUILDING IN PUBLIC - LAGOS, NIGERIA
@@ -599,7 +636,7 @@ const Hero = () => {
             SCROLL
           </span>
           <div
-            className="w-px h-16 bg-gradient-to-b from-current to-transparent"
+            className="w-px h-10 md:h-12 xl:h-16 bg-gradient-to-b from-current to-transparent"
             style={{ color: "var(--fg-muted)" }}
           />
         </div>

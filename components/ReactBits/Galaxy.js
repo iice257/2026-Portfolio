@@ -188,6 +188,7 @@ export default function Galaxy({
   transparent = true,
   pixelRatio = 0.55,
   targetFps = 24,
+  maxPixelCount = 520000,
   paused = false,
   ...rest
 }) {
@@ -228,7 +229,9 @@ export default function Galaxy({
     function resize() {
       const width = Math.max(1, ctn.offsetWidth);
       const height = Math.max(1, ctn.offsetHeight);
-      const scale = Math.max(0.35, Math.min(pixelRatio, window.devicePixelRatio || 1));
+      const requestedScale = Math.max(0.3, Math.min(pixelRatio, window.devicePixelRatio || 1));
+      const pixelBudgetScale = Math.sqrt(maxPixelCount / (width * height));
+      const scale = Math.min(requestedScale, Number.isFinite(pixelBudgetScale) ? pixelBudgetScale : requestedScale);
 
       renderer.setSize(Math.ceil(width * scale), Math.ceil(height * scale));
       gl.canvas.style.width = `${width}px`;
@@ -362,7 +365,8 @@ export default function Galaxy({
     autoCenterRepulsion,
     transparent,
     pixelRatio,
-    targetFps
+    targetFps,
+    maxPixelCount
   ]);
 
   return <div ref={ctnDom} className="galaxy-container" {...rest} />;

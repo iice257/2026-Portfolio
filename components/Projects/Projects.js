@@ -97,7 +97,12 @@ const Projects = ({ isDesktop }) => {
       </div>
 
       {/* Fullscreen Project Panels */}
-      <div ref={projectsContainerRef}>
+      <div
+        ref={projectsContainerRef}
+        data-cursor-group="cards"
+        data-cursor-label="Click for more details"
+        data-cursor-variant="project"
+      >
         {featuredProjects.map((project, index) => {
           const isEven = index % 2 === 0;
 
@@ -187,7 +192,8 @@ const Projects = ({ isDesktop }) => {
       {/* View All Projects - Full Screen Width Rectangle Button */}
       <Link
         href="/projects"
-        className="block w-full mt-8 py-10 md:py-14 border-y border-[var(--border)] group relative overflow-hidden text-center cursor-none"
+        className="block w-full py-10 md:py-14 border-y border-[var(--border)] group relative overflow-hidden text-center cursor-none"
+        data-clickable="true"
         style={{
           backgroundColor: 'var(--bg-primary)',
           textDecoration: 'none'

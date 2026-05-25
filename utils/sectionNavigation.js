@@ -1,12 +1,15 @@
-export const SECTION_IDS = ["skills", "experience", "contact"];
+export const SECTION_IDS = ["home", "skills", "projects", "experience", "contact"];
 
 export const getSectionHref = (sectionId) => {
   if (!sectionId || sectionId === "home") return "/";
-  return `/${sectionId}`;
+  return `/#${sectionId}`;
 };
 
 export const getRequestedSection = () => {
   if (typeof window === "undefined") return null;
+
+  const hashId = window.location.hash.replace(/^#/, "");
+  if (SECTION_IDS.includes(hashId)) return hashId;
 
   const sectionId = window.location.pathname.replace(/^\/+|\/+$/g, "");
   return SECTION_IDS.includes(sectionId) ? sectionId : null;
@@ -15,8 +18,8 @@ export const getRequestedSection = () => {
 export const replaceSectionUrl = (sectionId) => {
   if (typeof window === "undefined") return;
 
-  const nextUrl = sectionId && sectionId !== "home" ? getSectionHref(sectionId) : "/";
-  const currentUrl = window.location.pathname;
+  const nextUrl = sectionId && sectionId !== "home" ? `/#${sectionId}` : "/";
+  const currentUrl = `${window.location.pathname}${window.location.hash}`;
 
   if (currentUrl !== nextUrl) {
     window.history.replaceState(null, "", nextUrl);

@@ -134,7 +134,7 @@ const MockupPair = ({ project, onOpenPreview, onHover, onLeave, actions = null }
         <ProjectMockupFrame project={project} variant="desktop" className="aspect-[16/10] p-5" />
       </PreviewSurface>
       {actions && (
-        <div className="major-expanded-buttons" data-cursor-bridge="true" onClick={(event) => event.stopPropagation()}>
+        <div className="major-expanded-buttons" data-cursor-group="buttons" onClick={(event) => event.stopPropagation()}>
           {actions}
         </div>
       )}
@@ -159,7 +159,7 @@ const ProjectActionLinks = ({ project, className = "" }) => {
   if (!actions.length) return null;
 
   return (
-    <div className={`flex flex-wrap items-center gap-3 ${className}`} data-cursor-bridge="true">
+    <div className={`flex flex-wrap items-center gap-3 ${className}`} data-cursor-group="buttons">
       {actions.map((action) => (
         <a
           key={action.label}
@@ -209,7 +209,7 @@ const lightboxPanelVariants = {
   ),
 };
 
-const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, onClose, onNavigate }) => {
+const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompactPreview = false, onClose, onNavigate, onToggleVariant }) => {
   const fullscreenRef = useRef(null);
   useEffect(() => {
     if (!active) return undefined;
@@ -250,7 +250,7 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, onClose
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label={`${active.project.name} ${previewLabel(active.variant)} mockup preview`}
+      aria-label={`${isMobile ? "Mobile" : "Desktop"} mockup previews`}
     >
       <button type="button" className="mockup-lightbox-nav is-prev" onClick={(event) => { event.stopPropagation(); onNavigate(-1); }} aria-label="Previous mockup">
         <span aria-hidden="true">‹</span>
@@ -267,10 +267,10 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, onClose
       >
         <div className="mockup-lightbox-header">
           <div>
-            <p className="text-micro" style={{ color: "var(--fg-muted)" }}>{previewLabel(active.variant)}</p>
+            <p className="text-micro" style={{ color: "var(--fg-muted)" }}>{isMobile ? "Mobile previews" : "Desktop previews"}</p>
             <h3 className="text-body-xl font-light" style={{ color: "var(--fg-primary)" }}>{active.project.name}</h3>
           </div>
-          <div className="mockup-lightbox-header-actions" data-cursor-bridge="true">
+          <div className="mockup-lightbox-header-actions" data-cursor-group="buttons">
             <button type="button" className="mockup-lightbox-fullscreen" data-clickable="true" onClick={openFullscreen} aria-label="Open mockup fullscreen">
               <IconFullscreen />
             </button>
@@ -319,6 +319,19 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, onClose
             })}
           </motion.div>
         </div>
+        {isCompactPreview && (
+          <button
+            type="button"
+            className="mockup-lightbox-rotate"
+            data-clickable="true"
+            onClick={(event) => {
+              event.stopPropagation();
+              onToggleVariant();
+            }}
+          >
+            {isMobile ? "Rotate to view desktop" : "View mobile"}
+          </button>
+        )}
       </motion.div>
       <button type="button" className="mockup-lightbox-nav is-next" onClick={(event) => { event.stopPropagation(); onNavigate(1); }} aria-label="Next mockup">
         <span aria-hidden="true">›</span>
@@ -339,9 +352,8 @@ const MockupChoiceButton = ({ project, onOpenPreview, onHover, onLeave }) => {
   return (
     <div
       className={`mockup-choice ${isChoosing ? "is-open" : ""}`}
-      data-cursor-bridge="true"
+      data-cursor-group="buttons"
       onMouseLeave={() => {
-        setIsChoosing(false);
         onLeave?.();
       }}
     >
@@ -351,7 +363,14 @@ const MockupChoiceButton = ({ project, onOpenPreview, onHover, onLeave }) => {
         data-clickable="true"
         onClick={(event) => {
           event.stopPropagation();
-          setIsChoosing((value) => !value);
+          const isCompact = typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches;
+          if (isCompact) {
+            window.dispatchEvent(new CustomEvent("portfolio:cursor-clear"));
+            onOpenPreview(project, "mobile");
+            return;
+          }
+          setIsChoosing(true);
+          window.dispatchEvent(new CustomEvent("portfolio:cursor-clear"));
         }}
         onMouseEnter={() => onHover?.("")}
         aria-expanded={isChoosing}
@@ -360,7 +379,7 @@ const MockupChoiceButton = ({ project, onOpenPreview, onHover, onLeave }) => {
         <span>View mockup</span>
       </button>
       <div className="mockup-choice-options" aria-hidden={!isChoosing}>
-        {["mobile", "desktop"].map((variant) => (
+        {["desktop", "mobile"].map((variant) => (
           <button
             type="button"
             key={variant}
@@ -369,8 +388,8 @@ const MockupChoiceButton = ({ project, onOpenPreview, onHover, onLeave }) => {
             tabIndex={isChoosing ? 0 : -1}
             onClick={(event) => {
               event.stopPropagation();
+              window.dispatchEvent(new CustomEvent("portfolio:cursor-clear"));
               onOpenPreview(project, variant);
-              setIsChoosing(false);
             }}
             onMouseEnter={() => onHover?.("")}
           >
@@ -384,6 +403,11 @@ const MockupChoiceButton = ({ project, onOpenPreview, onHover, onLeave }) => {
 };
 
 const MajorProjectExpandedCard = ({ project, index, onFlip, onHover, onLeave, onOpenPreview }) => {
+  const handleCollapse = (event) => {
+    if (event.target.closest?.("a, button, [role='button'], [data-clickable='true']")) return;
+    onFlip();
+  };
+
   return (
     <motion.article
       key={`${project.slug}-expanded`}
@@ -395,7 +419,7 @@ const MajorProjectExpandedCard = ({ project, index, onFlip, onHover, onLeave, on
       aria-label={`Collapse details for ${project.name}`}
       data-cursor-label="Click to collapse"
       data-cursor-variant="project"
-      onClick={onFlip}
+      onClick={handleCollapse}
       onMouseEnter={() => onHover("Click to collapse")}
       onMouseLeave={onLeave}
       className="major-project-expanded cursor-none"
@@ -482,7 +506,7 @@ const MajorProjectCard = ({ project, index, onFlip, onHover, onLeave, dimmed }) 
         <p className="text-body-md major-card-subtitle" style={{ color: "var(--fg-secondary)" }}>
           {project.subtitle}
         </p>
-        <div className="major-card-actions" data-cursor-bridge="true" onClick={(event) => event.stopPropagation()}>
+        <div className="major-card-actions" onClick={(event) => event.stopPropagation()}>
           <TagList tags={project.tech} />
           <ProjectActionLinks project={project} />
         </div>
@@ -497,18 +521,30 @@ export default function ProjectsIndex() {
   const [openProject, setOpenProject] = useState(remainingProjects[0]?.slug);
   const [activePreview, setActivePreview] = useState(null);
   const [previewDirection, setPreviewDirection] = useState(0);
+  const [isCompactPreview, setIsCompactPreview] = useState(false);
   const { setCursorText, setCursorVariant, requestCursorRefresh } = useCursor();
   const expandedSlug = Object.keys(flippedCards).find((slug) => flippedCards[slug]);
   const majorProjectRows = chunkProjects(majorProjects);
   const previewItems = useMemo(() => (
     [...featuredProjects, ...majorProjects, ...remainingProjects].flatMap((project) => [
-      { project, variant: "mobile" },
       { project, variant: "desktop" },
+      { project, variant: "mobile" },
     ])
   ), []);
+  const visiblePreviewItems = useMemo(() => (
+    activePreview && isCompactPreview ? previewItems.filter((item) => item.variant === activePreview.variant) : previewItems
+  ), [activePreview, isCompactPreview, previewItems]);
   const activePreviewIndex = activePreview
-    ? previewItems.findIndex((item) => item.project.slug === activePreview.project.slug && item.variant === activePreview.variant)
+    ? visiblePreviewItems.findIndex((item) => item.project.slug === activePreview.project.slug && item.variant === activePreview.variant)
     : -1;
+
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 767px)");
+    const sync = () => setIsCompactPreview(query.matches);
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
 
   const toggleFlip = (slug) => {
     setFlippedCards((current) => {
@@ -525,6 +561,13 @@ export default function ProjectsIndex() {
     setCursorVariant("project");
   }, [setCursorText, setCursorVariant]);
 
+  const closeMajorProject = useCallback(() => {
+    setFlippedCards({});
+    setProjectCursor("Click to expand");
+    window.setTimeout(requestCursorRefresh, 0);
+    window.setTimeout(requestCursorRefresh, 620);
+  }, [requestCursorRefresh, setProjectCursor]);
+
   const clearProjectCursor = useCallback(() => {
     setCursorText("");
     setCursorVariant("default");
@@ -540,12 +583,21 @@ export default function ProjectsIndex() {
     setPreviewDirection(direction);
     setActivePreview((current) => {
       if (!current) return current;
-      const currentIndex = previewItems.findIndex((item) => item.project.slug === current.project.slug && item.variant === current.variant);
-      const nextIndex = (currentIndex + direction + previewItems.length) % previewItems.length;
-      return previewItems[nextIndex];
+      const scopedItems = isCompactPreview ? previewItems.filter((item) => item.variant === current.variant) : previewItems;
+      const currentIndex = scopedItems.findIndex((item) => item.project.slug === current.project.slug && item.variant === current.variant);
+      const nextIndex = (currentIndex + direction + scopedItems.length) % scopedItems.length;
+      return scopedItems[nextIndex];
     });
     window.setTimeout(requestCursorRefresh, 0);
-  }, [previewItems, requestCursorRefresh]);
+  }, [isCompactPreview, previewItems, requestCursorRefresh]);
+
+  const togglePreviewVariant = useCallback(() => {
+    setPreviewDirection(0);
+    setActivePreview((current) => (
+      current ? { project: current.project, variant: current.variant === "mobile" ? "desktop" : "mobile" } : current
+    ));
+    window.setTimeout(requestCursorRefresh, 0);
+  }, [requestCursorRefresh]);
 
   const closePreview = useCallback(() => {
     setActivePreview(null);
@@ -624,12 +676,17 @@ export default function ProjectsIndex() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          <div
+            className="featured-project-grid grid grid-cols-1 lg:grid-cols-2"
+            data-cursor-group="cards"
+            data-cursor-label="Click for more details"
+            data-cursor-variant="project"
+          >
             {featuredProjects.map((project, index) => (
               <Link
                 key={project.slug}
                 href={`/projects/${project.slug}`}
-                className="group block cursor-none"
+                className="featured-project-card group block cursor-none"
                 data-cursor-label="Click for more details"
                 data-cursor-variant="project"
                 onMouseEnter={() => setProjectCursor("Click for more details")}
@@ -637,19 +694,19 @@ export default function ProjectsIndex() {
                 onClick={clearProjectCursor}
               >
                 <article className="relative">
-                  <div className="relative aspect-[16/11] overflow-hidden mb-6 outline outline-1 outline-[var(--border)]">
-                    <ProjectVisual project={project} priority={index === 0} />
+                  <div className="featured-project-thumb relative overflow-hidden outline outline-1 outline-[var(--border)]">
+                    <ProjectVisual project={project} priority={index === 0} metallic />
                   </div>
-                  <span className="text-micro mb-3 block" style={{ color: "var(--fg-muted)" }}>
+                  <span className="featured-project-kicker text-micro block" style={{ color: "var(--fg-muted)" }}>
                     {String(index + 1).padStart(2, "0")} / Featured
                   </span>
                   <h3
-                    className="text-display-md font-light mb-3 whitespace-nowrap group-hover:translate-x-2 transition-transform duration-300"
+                    className="featured-project-title font-light whitespace-nowrap group-hover:translate-x-2 transition-transform duration-300"
                     style={{ color: "var(--fg-primary)" }}
                   >
                     <ShuffleText text={project.name} duration={0.45} shuffleTimes={3} textAlign="left" />
                   </h3>
-                  <p className="text-body-lg mb-5 max-w-xl" style={{ color: "var(--fg-secondary)" }}>
+                  <p className="featured-project-description max-w-3xl" style={{ color: "var(--fg-secondary)" }}>
                     {project.description}
                   </p>
                   <TagList tags={project.tech} />
@@ -680,7 +737,10 @@ export default function ProjectsIndex() {
                 <motion.div
                   key={rowProjects.map((project) => project.slug).join("-")}
                   layout
-                  className={`major-project-row ${expandedProject ? "is-expanded" : ""}`}
+                className={`major-project-row ${expandedProject ? "is-expanded" : ""}`}
+                data-cursor-group="cards"
+                data-cursor-label={expandedProject ? "Click to collapse" : "Click to expand"}
+                data-cursor-variant="project"
                   transition={flipTransition}
                 >
                   {rowProjects.map((project, projectIndex) => {
@@ -709,10 +769,7 @@ export default function ProjectsIndex() {
                         key={expandedProject.slug}
                         project={expandedProject}
                         index={majorProjects.findIndex((project) => project.slug === expandedProject.slug)}
-                        onFlip={() => {
-                          toggleFlip(expandedProject.slug);
-                          setProjectCursor("Click to expand");
-                        }}
+                        onFlip={closeMajorProject}
                         onHover={setProjectCursor}
                         onLeave={clearProjectCursor}
                         onOpenPreview={openPreview}
@@ -743,10 +800,17 @@ export default function ProjectsIndex() {
               const isOpen = openProject === project.slug;
 
               return (
-                <article key={project.slug} className="border-b" style={{ borderColor: "var(--border)" }}>
+                <article
+                  key={project.slug}
+                  className="border-b"
+                  style={{ borderColor: "var(--border)" }}
+                  data-cursor-group="cards"
+                  data-cursor-label={isOpen ? "Click to collapse" : "Click to expand"}
+                  data-cursor-variant="project"
+                >
                   <button
                     type="button"
-                    className="w-full py-6 grid grid-cols-1 md:grid-cols-12 gap-4 text-left group cursor-none"
+                    className="archive-project-toggle relative w-full py-6 pr-12 grid grid-cols-1 md:grid-cols-12 gap-4 text-left group cursor-none"
                     data-cursor-label={isOpen ? "Click to collapse" : "Click to expand"}
                     data-cursor-variant="project"
                     onClick={() => {
@@ -763,14 +827,14 @@ export default function ProjectsIndex() {
                     <span className="text-micro md:col-span-2" style={{ color: "var(--fg-muted)" }}>
                       {String(index + 11).padStart(2, "0")}
                     </span>
-                    <span className="md:col-span-5 min-w-0 text-body-xl font-light whitespace-nowrap overflow-hidden text-ellipsis" style={{ color: "var(--fg-primary)" }}>
+                    <span className="archive-project-title md:col-span-5 min-w-0 text-body-xl font-light whitespace-nowrap overflow-hidden text-ellipsis" style={{ color: "var(--fg-primary)" }}>
                       <ShuffleText text={project.name} duration={0.4} shuffleTimes={2} textAlign="left" />
                     </span>
                     <span className="md:col-span-4 text-body-md" style={{ color: "var(--fg-secondary)" }}>
                       {project.status}
                     </span>
                     <span
-                      className={`md:col-span-1 text-right text-body-xl transition-transform duration-300 ${isOpen ? "rotate-45" : ""}`}
+                      className={`archive-project-plus text-body-xl transition-transform duration-300 ${isOpen ? "rotate-45" : ""}`}
                       style={{ color: "var(--fg-primary)" }}
                       aria-hidden="true"
                     >
@@ -803,19 +867,16 @@ export default function ProjectsIndex() {
                           onMouseLeave={clearProjectCursor}
                         >
                           <div className="hidden md:block md:col-span-2" />
-                          <div className="md:col-span-10 max-w-4xl">
+                          <div className="archive-project-expanded-content md:col-span-10 max-w-4xl">
                             <p className="text-body-lg mb-5 leading-relaxed" style={{ color: "var(--fg-secondary)" }}>
                               {project.description}
                             </p>
                             <div className="archive-project-actions">
                               <TagList tags={project.tech} />
-                              <div className="flex flex-wrap items-center gap-3" data-cursor-bridge="true" onClick={(event) => event.stopPropagation()}>
+                              <div className="flex flex-wrap items-center gap-3" data-cursor-group="buttons" onClick={(event) => event.stopPropagation()}>
                                 <ProjectActionLinks project={project} />
                                 <MockupChoiceButton project={project} onOpenPreview={openPreview} onHover={setProjectCursor} onLeave={clearProjectCursor} />
                               </div>
-                            </div>
-                            <div className="mt-5 text-body-sm" style={{ color: "var(--fg-muted)" }}>
-                              <p>{project.notes}</p>
                             </div>
                           </div>
                         </div>
@@ -841,10 +902,12 @@ export default function ProjectsIndex() {
           <MockupPreviewModal
             active={activePreview}
             activeIndex={activePreviewIndex}
-            items={previewItems}
+            items={visiblePreviewItems}
             direction={previewDirection}
+            isCompactPreview={isCompactPreview}
             onClose={closePreview}
             onNavigate={navigatePreview}
+            onToggleVariant={togglePreviewVariant}
           />
         )}
       </AnimatePresence>

@@ -46,7 +46,7 @@ const Contact = () => {
         </p>
 
         <h2
-          className="text-display-lg md:text-display-xl font-light mb-8 contact-reveal"
+          className="contact-title text-display-lg md:text-display-xl font-light mb-8 contact-reveal"
           style={{ color: "var(--fg-primary)" }}
         >
           <span className="block">We&apos;re gonna build amazing things,</span>

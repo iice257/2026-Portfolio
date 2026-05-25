@@ -33,6 +33,8 @@ const Work = () => {
         const line = item.querySelector(".work-line");
         const content = item.querySelector(".work-content");
 
+        gsap.set(item, { pointerEvents: "none" });
+
         gsap.fromTo(
           line,
           { scaleX: 0, transformOrigin: "left" },
@@ -43,7 +45,7 @@ const Work = () => {
             scrollTrigger: {
               trigger: item,
               start: "top 80%",
-              toggleActions: "play none none reverse",
+              toggleActions: "play none none none",
             },
           }
         );
@@ -60,7 +62,10 @@ const Work = () => {
             scrollTrigger: {
               trigger: item,
               start: "top 75%",
-              toggleActions: "play none none reverse",
+              toggleActions: "play none none none",
+            },
+            onComplete: () => {
+              gsap.set(item, { pointerEvents: "auto" });
             },
           }
         );

@@ -3,15 +3,18 @@ import { useCursor } from '../../context/CursorContext';
 import { gsap } from 'gsap';
 
 const DEFAULT_CURSOR_PATH = "M5.5 3 C5.5 3 5.5 3 5.5 3 L11.5 26.5 C11.5 26.5 11.5 26.5 11.5 26.5 L16.2 17.8 C16.2 17.8 16.2 17.8 16.2 17.8 L25.5 17.8 C25.5 17.8 25.5 17.8 25.5 17.8 L5.5 3 Z";
-const CLICKABLE_CURSOR_PATH = "M5.45 3.18 C5.25 2.8 5.78 2.52 6.18 2.84 L24.02 16.02 C25.82 17.36 25.16 19.18 22.78 19.18 L17.38 19.18 C16.48 19.18 15.96 19.58 15.54 20.34 L12.9 25.14 C11.72 27.28 9.96 26.66 9.5 24.28 L5.06 4.46 C4.92 3.84 5.08 3.38 5.45 3.18 Z";
+const CLICKABLE_CURSOR_PATH = "M5.5 3 C5.95 3.3 6.2 3.45 6.55 3.72 L24.65 17.05 C25.65 17.8 25.2 18.55 23.95 18.55 L16.75 18.55 C16.2 18.55 15.9 18.8 15.65 19.25 L12.2 25.65 C11.65 26.65 10.95 26.35 10.65 25.15 L5.5 3 Z";
 const CURSOR_SIZE = 32;
 const CURSOR_TIP_X = 5.5;
 const CURSOR_TIP_Y = 3;
 const INTERACTIVE_SELECTOR = 'a, button, [role="button"], input, textarea, select, summary, [data-clickable="true"]';
 const LABEL_SELECTOR = "[data-cursor-label]";
 const BRIDGE_SELECTOR = "[data-cursor-bridge='true']";
+const CURSOR_GROUP_SELECTOR = "[data-cursor-group]";
 const PREVIEW_LABEL_PATTERN = /^click to (open|close)$/i;
-const INTERACTIVE_BRIDGE_RADIUS = 30;
+const INTERACTIVE_BRIDGE_RADIUS = 38;
+const WELCOME_VISIT_KEY = "portfolio.cursor.welcomed";
+const WELCOME_TOOLTIP_MS = 5000;
 const INTERACTIVE_BRIDGE_OFFSETS = [
   [0, 0],
   [INTERACTIVE_BRIDGE_RADIUS, 0],
@@ -37,6 +40,7 @@ const CustomCursor = () => {
   const fillRectRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false); // Default hidden until mouse moves
   const [isClickable, setIsClickable] = useState(false);
+  const [welcomeText, setWelcomeText] = useState("");
   const isVisibleRef = useRef(false);
   const isClickableRef = useRef(false);
   const { cursorText, setCursorText, cursorVariant, setCursorVariant, isRouteLoading } = useCursor();
@@ -49,6 +53,8 @@ const CustomCursor = () => {
   const lastPointerRef = useRef({ x: 0, y: 0, hasPointer: false });
   const loadingTimelineRef = useRef(null);
   const refreshFrameRef = useRef(null);
+  const welcomeTimerRef = useRef(null);
+  const welcomeStartedRef = useRef(false);
   const resolvedStateRef = useRef({ text: "", variant: "default", clickable: false });
 
   useEffect(() => {
@@ -71,15 +77,10 @@ const CustomCursor = () => {
     };
 
     const applyCursorContext = (nextText, nextVariant) => {
-      if (cursorTextRef.current !== nextText) {
-        cursorTextRef.current = nextText;
-        setCursorText(nextText);
-      }
-
-      if (cursorVariantRef.current !== nextVariant) {
-        cursorVariantRef.current = nextVariant;
-        setCursorVariant(nextVariant);
-      }
+      cursorTextRef.current = nextText;
+      cursorVariantRef.current = nextVariant;
+      setCursorText(nextText);
+      setCursorVariant(nextVariant);
     };
 
     const isUsableInteractive = (element) => {
@@ -88,9 +89,8 @@ const CustomCursor = () => {
       return true;
     };
 
-    const findNearbyInteractive = (x, y, labeledTarget) => {
-      if (!resolvedStateRef.current.clickable || !labeledTarget) return null;
-      const bridgeRoot = labeledTarget.closest?.(BRIDGE_SELECTOR) || labeledTarget;
+    const findNearbyInteractive = (x, y, bridgeRoot) => {
+      if (!bridgeRoot) return null;
 
       for (const [offsetX, offsetY] of INTERACTIVE_BRIDGE_OFFSETS) {
         const sampleX = Math.min(window.innerWidth - 1, Math.max(0, x + offsetX));
@@ -107,6 +107,13 @@ const CustomCursor = () => {
       return null;
     };
 
+    const isBridgedClickableGap = (target, point, labeledTarget) => {
+      const buttonGroup = target.closest?.("[data-cursor-group='buttons']");
+      const bridgeRoot = buttonGroup || target.closest?.(BRIDGE_SELECTOR) || labeledTarget?.closest?.(BRIDGE_SELECTOR);
+      if (!bridgeRoot) return false;
+      return Boolean(findNearbyInteractive(point.x, point.y, bridgeRoot));
+    };
+
     const resolveCursorState = (target, point = lastPointerRef.current) => {
       if (!target?.closest) {
         return { text: "", variant: "default", clickable: false };
@@ -119,6 +126,10 @@ const CustomCursor = () => {
 
       const interactiveTarget = target.closest(INTERACTIVE_SELECTOR);
       const interactiveLabel = interactiveTarget?.getAttribute?.("data-cursor-label");
+      const labeledTarget = target.closest(LABEL_SELECTOR);
+      const cursorGroup = target.closest(CURSOR_GROUP_SELECTOR);
+      const buttonGroup = target.closest("[data-cursor-group='buttons']");
+      const cardGroup = target.closest("[data-cursor-group='cards']");
 
       if (interactiveLabel) {
         return {
@@ -128,8 +139,6 @@ const CustomCursor = () => {
         };
       }
 
-      const labeledTarget = target.closest(LABEL_SELECTOR);
-
       if (interactiveTarget && labeledTarget && labeledTarget !== interactiveTarget) {
         return { text: "", variant: "default", clickable: true };
       }
@@ -138,8 +147,17 @@ const CustomCursor = () => {
         return { text: "", variant: "default", clickable: true };
       }
 
+      if (buttonGroup && findNearbyInteractive(point.x, point.y, buttonGroup)) {
+        return { text: "", variant: "default", clickable: true };
+      }
+
+      if (isBridgedClickableGap(target, point, labeledTarget)) {
+        return { text: "", variant: "default", clickable: true };
+      }
+
       if (labeledTarget) {
-        const bridgedInteractive = findNearbyInteractive(point.x, point.y, labeledTarget);
+        const bridgeRoot = labeledTarget.closest?.(BRIDGE_SELECTOR);
+        const bridgedInteractive = bridgeRoot ? findNearbyInteractive(point.x, point.y, bridgeRoot) : null;
         if (bridgedInteractive) {
           return { text: "", variant: "default", clickable: true };
         }
@@ -149,6 +167,24 @@ const CustomCursor = () => {
           variant: labeledTarget.getAttribute("data-cursor-variant") || "project",
           clickable: false,
         };
+      }
+
+      if (cardGroup) {
+        const text = cardGroup.getAttribute("data-cursor-label") || cursorGroup?.getAttribute("data-cursor-label") || "";
+        if (text) {
+          return {
+            text,
+            variant: cardGroup.getAttribute("data-cursor-variant") || "project",
+            clickable: false,
+          };
+        }
+      }
+
+      if (resolvedStateRef.current.clickable) {
+        const bridgeRoot = target.closest?.(BRIDGE_SELECTOR);
+        if (bridgeRoot && findNearbyInteractive(point.x, point.y, bridgeRoot)) {
+          return { text: "", variant: "default", clickable: true };
+        }
       }
 
       return { text: "", variant: "default", clickable: false };
@@ -189,12 +225,32 @@ const CustomCursor = () => {
       applyCursorContext("", "default");
     };
 
+    const startWelcomeTooltip = () => {
+      if (welcomeStartedRef.current) return;
+      welcomeStartedRef.current = true;
+
+      let hasVisited = false;
+      try {
+        hasVisited = window.localStorage.getItem(WELCOME_VISIT_KEY) === "true";
+        window.localStorage.setItem(WELCOME_VISIT_KEY, "true");
+      } catch {
+        hasVisited = true;
+      }
+
+      setWelcomeText(hasVisited ? "Welcome back!" : "Welcome! Have a great time");
+      window.clearTimeout(welcomeTimerRef.current);
+      welcomeTimerRef.current = window.setTimeout(() => {
+        setWelcomeText("");
+      }, WELCOME_TOOLTIP_MS);
+    };
+
     const onMouseMove = (e) => {
       // Ensure visible on movement
       if (!isVisibleRef.current) {
         isVisibleRef.current = true;
         setIsVisible(true);
       }
+      startWelcomeTooltip();
       lastPointerRef.current = { x: e.clientX, y: e.clientY, hasPointer: true };
       updateCursorFromPoint(e.target);
     };
@@ -220,6 +276,7 @@ const CustomCursor = () => {
     window.addEventListener('portfolio:cursor-refresh', scheduleCursorRefresh);
     window.addEventListener('portfolio:cursor-clear', clearCursorState);
     document.addEventListener('focusin', scheduleCursorRefresh);
+    document.addEventListener('pointerover', scheduleCursorRefresh, true);
     document.addEventListener('pointerup', scheduleCursorRefresh);
     document.addEventListener('transitionend', scheduleCursorRefresh, true);
     document.addEventListener('animationend', scheduleCursorRefresh, true);
@@ -233,6 +290,7 @@ const CustomCursor = () => {
       window.removeEventListener('portfolio:cursor-refresh', scheduleCursorRefresh);
       window.removeEventListener('portfolio:cursor-clear', clearCursorState);
       document.removeEventListener('focusin', scheduleCursorRefresh);
+      document.removeEventListener('pointerover', scheduleCursorRefresh, true);
       document.removeEventListener('pointerup', scheduleCursorRefresh);
       document.removeEventListener('transitionend', scheduleCursorRefresh, true);
       document.removeEventListener('animationend', scheduleCursorRefresh, true);
@@ -241,6 +299,7 @@ const CustomCursor = () => {
       if (refreshFrameRef.current) {
         window.cancelAnimationFrame(refreshFrameRef.current);
       }
+      window.clearTimeout(welcomeTimerRef.current);
     };
   }, [setCursorText, setCursorVariant]);
 
@@ -253,18 +312,25 @@ const CustomCursor = () => {
 
     gsap.to([outlinePathRef.current, fillPathRef.current], {
       attr: { d: targetPath },
-      duration: 0.28,
-      ease: "power3.out",
+      duration: 0.08,
+      ease: "power1.out",
       overwrite: "auto",
     });
 
     gsap.to(fillRectRef.current, {
       attr: {
-        y: shouldUseClickableShape ? 0 : 32,
-        height: shouldUseClickableShape ? 32 : 0,
+        y: 0,
+        height: 32,
       },
-      duration: 0.3,
-      ease: "power3.out",
+      duration: 0.01,
+      ease: "power2.out",
+      overwrite: "auto",
+    });
+
+    gsap.to(fillPathRef.current, {
+      opacity: shouldUseClickableShape ? 1 : 0,
+      duration: 0.12,
+      ease: "power2.out",
       overwrite: "auto",
     });
   }, [cursorText, isClickable, isRouteLoading]);
@@ -275,6 +341,7 @@ const CustomCursor = () => {
     const outlinePath = outlinePathRef.current;
     const fillPath = fillPathRef.current;
     const fillRect = fillRectRef.current;
+    const shape = shapeRef.current;
 
     loadingTimelineRef.current?.kill();
 
@@ -283,25 +350,34 @@ const CustomCursor = () => {
       const targetPath = shouldUseClickableShape ? CLICKABLE_CURSOR_PATH : DEFAULT_CURSOR_PATH;
 
       gsap.to(fillPath, {
-        opacity: 1,
+        opacity: shouldUseClickableShape ? 1 : 0,
         duration: 0.16,
         ease: "power2.out",
       });
 
       gsap.to([outlinePath, fillPath], {
         attr: { d: targetPath },
-        duration: 0.22,
-        ease: "power3.out",
+        duration: 0.08,
+        ease: "power1.out",
         overwrite: "auto",
       });
 
       gsap.to(fillRect, {
         attr: {
-          y: shouldUseClickableShape ? 0 : 32,
-          height: shouldUseClickableShape ? 32 : 0,
+          y: 0,
+          height: 32,
         },
-        duration: 0.24,
+        duration: 0.01,
         ease: "power3.out",
+        overwrite: "auto",
+      });
+
+      gsap.to(shape, {
+        scale: 1,
+        rotate: 0,
+        opacity: 1,
+        duration: 0.18,
+        ease: "power2.out",
         overwrite: "auto",
       });
 
@@ -322,32 +398,42 @@ const CustomCursor = () => {
       defaults: { overwrite: "auto" },
     });
 
-    loadingTimelineRef.current.to(fillPath, {
-      opacity: 0.38,
-      duration: 0.42,
-      ease: "power2.inOut",
-    });
+    loadingTimelineRef.current
+      .set(fillPath, { opacity: 1 })
+      .to(shape, {
+        scale: 1.16,
+        opacity: 0.72,
+        duration: 0.34,
+        ease: "power2.inOut",
+      }, 0)
+      .to(fillPath, {
+        opacity: 0.34,
+        duration: 0.34,
+        ease: "power2.inOut",
+      }, 0);
 
     return () => {
       loadingTimelineRef.current?.kill();
       loadingTimelineRef.current = null;
-      gsap.set(fillPath, { opacity: 1 });
+      gsap.set(shape, { scale: 1, rotate: 0, opacity: 1 });
+      gsap.set(fillPath, { opacity: isClickableRef.current || Boolean(cursorTextRef.current) ? 1 : 0 });
     };
   }, [isRouteLoading]);
 
   useEffect(() => {
-    if (!cursorText || !textRef.current) return;
+    if ((!cursorText && !welcomeText) || !textRef.current) return;
 
     gsap.set(textRef.current, {
       x: lastPointerRef.current.x,
       y: lastPointerRef.current.y,
     });
-  }, [cursorText]);
+  }, [cursorText, welcomeText]);
 
   // Theme colors
-  const hasCursorLabel = Boolean(cursorText);
+  const effectiveCursorText = cursorText || welcomeText;
+  const hasCursorLabel = Boolean(effectiveCursorText);
   const isMenu = cursorVariant === 'menu';
-  const cursorLabelKind = getCursorLabelKind(cursorText);
+  const cursorLabelKind = welcomeText && !cursorText ? "standard" : getCursorLabelKind(cursorText);
 
   return (
     <>
@@ -409,6 +495,7 @@ const CustomCursor = () => {
                 d={DEFAULT_CURSOR_PATH}
                 fill="#ffffff"
                 stroke="none"
+                opacity="0"
                 clipPath="url(#custom-cursor-fill)"
               />
               <path
@@ -436,7 +523,7 @@ const CustomCursor = () => {
         <div
           className={`custom-cursor-label absolute left-0 top-0 backdrop-blur-sm px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-widest whitespace-nowrap is-${cursorLabelKind} ${hasCursorLabel ? 'is-visible' : 'is-hidden'}`}
         >
-          {cursorText || " "}
+          {effectiveCursorText || " "}
         </div>
       </div>
 

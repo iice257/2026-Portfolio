@@ -47,32 +47,36 @@ const DetailBlock = ({ label, title, children }) => (
 
 const ProjectNumberCarousel = ({ projects, currentIndex }) => {
   const currentProject = projects[currentIndex];
-  const otherProjects = projects
-    .map((item, itemIndex) => ({ item, itemIndex }))
-    .filter(({ itemIndex }) => itemIndex !== currentIndex);
 
   return (
     <div
       className="project-number-carousel mb-4"
-      tabIndex={0}
       aria-label={`Project ${String(currentIndex + 1).padStart(2, "0")}: ${currentProject.name}`}
     >
-      <div className="project-number-current-stack">
-        <span className="project-number-current text-display-2xl" aria-hidden="true">
-          {String(currentIndex + 1).padStart(2, "0")}
-        </span>
-      </div>
+      <div className="project-number-track" aria-label="Featured projects">
+        {projects.map((item, itemIndex) => {
+          const isCurrent = itemIndex === currentIndex;
+          const label = String(itemIndex + 1).padStart(2, "0");
 
-      <div className="project-number-track" aria-label="Other featured projects">
-        {otherProjects.map(({ item, itemIndex }) => (
+          return isCurrent ? (
+            <span
+              key={item.slug}
+              className="project-number-item is-current"
+              aria-current="page"
+            >
+              <span className="project-number-digits">{label}</span>
+            </span>
+          ) : (
           <Link
             key={item.slug}
             href={`/projects/${item.slug}`}
             className="project-number-item"
           >
-            {String(itemIndex + 1).padStart(2, "0")}
+            <span className="project-number-digits">{label}</span>
+            <span className="project-number-name">{item.name}</span>
           </Link>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -97,6 +101,13 @@ const IconLoop = () => (
 const IconFullscreen = () => (
   <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5" />
+  </svg>
+);
+
+const IconList = () => (
+  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M8 6h12M8 12h12M8 18h12" />
+    <path d="M4 6h.01M4 12h.01M4 18h.01" />
   </svg>
 );
 
@@ -224,7 +235,7 @@ const ProjectMediaPreview = ({ project, variant = "desktop", priority = false, o
         {videoSrc && (
           <div
             className={`project-media-controls active-${activeControl || "play"}`}
-            data-cursor-bridge="true"
+            data-cursor-group="buttons"
             onClick={(event) => event.stopPropagation()}
             onMouseLeave={() => setActiveControl(null)}
           >
@@ -368,7 +379,7 @@ const ProjectMediaLightbox = ({ active, activeIndex, items, direction = 0, onClo
             <p className="text-micro" style={{ color: "var(--fg-muted)" }}>{isMobile ? "Mobile" : "Desktop"}</p>
             <h3 className="text-body-xl font-light" style={{ color: "var(--fg-primary)" }}>{active.project.name}</h3>
           </div>
-          <div className="mockup-lightbox-header-actions" data-cursor-bridge="true">
+          <div className="mockup-lightbox-header-actions" data-cursor-group="buttons">
             <button type="button" className="mockup-lightbox-fullscreen" data-clickable="true" onClick={openFullscreen} aria-label="Open mockup fullscreen">
               <IconFullscreen />
             </button>
@@ -511,17 +522,18 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
       <main id="main-content" className="min-h-screen" style={{ backgroundColor: "var(--bg-primary)" }}>
         <section className="section-container pt-32 pb-12">
           <div className="mb-7 flex flex-wrap items-center justify-between gap-3">
-            <Link href="/projects" className="project-action-link" data-clickable="true">
+            <Link href="/projects" className="project-action-link project-action-link-secondary" data-clickable="true">
+              <IconList />
               <span>All projects</span>
             </Link>
-            <div className="ml-auto flex flex-wrap items-center justify-end gap-3">
+            <div className="project-detail-action-group ml-auto flex flex-wrap items-center justify-end gap-3" data-cursor-group="buttons">
               {projectActions.map((action) => (
                 <a
                   key={action.label}
                   href={action.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="project-action-link"
+                  className="project-action-link project-action-link-compact"
                   data-clickable="true"
                 >
                   <span>{action.label}</span>
@@ -605,7 +617,17 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
                 </span>
               </Link>
             ) : (
-              <div />
+              <Link href="/projects" className="project-nav-link group is-prev is-list justify-self-start items-center gap-4" data-clickable="true">
+                <span className="project-nav-list-icon" aria-hidden="true">
+                  <IconList />
+                </span>
+                <span>
+                  <span className="text-micro block mb-2 opacity-60">Browse</span>
+                  <span className="text-body-xl font-light transition-transform duration-300 inline-block">
+                    All projects
+                  </span>
+                </span>
+              </Link>
             )}
 
             {nextProject ? (
@@ -621,7 +643,17 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
                 </span>
               </Link>
             ) : (
-              <div />
+              <Link href="/projects" className="project-nav-link group is-next is-list justify-self-end items-center justify-end gap-4 text-right" data-clickable="true">
+                <span>
+                  <span className="text-micro block mb-2 opacity-60">Browse</span>
+                  <span className="text-body-xl font-light transition-transform duration-300 inline-block">
+                    Other projects
+                  </span>
+                </span>
+                <span className="project-nav-list-icon" aria-hidden="true">
+                  <IconList />
+                </span>
+              </Link>
             )}
           </div>
         </section>

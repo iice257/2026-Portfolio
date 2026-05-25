@@ -20,6 +20,25 @@
   opacity: 0.42;
 }
 
+.heroBottomFeather {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 1;
+  height: clamp(5rem, 12vh, 8rem);
+  pointer-events: none;
+  background:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--bg-primary) 0%, transparent) 0%,
+      color-mix(in srgb, var(--bg-primary) 64%, transparent) 58%,
+      var(--bg-primary) 100%
+    );
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 38%, black 100%);
+}
+
 .galaxyBackdrop canvas,
 .wavesBackdrop canvas {
   display: block;
@@ -88,6 +107,12 @@
   border-color: color-mix(in srgb, var(--fg-primary) 34%, transparent);
 }
 
+.lockButtonUnlocked {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--fg-primary) 10%, var(--bg-primary) 90%), var(--bg-primary));
+  border-color: color-mix(in srgb, var(--fg-primary) 28%, transparent);
+}
+
 .lockButton:active {
   transform: translateY(1px) scale(0.98);
 }
@@ -128,10 +153,10 @@
 
 .nameStack {
   display: flex;
-  width: min(100%, 50rem);
+  width: min(100%, 64rem);
   flex-direction: column;
   align-items: center;
-  gap: clamp(0.85rem, 2vw, 1.55rem);
+  gap: clamp(0.75rem, 1.8vw, 1.35rem);
 }
 
 .firstName,
@@ -144,13 +169,23 @@
 }
 
 .firstName {
-  height: clamp(6.15rem, 22vw, 8rem);
-  max-width: min(100%, 50rem);
+  height: clamp(7.7rem, 29vw, 10.4rem);
+  max-width: min(100%, 64rem);
 }
 
 .lastName {
-  height: clamp(5.95rem, 21vw, 7.85rem);
-  max-width: min(82vw, 37.5rem);
+  height: clamp(7.35rem, 27vw, 9.9rem);
+  max-width: min(90vw, 52rem);
+}
+
+.heroIntroLine,
+.heroPrecisionLine {
+  display: block;
+}
+
+.heroLead,
+.heroCrafting {
+  display: block;
 }
 
 .heroDetails,
@@ -176,45 +211,91 @@
   }
 
   .firstName {
-    height: clamp(7rem, 16vw, 8rem);
+    height: clamp(10rem, 18vw, 12.6rem);
   }
 
   .lastName {
-    height: clamp(6.85rem, 15vw, 7.85rem);
+    height: clamp(9.2rem, 16.8vw, 11.8rem);
+  }
+
+  .heroLead,
+  .heroCrafting {
+    display: inline;
   }
 }
 
 @media (min-width: 1024px) {
   .heroTitleShell {
-    gap: 2rem;
+    gap: clamp(1.05rem, 2vw, 1.7rem);
   }
 
   .nameStack {
-    width: min(100%, 50rem);
+    width: min(98vw, 100rem);
+    gap: clamp(0rem, 0.18vw, 0.22rem);
   }
 
   .firstName {
-    height: 8rem;
-    max-width: 50rem;
+    height: clamp(14.6rem, 22vw, 19.1rem);
+    max-width: min(98vw, 100rem);
   }
 
   .lastName {
-    height: 7.85rem;
-    max-width: 37.5rem;
+    height: clamp(13.1rem, 19.8vw, 17.1rem);
+    max-width: min(84vw, 78rem);
+    margin-top: clamp(-5.25rem, calc(-3.9vw - 1.25rem), -3.6rem);
   }
 }
 
 @media (max-width: 420px) {
   .nameStack {
-    width: min(100%, 23.5rem);
+    width: min(calc(100vw - 0.45rem), 36rem);
   }
 
   .firstName {
-    height: clamp(4.9rem, 24vw, 6rem);
+    height: clamp(10.2rem, 51vw, 12.2rem);
+    max-width: min(calc(100vw - 0.45rem), 36rem);
   }
 
   .lastName {
-    height: clamp(4.75rem, 23vw, 5.85rem);
+    height: clamp(9.25rem, 45vw, 10.95rem);
+    max-width: min(calc(97vw - 0.45rem), 29rem);
+  }
+}
+
+@media (max-width: 767px) {
+  .nameStack {
+    max-width: calc(100vw - 0.75rem);
+  }
+
+  .firstName,
+  .lastName {
+    max-width: 100%;
+  }
+
+  .firstName > div {
+    transform: scale(0.88);
+    transform-origin: center center;
+  }
+
+  .lastName > div {
+    transform: scale(0.9);
+    transform-origin: center center;
+  }
+
+  .heroDetails :global(.text-editorial) {
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+
+  .heroCrafting,
+  .heroPrecisionLine {
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 768px) and (max-height: 735px) {
+  .scrollCue {
+    display: none;
   }
 }
 

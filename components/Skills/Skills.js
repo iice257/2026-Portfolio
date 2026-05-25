@@ -27,6 +27,32 @@ const Skills = () => {
           }
         }
       );
+
+      const items = sectionRef.current.querySelectorAll(".skill-item");
+      items.forEach((item) => {
+        const content = item.querySelector(".skill-content");
+
+        gsap.set(item, { pointerEvents: "none" });
+
+        gsap.fromTo(
+          content,
+          { y: 30, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: item,
+              start: "top 78%",
+              toggleActions: "play none none none",
+            },
+            onComplete: () => {
+              gsap.set(item, { pointerEvents: "auto" });
+            },
+          }
+        );
+      });
     });
 
     return () => ctx.revert();
@@ -108,7 +134,7 @@ const Skills = () => {
         {/* Accordion-style skill categories */}
         <div className="space-y-0">
           {skillCategories.map((category, index) => (
-            <div key={category.name}>
+            <div key={category.name} className="skill-item">
               {/* Category Header - Clickable */}
               <button
                 onClick={() => handleCategoryClick(category.name)}
@@ -116,7 +142,7 @@ const Skills = () => {
                 onFocus={() => setExpandedCategory(category.name)}
                 aria-expanded={expandedCategory === category.name}
                 aria-controls={`skills-panel-${category.name.toLowerCase().replace(/\s+/g, "-")}`}
-                className="w-full flex items-center justify-between py-6 group text-left"
+                className="skill-content w-full flex items-center justify-between py-6 group text-left"
                 style={{ borderTop: index === 0 ? 'none' : '1px solid var(--border)' }}
               >
                 <div className="flex items-center gap-6">

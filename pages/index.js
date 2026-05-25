@@ -43,10 +43,11 @@ export default function Home() {
       const href = anchor?.getAttribute("href");
       if (!href) return;
 
-      const { pathname } = new URL(href, window.location.origin);
-      const sectionId = pathname.replace(/^\/+|\/+$/g, "");
+      const { pathname, hash } = new URL(href, window.location.origin);
+      const sectionId = hash.replace(/^#/, "") || pathname.replace(/^\/+|\/+$/g, "");
 
       if (!SECTION_IDS.includes(sectionId)) return;
+      if (sectionId === "projects") return;
 
       e.preventDefault();
       scrollToSection(sectionId);
@@ -57,12 +58,6 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const observed = [
-      ...SECTION_IDS.map((id) => document.getElementById(id)).filter(Boolean),
-    ];
-
-    if (!observed.length) return undefined;
-
     let frameId = null;
     const updateUrlFromViewport = () => {
       if (frameId !== null) {
@@ -71,20 +66,26 @@ export default function Home() {
 
       frameId = window.requestAnimationFrame(() => {
         frameId = null;
-        const centerY = window.innerHeight * 0.45;
-        const ranked = observed
-          .map((section) => {
-            const rect = section.getBoundingClientRect();
-            return {
-              section,
-              distance: Math.abs((rect.top + rect.bottom) / 2 - centerY),
-              visible: rect.bottom > window.innerHeight * 0.18 && rect.top < window.innerHeight * 0.82,
-            };
-          })
-          .filter((item) => item.visible)
+        const observed = SECTION_IDS.map((id) => document.getElementById(id)).filter(Boolean);
+        if (!observed.length) return;
+
+        const probeY = window.innerHeight * 0.45;
+        const measured = observed.map((section) => {
+          const rect = section.getBoundingClientRect();
+          return {
+            section,
+            rect,
+            distance: Math.abs(rect.top - probeY),
+          };
+        });
+        const containing = measured
+          .filter(({ rect }) => rect.top <= probeY && rect.bottom > probeY)
+          .sort((a, b) => b.rect.top - a.rect.top);
+        const nearest = measured
+          .filter(({ rect }) => rect.bottom > 0 && rect.top < window.innerHeight)
           .sort((a, b) => a.distance - b.distance);
 
-        const active = ranked[0]?.section;
+        const active = containing[0]?.section || nearest[0]?.section;
         if (!active) return;
 
         if (SECTION_IDS.includes(active.id)) {
@@ -93,20 +94,34 @@ export default function Home() {
       });
     };
 
-    const observer = new IntersectionObserver(updateUrlFromViewport, {
-      rootMargin: "-18% 0px -18% 0px",
-      threshold: [0, 0.2, 0.45, 0.7],
+    const observer = new MutationObserver(updateUrlFromViewport);
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
     });
 
-    observed.forEach((section) => observer.observe(section));
     window.addEventListener("scroll", updateUrlFromViewport, { passive: true });
     window.addEventListener("resize", updateUrlFromViewport);
 
     const requestedSection = getRequestedSection();
     if (requestedSection) {
-      window.requestAnimationFrame(() => {
-        scrollToSection(requestedSection, { behavior: "auto", updateUrl: true });
-      });
+      let attempts = 0;
+      const scrollWhenReady = () => {
+        attempts += 1;
+        if (document.getElementById(requestedSection)) {
+          window.requestAnimationFrame(() => {
+            scrollToSection(requestedSection, { behavior: "auto", updateUrl: true });
+            updateUrlFromViewport();
+          });
+          return;
+        }
+
+        if (attempts < 60) {
+          window.setTimeout(scrollWhenReady, 80);
+        }
+      };
+
+      scrollWhenReady();
     } else {
       updateUrlFromViewport();
     }

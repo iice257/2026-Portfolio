@@ -18,6 +18,7 @@ import "../components/ReactBits/TextPressure.css";
 import "../components/ReactBits/StaggeredMenu.css";
 import "../components/ReactBits/Galaxy.css";
 import "../components/ReactBits/Waves.css";
+import "../components/ReactBits/MetallicPaint.css";
 import { GTAG } from "../constants";
 
 const inter = Inter({
@@ -48,7 +49,7 @@ const Snowfall = dynamic(() => import("react-snowfall"), {
 const AppContent = ({ Component, pageProps }) => {
   const { isSnowing } = useSnow();
   const { theme } = useTheme();
-  const { isHeroLocked } = useHeroLock();
+  const { isHeroLocked, setIsHeroLocked } = useHeroLock();
   const { setIsRouteLoading } = useCursor();
   const router = useRouter();
   const [isLoaded, setIsLoaded] = useState(false);
@@ -113,6 +114,12 @@ const AppContent = ({ Component, pageProps }) => {
       router.events.off("routeChangeError", handleRouteDone);
     };
   }, [router.events, setIsRouteLoading]);
+
+  useEffect(() => {
+    if (router.pathname === "/") return;
+    setIsHeroLocked(false);
+    document.documentElement.removeAttribute("data-hero-locked");
+  }, [router.pathname, setIsHeroLocked]);
 
   // Different snow colors for different themes
   const snowColor = theme === 'dark' ? '#ffffff' : '#303030';

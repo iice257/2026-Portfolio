@@ -22,6 +22,7 @@ const Header = () => {
 
   useEffect(() => {
     let frameId = null;
+    logoWidthsRef.current = { leading: 0, trailing: 0 };
 
     const updateHeader = () => {
       frameId = null;
@@ -80,7 +81,7 @@ const Header = () => {
         window.cancelAnimationFrame(frameId);
       }
     };
-  }, []);
+  }, [router.asPath]);
 
   const handleLogoClick = (e) => {
     // If on home, scroll to top instead of navigating
@@ -98,7 +99,7 @@ const Header = () => {
 
     const ref = item.sectionRef;
     if (router.pathname !== '/') {
-      router.push(item.link);
+      router.push(`/#${ref}`);
       return;
     }
 
@@ -109,7 +110,7 @@ const Header = () => {
   const menuItems = MENULINKS.map((link) => ({
     label: link.name,
     ariaLabel: link.ref === "projects" ? "Open Projects page" : `Go to ${link.name}`,
-    link: getSectionHref(link.ref),
+    link: link.ref === "projects" ? "/projects" : getSectionHref(link.ref),
     sectionRef: link.ref,
     opensPage: link.ref === "projects",
   }));

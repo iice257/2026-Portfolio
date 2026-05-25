@@ -105,7 +105,9 @@ export default function Waves({
   maxCursorMove = 100,
   pixelRatio = 0.55,
   targetFps = 24,
+  maxPixelCount = 520000,
   paused = false,
+  mouseInteraction = true,
   style = {},
   className = "",
 }) {
@@ -172,7 +174,9 @@ export default function Waves({
       boundingRef.current = container.getBoundingClientRect();
       const width = Math.max(1, boundingRef.current.width);
       const height = Math.max(1, boundingRef.current.height);
-      const scale = Math.max(0.35, Math.min(pixelRatio, window.devicePixelRatio || 1));
+      const requestedScale = Math.max(0.3, Math.min(pixelRatio, window.devicePixelRatio || 1));
+      const pixelBudgetScale = Math.sqrt(maxPixelCount / (width * height));
+      const scale = Math.min(requestedScale, Number.isFinite(pixelBudgetScale) ? pixelBudgetScale : requestedScale);
 
       canvas.width = Math.ceil(width * scale);
       canvas.height = Math.ceil(height * scale);
@@ -226,16 +230,18 @@ export default function Waves({
           point.wave.x = Math.cos(move) * ampX;
           point.wave.y = Math.sin(move) * ampY;
 
-          const dx = point.x - mouse.sx;
-          const dy = point.y - mouse.sy;
-          const distance = Math.hypot(dx, dy);
-          const influence = Math.max(175, mouse.vs);
+          if (mouseInteraction) {
+            const dx = point.x - mouse.sx;
+            const dy = point.y - mouse.sy;
+            const distance = Math.hypot(dx, dy);
+            const influence = Math.max(175, mouse.vs);
 
-          if (distance < influence) {
-            const strength = 1 - distance / influence;
-            const force = Math.cos(distance * 0.001) * strength;
-            point.cursor.vx += Math.cos(mouse.a) * force * influence * mouse.vs * 0.00065;
-            point.cursor.vy += Math.sin(mouse.a) * force * influence * mouse.vs * 0.00065;
+            if (distance < influence) {
+              const strength = 1 - distance / influence;
+              const force = Math.cos(distance * 0.001) * strength;
+              point.cursor.vx += Math.cos(mouse.a) * force * influence * mouse.vs * 0.00065;
+              point.cursor.vy += Math.sin(mouse.a) * force * influence * mouse.vs * 0.00065;
+            }
           }
 
           point.cursor.vx += (0 - point.cursor.x) * physicsTension;
@@ -347,18 +353,31 @@ export default function Waves({
     }
 
     rebuild();
+    if (!mouseInteraction) {
+      mouseRef.current.x = -10000;
+      mouseRef.current.y = -10000;
+      mouseRef.current.sx = -10000;
+      mouseRef.current.sy = -10000;
+      mouseRef.current.lx = -10000;
+      mouseRef.current.ly = -10000;
+      mouseRef.current.set = true;
+    }
     frameIdRef.current = requestAnimationFrame(animate);
     window.addEventListener("resize", rebuild);
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    if (mouseInteraction) {
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    }
 
     return () => {
       window.removeEventListener("resize", rebuild);
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("touchmove", handleTouchMove);
+      if (mouseInteraction) {
+        window.removeEventListener("mousemove", handleMouseMove);
+        window.removeEventListener("touchmove", handleTouchMove);
+      }
       if (frameIdRef.current) cancelAnimationFrame(frameIdRef.current);
     };
-  }, [pixelRatio, targetFps]);
+  }, [pixelRatio, targetFps, maxPixelCount, mouseInteraction]);
 
   return (
     <div

@@ -13,21 +13,15 @@ export const ThemeProvider = ({ children }) => {
   useEffect(() => {
     setMounted(true);
     const stored = safeStorage.get(window.localStorage, "theme");
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
     if (stored === "dark" || stored === "light") {
       setTheme(stored);
       return undefined;
     }
 
-    const syncSystemTheme = (event) => {
-      setTheme(event.matches ? "dark" : "light");
-    };
-
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     setTheme(mediaQuery.matches ? "dark" : "light");
-    mediaQuery.addEventListener("change", syncSystemTheme);
-
-    return () => mediaQuery.removeEventListener("change", syncSystemTheme);
+    return undefined;
   }, []);
 
   useEffect(() => {
