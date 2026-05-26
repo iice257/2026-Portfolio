@@ -143,6 +143,27 @@ export const majorProjects = [
   { name: "Unfollowr", repoName: "Unfollowr", slug: "unfollowr", image: "/projects/unfollowr.png", subtitle: "Social account hygiene dashboard", description: "A social media account management dashboard with health metrics, hygiene queues, experiments, and action logs.", url: repo("Unfollowr"), tech: ["typescript", "dashboard", "social"], status: "Dashboard build", notes: "Existing project detail preserved, now promoted into the major interactive grid.", visual: { contain: false, accent: "#FFA62E", secondary: "#EA4D2C" } },
 ];
 
+export const highlightedProject = {
+  name: "2026 Portfolio",
+  repoName: "2026-Portfolio",
+  slug: "2026-portfolio",
+  description: "The current portfolio website and the codebase powering this page.",
+  highlightTitle: "This portfolio as a technical product",
+  highlightSummary: "A living portfolio system built as more than a gallery: it combines a themed design language, custom cursor states, animated section choreography, project hierarchy, media previews, validation scripts, CI hardening, local build recovery, SEO metadata, and production-focused performance passes into one coherent personal platform.",
+  highlightNotes: [
+    "The project archive is data-driven so featured work, major builds, highlighted work, and the complete repository list can evolve without rewriting page structure.",
+    "Interaction design is treated as infrastructure: custom cursor modes, hover-open capabilities, keyboard-operable previews, route-aware links, and responsive mockup states all work inside the same visual system.",
+    "Production readiness is part of the build, with project data validation, security headers, deterministic npm workflow, build/start output tracking, CI coverage, and a local Next compatibility wrapper.",
+    "Performance work is explicit: below-the-fold homepage sections are code-split, expensive cursor tracking was removed, media is lazy where possible, and the homepage first-load JavaScript has been reduced while preserving the site identity.",
+  ],
+  url: repo("2026-Portfolio"),
+  liveUrl: "https://kingsleyaremu.vercel.app",
+  tech: ["next.js", "performance", "interaction design", "ci"],
+  status: "Active portfolio system",
+  notes: "Moved out of the compact archive because the portfolio itself demonstrates the technical direction: product thinking, interface polish, production hardening, and a maintainable project data model.",
+  visual: { label: "KA", kicker: "Portfolio system", accent: "#F5F5F5", secondary: "#7CFFCB" },
+};
+
 export const remainingProjects = [
   { name: "Codexoors", repoName: "Codexoors", slug: "codexoors", description: "Early-access/waitlist experience with original Codexoors branding, identity connection, community tasks, and invite unlocks.", tech: ["css", "waitlist", "community"], status: "Brand/product page", notes: "Strong identity concept; kept near the top for polish potential.", url: repo("Codexoors") },
   { name: "PowergridApp", repoName: "PowergridApp", slug: "powergridapp", image: "/projects/powergrid.png", description: "Mobile app concept for navigating unreliable power supply in Nigeria with availability, usage, and management guidance.", tech: ["mobile", "energy", "utility"], status: "Product concept", notes: "Preserves the existing PowerGrid idea in the complete archive.", url: repo("PowergridApp") },
@@ -167,7 +188,6 @@ export const remainingProjects = [
   { name: "Hyperball Airdrop", repoName: "Hyperballairdrop", slug: "hyperballairdrop", description: "Small airdrop page built for the Hyperball project.", tech: ["html", "airdrop", "landing page"], status: "Landing page", notes: "Compact campaign-style build.", url: repo("Hyperballairdrop"), liveUrl: "https://hyperballairdrop.netlify.app" },
   { name: "Ambition Collection", repoName: "Ambition-Collection", slug: "ambition-collection", description: "A visual essay on the human psyche.", tech: ["html", "visual essay", "creative"], status: "Creative web page", notes: "Editorial/visual exploration.", url: repo("Ambition-Collection"), liveUrl: "https://ambition-collection.vercel.app" },
   { name: "MHC Architecture Analysis", repoName: "Research---MHC-Architecture-Analysis", slug: "mhc-architecture-analysis", description: "Research page about Manifold Constrained Hyperconnections and AI scaling architecture.", tech: ["html", "research", "ai"], status: "Research page", notes: "Technical writing and presentation artifact.", url: repo("Research---MHC-Architecture-Analysis"), liveUrl: "https://mhc-interactive-article-by-ice-on-x.netlify.app" },
-  { name: "2026 Portfolio", repoName: "2026-Portfolio", slug: "2026-portfolio", description: "The current portfolio website and the codebase powering this page.", tech: ["javascript", "next.js", "portfolio"], status: "Active portfolio", notes: "Included because it is a public GitHub project.", url: repo("2026-Portfolio"), liveUrl: "https://kingsleyaremu.vercel.app" },
   { name: "King's Portfolio", repoName: "king-s-portfolio", slug: "king-s-portfolio", description: "Previous portfolio website for Kingsley Aremu, showcasing projects and professional experience.", tech: ["typescript", "portfolio", "react"], status: "Previous portfolio", notes: "Useful as portfolio lineage.", url: repo("king-s-portfolio"), liveUrl: "https://kingsleyaremu.vercel.app" },
   { name: "Val Day Site", repoName: "val-day-site", slug: "val-day-site", description: "A simple single-file Valentine's Day website with no framework or build tooling.", tech: ["html", "single page", "creative"], status: "Small experiment", notes: "Lightweight creative build.", url: repo("val-day-site"), liveUrl: "https://val-day-site.vercel.app" },
   { name: "Heads Tails Game", repoName: "Heads-Tails-Game", slug: "heads-tails-game", description: "Heads-or-tails game section built as a mini landing-page interaction for BeraKols.", tech: ["game", "landing page"], status: "Mini game", notes: "Small interactive UI piece.", url: repo("Heads-Tails-Game") },
@@ -188,6 +208,6 @@ export const remainingProjects = [
   { name: "Pix Plot", repoName: "pix-plot", slug: "pix-plot", description: "A WebGL viewer for UMAP or TSNE-clustered images.", tech: ["webgl", "visualization", "reference"], status: "Reference", notes: "Reference/visualization repo kept in the archive.", url: repo("pix-plot") },
 ];
 
-export const allProjects = [...featuredProjects, ...majorProjects, ...remainingProjects];
+export const allProjects = [...featuredProjects, highlightedProject, ...majorProjects, ...remainingProjects];
 export const githubProjectCount = 50;
 export const majorProjectCount = featuredProjects.length + majorProjects.length;

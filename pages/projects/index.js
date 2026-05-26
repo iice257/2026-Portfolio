@@ -7,6 +7,7 @@ import { METADATA } from "../../constants";
 import {
   featuredProjects,
   githubProjectCount,
+  highlightedProject,
   majorProjectCount,
   majorProjects,
   remainingProjects,
@@ -526,7 +527,7 @@ export default function ProjectsIndex() {
   const expandedSlug = Object.keys(flippedCards).find((slug) => flippedCards[slug]);
   const majorProjectRows = chunkProjects(majorProjects);
   const previewItems = useMemo(() => (
-    [...featuredProjects, ...majorProjects, ...remainingProjects].flatMap((project) => [
+    [...featuredProjects, highlightedProject, ...majorProjects, ...remainingProjects].flatMap((project) => [
       { project, variant: "desktop" },
       { project, variant: "mobile" },
     ])
@@ -714,6 +715,53 @@ export default function ProjectsIndex() {
               </Link>
             ))}
           </div>
+        </section>
+
+        <section className="section-container pb-32">
+          <div className="mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+            <div>
+              <p className="text-micro mb-4" style={{ color: "var(--fg-muted)" }}>
+                Highlight project
+              </p>
+              <h2 className="text-display-lg font-light" style={{ color: "var(--fg-primary)" }}>
+                This site, as a system
+              </h2>
+            </div>
+            <p className="text-body-md max-w-md" style={{ color: "var(--fg-secondary)" }}>
+              Moved out of the archive because the portfolio itself carries the strongest technical story.
+            </p>
+          </div>
+
+          <article className="highlight-project-panel">
+            <div className="highlight-project-visual">
+              <PreviewSurface project={highlightedProject} variant="desktop" onOpen={openPreview} onHover={setProjectCursor} onLeave={clearProjectCursor}>
+                <ProjectMockupFrame project={highlightedProject} variant="desktop" className="aspect-[16/10] p-5" />
+              </PreviewSurface>
+            </div>
+
+            <div className="highlight-project-copy">
+              <p className="text-micro mb-4" style={{ color: "var(--fg-muted)" }}>
+                Active portfolio system
+              </p>
+              <h3 className="text-display-md font-light mb-5" style={{ color: "var(--fg-primary)" }}>
+                <ShuffleText text={highlightedProject.highlightTitle} duration={0.45} shuffleTimes={3} textAlign="left" />
+              </h3>
+              <p className="text-body-lg leading-relaxed mb-6" style={{ color: "var(--fg-secondary)" }}>
+                {highlightedProject.highlightSummary}
+              </p>
+              <div className="highlight-project-notes">
+                {highlightedProject.highlightNotes.map((note) => (
+                  <p key={note} className="text-body-sm" style={{ color: "var(--fg-muted)" }}>
+                    {note}
+                  </p>
+                ))}
+              </div>
+              <div className="highlight-project-actions">
+                <TagList tags={highlightedProject.tech} />
+                <ProjectActionLinks project={highlightedProject} />
+              </div>
+            </div>
+          </article>
         </section>
 
         <section className="section-container pb-32">
