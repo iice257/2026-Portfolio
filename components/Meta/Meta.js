@@ -1,7 +1,17 @@
 import Head from "next/head";
 import { METADATA, PROFILE_LINKS } from "../../constants";
+import { featuredProjects, highlightedProject, majorProjects } from "../../data/projects";
 
 const cleanUrl = METADATA.siteUrl.replace(/\/$/, "");
+const primaryProjects = [...featuredProjects, highlightedProject, ...majorProjects];
+const searchQueries = METADATA.topSearchQueries.join(", ");
+const siteNavigation = [
+  { name: "Home", url: cleanUrl },
+  { name: "Projects", url: `${cleanUrl}/projects` },
+  { name: "Skills", url: `${cleanUrl}/#skills` },
+  { name: "Experience", url: `${cleanUrl}/#experience` },
+  { name: "Contact", url: `${cleanUrl}/#contact` },
+];
 
 const structuredData = [
   {
@@ -9,25 +19,43 @@ const structuredData = [
     "@type": "Person",
     "@id": `${cleanUrl}/#person`,
     name: METADATA.author,
-    alternateName: "Kingsley Aremu",
+    alternateName: [METADATA.shortName, METADATA.username],
     url: cleanUrl,
     image: METADATA.image,
     jobTitle: METADATA.jobTitle,
     description: METADATA.description,
+    email: METADATA.email,
+    identifier: METADATA.username,
+    nationality: {
+      "@type": "Country",
+      name: METADATA.country,
+    },
+    homeLocation: {
+      "@type": "Place",
+      name: METADATA.location,
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: METADATA.city,
+        addressRegion: METADATA.region,
+        addressCountry: "NG",
+      },
+    },
     address: {
       "@type": "PostalAddress",
-      addressLocality: "Lagos",
+      addressLocality: METADATA.city,
+      addressRegion: METADATA.region,
       addressCountry: "NG",
     },
-    knowsAbout: [
-      "Full-stack web development",
-      "React",
-      "Next.js",
-      "React Native",
-      "AI agent tooling",
-      "Frontend performance",
-      "Creative engineering",
-    ],
+    knowsAbout: METADATA.focusAreas,
+    knowsLanguage: ["English"],
+    hasOccupation: {
+      "@type": "Occupation",
+      name: METADATA.jobTitle,
+      skills: METADATA.focusAreas.join(", "),
+    },
+    mainEntityOfPage: {
+      "@id": `${cleanUrl}/#profile`,
+    },
     sameAs: PROFILE_LINKS,
   },
   {
@@ -41,6 +69,11 @@ const structuredData = [
       "@id": `${cleanUrl}/#person`,
     },
     inLanguage: "en",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${cleanUrl}/projects?query={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
   },
   {
     "@context": "https://schema.org",
@@ -52,6 +85,44 @@ const structuredData = [
     mainEntity: {
       "@id": `${cleanUrl}/#person`,
     },
+    about: {
+      "@id": `${cleanUrl}/#person`,
+    },
+    primaryImageOfPage: {
+      "@type": "ImageObject",
+      url: METADATA.image,
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "@id": `${cleanUrl}/#featured-projects`,
+    name: "Featured projects by Kingsley Afolabi Aremu",
+    description:
+      "Flagship portfolio projects spanning AI productivity, private productivity tools, AI-agent workflows, image restoration, agent operations, and portfolio systems.",
+    itemListOrder: "https://schema.org/ItemListOrderAscending",
+    numberOfItems: primaryProjects.length,
+    itemListElement: primaryProjects.map((project, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: project.slug
+        ? `${cleanUrl}/projects${featuredProjects.some((item) => item.slug === project.slug) ? `/${project.slug}` : ""}`
+        : `${cleanUrl}/projects`,
+      item: {
+        "@type": "CreativeWork",
+        name: project.name,
+        description: project.longDescription || project.description,
+        keywords: project.tech?.join(", "),
+        sameAs: [project.url, project.liveUrl].filter((url) => url && url !== "#"),
+      },
+    })),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "SiteNavigationElement",
+    "@id": `${cleanUrl}/#site-navigation`,
+    name: siteNavigation.map((item) => item.name),
+    url: siteNavigation.map((item) => item.url),
   },
 ];
 
@@ -62,14 +133,27 @@ const Meta = () => (
     <title>{METADATA.title}</title>
     <meta name="description" content={METADATA.description} />
     <meta name="keywords" content={METADATA.keywords} />
+    <meta name="subject" content="Full-stack engineer portfolio, frontend engineering, React, Next.js, React Native, AI agent tooling, automation, creative engineering" />
+    <meta name="abstract" content={METADATA.description} />
+    <meta name="topic" content="Software engineering portfolio" />
+    <meta name="summary" content={METADATA.description} />
+    <meta name="target" content="software engineering recruiters, technical founders, product teams, AI tooling teams, frontend engineering leads" />
+    <meta name="search-queries" content={searchQueries} />
     <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
     <meta name="googlebot" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
     <meta name="bingbot" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
     <meta name="application-name" content={METADATA.title} />
     <meta name="creator" content={METADATA.author} />
     <meta name="publisher" content={METADATA.author} />
+    <meta name="owner" content={METADATA.author} />
+    <meta name="designer" content={METADATA.author} />
+    <meta name="reply-to" content={METADATA.email} />
     <meta name="category" content="portfolio" />
-    <meta name="classification" content="Full-stack developer portfolio" />
+    <meta name="classification" content="Full-stack engineer portfolio" />
+    <meta name="coverage" content="Worldwide" />
+    <meta name="distribution" content="Global" />
+    <meta name="rating" content="General" />
+    <meta name="revisit-after" content="7 days" />
     <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="language" content={METADATA.language} />
     <meta name="author" content={METADATA.author} />

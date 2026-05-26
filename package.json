@@ -5,8 +5,9 @@
     "build": "node scripts/next-build.mjs",
     "start": "node scripts/next-start.mjs",
     "lint": "next lint",
+    "seo:generate": "node scripts/generate-seo-assets.mjs",
     "validate:data": "node scripts/validate-project-data.mjs",
-    "check": "npm run validate:data && npm run lint && npm run build"
+    "check": "npm run seo:generate && npm run validate:data && npm run lint && npm run build"
   },
   "dependencies": {
     "@next/third-parties": "^14.2.35",

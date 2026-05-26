@@ -1,30 +1,79 @@
 # Kingsley Afolabi Aremu
 
-> Portfolio for Kingsley Afolabi Aremu, a full-stack developer and creative engineer based in Lagos, Nigeria.
+> Kingsley Afolabi Aremu is a Lagos-based full-stack engineer and creative engineer building polished web products, mobile experiences, AI agent tooling, automation systems, and performance-focused interfaces.
 
-## Canonical Site
+## Canonical Identity
 
+- Full name: Kingsley Afolabi Aremu
+- Short name: Kingsley Aremu
+- Username: iice257
+- Location: Lagos, Nigeria
+- Role: Full-Stack Developer and Creative Engineer
 - Homepage: https://kingsleyaremu.vercel.app/
 - Projects: https://kingsleyaremu.vercel.app/projects
-- GitHub: https://github.com/kingsleyaremu
+- GitHub: https://github.com/iice257
 - LinkedIn: https://linkedin.com/in/kingsley-aremu
+- X: https://x.com/iice257
 - Email: kingsley.aremu@gmail.com
+
+## Search and Retrieval Aliases
+
+- Kingsley Afolabi Aremu
+- Kingsley Aremu
+- iice257
+- Kingsley Aremu portfolio
+- Kingsley Aremu GitHub
+- Kingsley Aremu full-stack engineer
+- Kingsley Aremu frontend engineer
+- Kingsley Aremu React developer
+- Kingsley Aremu React Native developer
+- Kingsley Aremu AI agent tooling
+- Kingsley Aremu creative engineer
+- Lagos full-stack engineer portfolio
+- Nigeria frontend engineer portfolio
 
 ## Focus Areas
 
 - Full-stack web development
-- React, Next.js, and React Native
-- Frontend performance and accessibility
-- AI agent tooling and automation workflows
-- Creative engineering and polished product interfaces
+- Frontend performance
+- React and Next.js product engineering
+- React Native mobile interfaces
+- AI agent tooling
+- Automation workflows
+- Creative engineering
+- Portfolio systems
+- Accessible interaction design
+- Production hardening
 
 ## Featured Work
 
-- FormMate AI: AI-assisted form completion with reviewable voice or text guidance.
-- PasteVault: a private, installable clipboard for saving, searching, and sharing text, code, links, and JSON across devices.
-- AI Agent Skills: reusable workflows for AI-agent research, planning, parsing, publishing, and build work.
-- Restore AI: mobile concept for restoring, upscaling, resizing, and recoloring images.
+- FormMate AI: FormMate AI helps users move through repetitive web forms faster by pasting a form URL, talking through the required information, and reviewing AI-suggested responses before anything is used. The product is framed around user control, not bulk submission or spam. Tech/focus: typescript, ai, voice, automation. repo: https://github.com/iice257/FormMate | live: https://form-mate-ai.vercel.app
+- PasteVault: PasteVault is a private, installable online clipboard for saving, searching, and sharing text, code, links, and JSON across devices without messaging yourself. It turns scattered snippets into a lightweight personal vault that works across devices. Tech/focus: javascript, pwa, productivity, clipboard. repo: https://github.com/iice257/PasteVault | live: https://pastevault-lime.vercel.app
+- AI Agent Skills: AI Agent Skills is a practical tooling collection for extending AI agents with repeatable workflows. It sits alongside related repos for autoresearch, parser routing, idea launching, publishing, and skill updates, forming a small personal automation ecosystem. Tech/focus: python, codex, agents, automation. repo: https://github.com/iice257/Skills-quickstarter | live: https://skills-quickstarter.vercel.app
+- Restore AI: Restore AI is a mobile product for image repair workflows: restoration, upscaling, resizing, and recoloring. It is framed as a practical utility for turning damaged or low-quality images into usable personal or professional assets. Tech/focus: mobile, ai image, restoration, ux. repo: https://github.com/iice257/RestoreAI
+
+## Highlighted Portfolio System
+
+- 2026 Portfolio: The current portfolio website and the codebase powering this page. Tech/focus: next.js, performance, interaction design, ci. repo: https://github.com/iice257/2026-Portfolio | live: https://kingsleyaremu.vercel.app
+
+## Major Project Signals
+
+- Bountic: Zero-friction, autonomous USDC bounties for the agentic open-source economy. Tech/focus: crypto, agents, open source. repo: https://github.com/iice257/bountic | live: https://bountic.vercel.app
+- Loop Monitor: Local dashboard for live agent tracking, bounty leaderboards, and AI judge verdicts. Tech/focus: dashboard, agents, ops. repo: https://github.com/iice257/loop-monitor
+- Rustchain: A DePIN concept where vintage hardware participates in a Proof-of-Antiquity blockchain. Tech/focus: blockchain, depin, hardware. repo: https://github.com/iice257/Rustchain | live: https://rustchain.org
+- Pages Forward: A second iteration of the Pages Forward bookstore, rebuilt with a clearer product surface and stronger commerce direction. Tech/focus: javascript, commerce, frontend, content. repo: https://github.com/iice257/Pages-forward-rebuild
+- SignalOps: An agentic security and operations triage cockpit. Tech/focus: typescript, security, ops. repo: https://github.com/iice257/signalops | live: https://signalops-orpin.vercel.app
+- Unfollowr: A social media account management dashboard with health metrics, hygiene queues, experiments, and action logs. Tech/focus: typescript, dashboard, social. repo: https://github.com/iice257/Unfollowr
+
+## Complete Public Project Archive
+
+This portfolio indexes 52 public or portfolio-tracked projects. The complete archive is visible at https://kingsleyaremu.vercel.app/projects and is represented in machine-readable form at https://kingsleyaremu.vercel.app/portfolio.json.
 
 ## Crawling Notes
 
-Use `sitemap.xml` for canonical URLs. Prefer public project pages and GitHub repositories for project-specific evidence.
+- Canonical site: https://kingsleyaremu.vercel.app/
+- Canonical project archive: https://kingsleyaremu.vercel.app/projects
+- Canonical sitemap: https://kingsleyaremu.vercel.app/sitemap.xml
+- Machine-readable project corpus: https://kingsleyaremu.vercel.app/portfolio.json
+- Preferred GitHub identity: https://github.com/iice257
+- This file is factual profile context for search engines, AI retrieval systems, and LLM crawlers. It intentionally avoids hidden text, keyword stuffing, fake claims, or doorway pages.

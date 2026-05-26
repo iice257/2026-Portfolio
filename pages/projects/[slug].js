@@ -452,22 +452,74 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
     project.url !== "#" ? { label: "View on GitHub", href: project.url } : null,
     project.liveUrl ? { label: "View website", href: project.liveUrl } : null,
   ].filter(Boolean);
-  const projectJsonLd = JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "CreativeWork",
-    "@id": `${canonicalUrl}#project`,
-    name: project.name,
-    headline: project.subtitle,
-    description: project.longDescription,
-    url: canonicalUrl,
-    creator: {
-      "@type": "Person",
-      name: METADATA.author,
-      url: METADATA.siteUrl,
+  const projectJsonLd = JSON.stringify([
+    {
+      "@context": "https://schema.org",
+      "@type": ["CreativeWork", "SoftwareSourceCode"],
+      "@id": `${canonicalUrl}#project`,
+      name: project.name,
+      headline: project.subtitle,
+      description: project.longDescription,
+      url: canonicalUrl,
+      codeRepository: project.url !== "#" ? project.url : undefined,
+      runtimePlatform: "Web",
+      programmingLanguage: project.toolsUsed || project.tech,
+      applicationCategory: project.category,
+      keywords: project.tech.join(", "),
+      creator: {
+        "@id": `${METADATA.siteUrl.replace(/\/$/, "")}/#person`,
+      },
+      author: {
+        "@id": `${METADATA.siteUrl.replace(/\/$/, "")}/#person`,
+      },
+      sameAs: [project.url, project.liveUrl].filter((url) => url && url !== "#"),
+      mainEntityOfPage: {
+        "@id": `${canonicalUrl}#webpage`,
+      },
     },
-    keywords: project.tech.join(", "),
-    sameAs: [project.url, project.liveUrl].filter((url) => url && url !== "#"),
-  }).replace(/</g, "\\u003c");
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "@id": `${canonicalUrl}#webpage`,
+      url: canonicalUrl,
+      name: `${project.name} | ${METADATA.author}`,
+      description: project.longDescription,
+      isPartOf: {
+        "@id": `${METADATA.siteUrl.replace(/\/$/, "")}/#website`,
+      },
+      about: {
+        "@id": `${canonicalUrl}#project`,
+      },
+      breadcrumb: {
+        "@id": `${canonicalUrl}#breadcrumb`,
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "@id": `${canonicalUrl}#breadcrumb`,
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: METADATA.siteUrl.replace(/\/$/, ""),
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Projects",
+          item: `${METADATA.siteUrl.replace(/\/$/, "")}/projects`,
+        },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: project.name,
+          item: canonicalUrl,
+        },
+      ],
+    },
+  ]).replace(/</g, "\\u003c");
 
   const setProjectCursor = (text) => {
     if (typeof window !== "undefined" && !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
@@ -502,6 +554,7 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
       <Head>
         <title>{`${project.name} | ${METADATA.author}`}</title>
         <meta name="description" content={project.longDescription} />
+        <meta name="keywords" content={`${project.name}, ${project.repoName}, ${project.tech.join(", ")}, ${METADATA.author}, ${METADATA.shortName}, iice257, portfolio project`} />
         <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1" />
         <link rel="canonical" href={canonicalUrl} />
         <meta property="og:type" content="article" />

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { METADATA } from "../../constants";
 import {
+  allProjects,
   featuredProjects,
   githubProjectCount,
   highlightedProject,
@@ -606,6 +607,55 @@ export default function ProjectsIndex() {
     window.dispatchEvent(new CustomEvent("portfolio:cursor-clear"));
     window.setTimeout(requestCursorRefresh, 0);
   }, [clearProjectCursor, requestCursorRefresh]);
+  const canonicalUrl = `${METADATA.siteUrl.replace(/\/$/, "")}/projects`;
+  const projectsJsonLd = JSON.stringify([
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "@id": `${canonicalUrl}#collection`,
+      url: canonicalUrl,
+      name: `Projects | ${METADATA.author}`,
+      description:
+        "A structured project archive by Kingsley Afolabi Aremu covering featured product builds, AI-agent tooling, automation systems, frontend experiments, mobile concepts, and public GitHub repositories.",
+      inLanguage: "en",
+      isPartOf: {
+        "@id": `${METADATA.siteUrl.replace(/\/$/, "")}/#website`,
+      },
+      about: {
+        "@id": `${METADATA.siteUrl.replace(/\/$/, "")}/#person`,
+      },
+      mainEntity: {
+        "@id": `${canonicalUrl}#project-list`,
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "@id": `${canonicalUrl}#project-list`,
+      name: "Portfolio projects by Kingsley Afolabi Aremu",
+      itemListOrder: "https://schema.org/ItemListOrderAscending",
+      numberOfItems: allProjects.length,
+      itemListElement: allProjects.map((project, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: featuredProjects.some((item) => item.slug === project.slug)
+          ? `${canonicalUrl}/${project.slug}`
+          : canonicalUrl,
+        item: {
+          "@type": "CreativeWork",
+          name: project.name,
+          description: project.longDescription || project.description,
+          keywords: project.tech?.join(", "),
+          genre: project.category || project.status || project.currentStatus,
+          codeRepository: project.url !== "#" ? project.url : undefined,
+          sameAs: [project.url, project.liveUrl].filter((url) => url && url !== "#"),
+          creator: {
+            "@id": `${METADATA.siteUrl.replace(/\/$/, "")}/#person`,
+          },
+        },
+      })),
+    },
+  ]).replace(/</g, "\\u003c");
 
   return (
     <>
@@ -615,13 +665,18 @@ export default function ProjectsIndex() {
           name="description"
           content="A structured project archive by Kingsley Afolabi Aremu, including featured work, major projects, and the complete GitHub project list."
         />
+        <meta name="keywords" content="Kingsley Aremu projects, iice257 projects, Kingsley Afolabi Aremu GitHub, React portfolio projects, Next.js portfolio projects, AI agent tooling projects, frontend engineering projects, Lagos software engineer projects" />
         <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1" />
-        <link rel="canonical" href={`${METADATA.siteUrl.replace(/\/$/, "")}/projects`} />
+        <link rel="canonical" href={canonicalUrl} />
         <meta property="og:title" content={`Projects | ${METADATA.author}`} />
         <meta property="og:description" content="A structured project archive by Kingsley Afolabi Aremu, including featured work, major projects, and the complete GitHub project list." />
-        <meta property="og:url" content={`${METADATA.siteUrl.replace(/\/$/, "")}/projects`} />
+        <meta property="og:url" content={canonicalUrl} />
         <meta property="og:image" content={METADATA.image} />
         <meta name="twitter:card" content="summary_large_image" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: projectsJsonLd }}
+        />
       </Head>
 
       <main id="main-content" className="min-h-screen" style={{ backgroundColor: "var(--bg-primary)" }}>
