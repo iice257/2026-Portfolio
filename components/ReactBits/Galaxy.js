@@ -198,6 +198,8 @@ export default function Galaxy({
   const targetMouseActive = useRef(0.0);
   const smoothMouseActive = useRef(0.0);
   const pausedRef = useRef(paused);
+  const resumeRef = useRef(() => {});
+  const stopRef = useRef(() => {});
   const focalX = focal[0];
   const focalY = focal[1];
   const rotationX = rotation[0];
@@ -205,6 +207,11 @@ export default function Galaxy({
 
   useEffect(() => {
     pausedRef.current = paused;
+    if (paused) {
+      stopRef.current();
+    } else if (document.visibilityState !== 'hidden') {
+      resumeRef.current();
+    }
   }, [paused]);
 
   useEffect(() => {
@@ -279,18 +286,32 @@ export default function Galaxy({
     });
 
     const mesh = new Mesh(gl, { geometry, program });
-    let animateId;
+    let animateId = null;
     let lastFrameTime = 0;
     const frameInterval = targetFps > 0 ? 1000 / targetFps : 0;
 
+    function stopLoop() {
+      if (animateId !== null) {
+        cancelAnimationFrame(animateId);
+        animateId = null;
+      }
+    }
+
+    function startLoop() {
+      if (animateId === null && !pausedRef.current && document.visibilityState !== 'hidden') {
+        animateId = requestAnimationFrame(update);
+      }
+    }
+
     function update(t) {
-      animateId = requestAnimationFrame(update);
+      animateId = null;
 
       if (pausedRef.current || document.visibilityState === 'hidden') {
         return;
       }
 
       if (frameInterval && t - lastFrameTime < frameInterval) {
+        startLoop();
         return;
       }
 
@@ -312,9 +333,12 @@ export default function Galaxy({
       program.uniforms.uMouseActiveFactor.value = smoothMouseActive.current;
 
       renderer.render({ scene: mesh });
+      startLoop();
     }
-    animateId = requestAnimationFrame(update);
+    resumeRef.current = startLoop;
+    stopRef.current = stopLoop;
     ctn.appendChild(gl.canvas);
+    startLoop();
 
     function handleMouseMove(e) {
       const rect = ctn.getBoundingClientRect();
@@ -333,9 +357,22 @@ export default function Galaxy({
       ctn.addEventListener('mouseleave', handleMouseLeave);
     }
 
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'hidden') {
+        stopLoop();
+      } else {
+        startLoop();
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     return () => {
-      cancelAnimationFrame(animateId);
+      stopLoop();
+      resumeRef.current = () => {};
+      stopRef.current = () => {};
       window.removeEventListener('resize', resize);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       if (mouseInteraction) {
         ctn.removeEventListener('mousemove', handleMouseMove);
         ctn.removeEventListener('mouseleave', handleMouseLeave);
