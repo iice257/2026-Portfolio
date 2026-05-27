@@ -135,9 +135,8 @@ const Work = () => {
       stack: [
         "IT Support",
         "Troubleshooting",
-        "Hardware Support",
-        "Software Support",
-        "User Support",
+        "Hardware Management",
+        "User Onboarding",
         "Operations",
       ],
     },
@@ -171,7 +170,7 @@ const Work = () => {
         <div className="space-y-0">
           {experiences.map((exp, i) => (
             <article key={`${exp.role}-${i}`} className="work-item" onMouseEnter={() => setOpenExperience(i)}>
-              <div className="work-line h-px w-full" style={{ backgroundColor: "var(--border)" }} />
+              <div className="work-line work-separator h-px w-full" />
 
               <div className="work-content">
                 <button
@@ -240,14 +239,18 @@ const Work = () => {
                         <ul className="mt-6 space-y-3 max-w-3xl">
                           {exp.details.map((detail) => (
                             <li key={detail} className="flex gap-4 text-body-md" style={{ color: "var(--fg-secondary)" }}>
-                              <span className="mt-[0.75em] h-px w-5 shrink-0" style={{ backgroundColor: "var(--border)" }} />
+                              <span className="work-detail-line mt-[0.75em] h-px w-5 shrink-0" />
                               <span>{detail}</span>
                             </li>
                           ))}
                         </ul>
-                        <p className="text-micro mt-7 max-w-3xl" style={{ color: "var(--fg-muted)" }}>
-                          {exp.stack.join(" · ")}
-                        </p>
+                        <div className="work-stack-tags mt-7 max-w-3xl" style={{ color: "var(--fg-muted)" }}>
+                          {exp.stack.map((item) => (
+                            <span key={item} className="text-micro">
+                              {item}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     </motion.div>
                   )}

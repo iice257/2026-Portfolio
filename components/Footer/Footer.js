@@ -13,7 +13,8 @@ const Footer = () => {
   const footerRef = useRef(null);
   const currentYear = new Date().getFullYear();
   const { theme } = useTheme();
-  const [canRenderFooterBackdrop, setCanRenderFooterBackdrop] = useState(false);
+  const [canRenderFooterBackdrop, setCanRenderFooterBackdrop] = useState(true);
+  const [isFooterBackdropPaused, setIsFooterBackdropPaused] = useState(true);
   const navLinks = MENULINKS.filter((link) => link.ref !== "home");
   const directOrder = ["twitter", "mail", "github", "linkedin"];
   const directLinks = [...CONTACT_LINKS].sort((a, b) => (
@@ -42,11 +43,10 @@ const Footer = () => {
     let isVisible = false;
 
     const syncBackdrop = () => {
-      setCanRenderFooterBackdrop(
-        isVisible &&
-        !motionQuery.matches &&
-        document.visibilityState !== "hidden"
-      );
+      const shouldReduce = motionQuery.matches;
+      const isDocumentHidden = document.visibilityState === "hidden";
+      setCanRenderFooterBackdrop(!shouldReduce);
+      setIsFooterBackdropPaused(!isVisible || shouldReduce || isDocumentHidden);
     };
 
     const observer = new IntersectionObserver(
@@ -84,7 +84,7 @@ const Footer = () => {
           <Galaxy
             mouseRepulsion={false}
             mouseInteraction={false}
-            density={0.46}
+            density={1.38}
             glowIntensity={0.07}
             saturation={0.42}
             hueShift={0}
@@ -94,6 +94,7 @@ const Footer = () => {
             pixelRatio={0.38}
             targetFps={18}
             maxPixelCount={240000}
+            paused={isFooterBackdropPaused}
           />
         </div>
       )}
@@ -101,21 +102,22 @@ const Footer = () => {
       {canRenderFooterBackdrop && theme === "light" && (
         <div className="footer-effect footer-effect-waves" aria-hidden="true">
           <Waves
-            lineColor="#8f8f8f"
+            lineColor="#6f6f6f"
             backgroundColor="transparent"
-            waveSpeedX={0.004}
-            waveSpeedY={0.004}
-            waveAmpX={18}
-            waveAmpY={9}
+            waveSpeedX={0.007}
+            waveSpeedY={0.007}
+            waveAmpX={28}
+            waveAmpY={14}
             friction={0.76}
             tension={0.004}
             maxCursorMove={70}
             xGap={36}
             yGap={22}
             pixelRatio={0.38}
-            targetFps={18}
+            targetFps={22}
             maxPixelCount={220000}
-            mouseInteraction={false}
+            mouseInteraction
+            paused={isFooterBackdropPaused}
           />
         </div>
       )}

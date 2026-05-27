@@ -751,7 +751,19 @@ export default function ProjectsIndex() {
               >
                 <article className={`featured-project-row relative ${index % 2 === 1 ? "is-reversed" : ""}`}>
                   <div className="featured-project-thumb relative overflow-hidden outline outline-1 outline-[var(--border)]">
-                    <ProjectVisual project={project} priority={index === 0} metallic />
+                    <Image
+                      src={project.image || "/project-bg.svg"}
+                      alt={project.name}
+                      fill
+                      className="project-panel-visual object-cover"
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                      priority={index === 0}
+                    />
+                    <span className="featured-metallic-artifact" aria-hidden="true">
+                      <span />
+                      <span />
+                      <span />
+                    </span>
                   </div>
                   <div className="featured-project-copy">
                     <span className="featured-project-kicker text-micro block" style={{ color: "var(--fg-muted)" }}>
@@ -767,6 +779,9 @@ export default function ProjectsIndex() {
                       {project.description}
                     </p>
                     <TagList tags={project.tech} />
+                    <span className="project-action-link featured-project-cta" aria-hidden="true">
+                      <span>View project</span>
+                    </span>
                   </div>
                 </article>
               </Link>

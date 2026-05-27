@@ -74,7 +74,8 @@ const Hero = () => {
   const [isLocked, setIsLocked] = useState(false);
   const [hasUnlocked, setHasUnlocked] = useState(false);
   const [isHeroInView, setIsHeroInView] = useState(true);
-  const [canRenderHeroBackdrop, setCanRenderHeroBackdrop] = useState(false);
+  const [canRenderHeroBackdrop, setCanRenderHeroBackdrop] = useState(true);
+  const [isHeroBackdropPaused, setIsHeroBackdropPaused] = useState(false);
   const [showUnlockTooltip, setShowUnlockTooltip] = useState(false);
   const [interactionPulse, setInteractionPulse] = useState(0);
   const [activeCapabilityIndex, setActiveCapabilityIndex] = useState(0);
@@ -310,11 +311,10 @@ const Hero = () => {
     let isVisible = true;
 
     const syncBackdrop = () => {
-      setCanRenderHeroBackdrop(
-        isVisible &&
-        !motionQuery.matches &&
-        document.visibilityState !== "hidden"
-      );
+      const shouldReduce = motionQuery.matches;
+      const isDocumentHidden = document.visibilityState === "hidden";
+      setCanRenderHeroBackdrop(!shouldReduce);
+      setIsHeroBackdropPaused(!isVisible || shouldReduce || isDocumentHidden);
     };
 
     const observer = new IntersectionObserver(
@@ -343,6 +343,8 @@ const Hero = () => {
     if (motionQuery.matches) return undefined;
 
     const intervalId = window.setInterval(() => {
+      if (!isHeroInView || document.visibilityState === "hidden") return;
+
       setActiveCapabilityIndex((index) => {
         setPreviousCapabilityIndex(index);
         return (index + 1) % HERO_CAPABILITY_PHRASES.length;
@@ -350,7 +352,7 @@ const Hero = () => {
     }, 2200);
 
     return () => window.clearInterval(intervalId);
-  }, []);
+  }, [isHeroInView]);
 
   useEffect(() => {
     if (previousCapabilityIndex === null) return undefined;
@@ -458,7 +460,7 @@ const Hero = () => {
           <Galaxy
             mouseRepulsion={false}
             mouseInteraction={false}
-            density={0.18}
+            density={0.54}
             glowIntensity={0.08}
             saturation={0.65}
             hueShift={0}
@@ -468,6 +470,7 @@ const Hero = () => {
             pixelRatio={0.48}
             targetFps={22}
             maxPixelCount={520000}
+            paused={isHeroBackdropPaused}
           />
         </div>
       )}
@@ -490,6 +493,7 @@ const Hero = () => {
             targetFps={22}
             maxPixelCount={520000}
             mouseInteraction={!isLockViewport || isLocked}
+            paused={isHeroBackdropPaused}
           />
         </div>
       )}

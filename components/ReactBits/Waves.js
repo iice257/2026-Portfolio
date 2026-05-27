@@ -143,9 +143,16 @@ export default function Waves({
   });
   const frameIdRef = useRef(null);
   const pausedRef = useRef(paused);
+  const resumeRef = useRef(() => {});
+  const stopRef = useRef(() => {});
 
   useEffect(() => {
     pausedRef.current = paused;
+    if (paused) {
+      stopRef.current();
+    } else if (document.visibilityState !== "hidden") {
+      resumeRef.current();
+    }
   }, [paused]);
 
   useEffect(() => {
@@ -289,14 +296,28 @@ export default function Waves({
 
     let lastFrameTime = 0;
 
+    function stopLoop() {
+      if (frameIdRef.current) {
+        cancelAnimationFrame(frameIdRef.current);
+        frameIdRef.current = null;
+      }
+    }
+
+    function startLoop() {
+      if (!frameIdRef.current && !pausedRef.current && document.visibilityState !== "hidden") {
+        frameIdRef.current = requestAnimationFrame(animate);
+      }
+    }
+
     function animate(time) {
-      frameIdRef.current = requestAnimationFrame(animate);
+      frameIdRef.current = null;
 
       if (pausedRef.current || document.visibilityState === "hidden") {
         return;
       }
 
       if (targetFps > 0 && time - lastFrameTime < 1000 / targetFps) {
+        startLoop();
         return;
       }
 
@@ -321,6 +342,7 @@ export default function Waves({
 
       movePoints(time);
       drawLines();
+      startLoop();
     }
 
     function rebuild() {
@@ -329,6 +351,8 @@ export default function Waves({
     }
 
     function updatePointer(clientX, clientY) {
+      if (pausedRef.current || document.visibilityState === "hidden") return;
+
       const mouse = mouseRef.current;
       const bounds = boundingRef.current;
       mouse.x = clientX - bounds.left;
@@ -362,20 +386,35 @@ export default function Waves({
       mouseRef.current.ly = -10000;
       mouseRef.current.set = true;
     }
-    frameIdRef.current = requestAnimationFrame(animate);
+    resumeRef.current = startLoop;
+    stopRef.current = stopLoop;
+    startLoop();
     window.addEventListener("resize", rebuild);
     if (mouseInteraction) {
       window.addEventListener("mousemove", handleMouseMove);
       window.addEventListener("touchmove", handleTouchMove, { passive: false });
     }
 
+    function handleVisibilityChange() {
+      if (document.visibilityState === "hidden") {
+        stopLoop();
+      } else {
+        startLoop();
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     return () => {
       window.removeEventListener("resize", rebuild);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       if (mouseInteraction) {
         window.removeEventListener("mousemove", handleMouseMove);
         window.removeEventListener("touchmove", handleTouchMove);
       }
-      if (frameIdRef.current) cancelAnimationFrame(frameIdRef.current);
+      stopLoop();
+      resumeRef.current = () => {};
+      stopRef.current = () => {};
     };
   }, [pixelRatio, targetFps, maxPixelCount, mouseInteraction]);
 
