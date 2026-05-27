@@ -41,6 +41,7 @@ const TextPressure = ({
   const titleRef = useRef(null);
   const spansRef = useRef([]);
   const spanRects = useRef([]);
+  const textMetricsRef = useRef({ maxDist: 1, maxDistSq: 1 });
   const mouseRef = useRef({ x: 0, y: 0 });
   const cursorRef = useRef({ x: 0, y: 0 });
   const isVisibleRef = useRef(false);
@@ -89,6 +90,13 @@ const TextPressure = ({
   const calculateSpans = useCallback(() => {
     if (!titleRef.current) return;
 
+    const titleWidth = titleRef.current.getBoundingClientRect().width;
+    const maxDist = Math.max(1, titleWidth / 2);
+    textMetricsRef.current = {
+      maxDist,
+      maxDistSq: maxDist * maxDist,
+    };
+
     spanRects.current = spansRef.current.map(span => {
       if (!span) return null;
       const rect = span.getBoundingClientRect();
@@ -116,6 +124,8 @@ const TextPressure = ({
 
   useEffect(() => {
     let rafId = null;
+    let lastFrameTime = 0;
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     const defaultSettings = `'wght' ${weight ? 100 : 400}, 'wdth' ${width ? 100 : 100}, 'ital' 0`;
 
@@ -138,25 +148,27 @@ const TextPressure = ({
       }
     };
 
-    const animate = () => {
+    const animate = (time) => {
       rafId = null;
 
-      if (!isVisibleRef.current || document.hidden) {
-        resetSpans();
+      if (!isVisibleRef.current || document.hidden || motionQuery.matches) {
+        lastFrameTime = 0;
         return;
       }
 
-      mouseRef.current.x += (cursorRef.current.x - mouseRef.current.x) * 0.1;
-      mouseRef.current.y += (cursorRef.current.y - mouseRef.current.y) * 0.1;
+      const delta = lastFrameTime ? Math.min(48, time - lastFrameTime) : 16.67;
+      lastFrameTime = time;
+      const ease = 1 - Math.pow(0.9, delta / 16.67);
+
+      mouseRef.current.x += (cursorRef.current.x - mouseRef.current.x) * ease;
+      mouseRef.current.y += (cursorRef.current.y - mouseRef.current.y) * ease;
 
       if (titleRef.current) {
         if (spanRects.current.length !== spansRef.current.length || spanRects.current.length === 0) {
           calculateSpans();
         }
 
-        const titleWidth = titleRef.current.offsetWidth;
-        const maxDist = titleWidth / 2;
-        const maxDistSq = maxDist * maxDist;
+        const { maxDist, maxDistSq } = textMetricsRef.current;
 
         spanRects.current.forEach(item => {
           if (!item || !item.elem) return;
@@ -194,12 +206,14 @@ const TextPressure = ({
     };
 
     const startAnimation = () => {
-      if (rafId === null) {
+      if (rafId === null && isVisibleRef.current && !document.hidden && !motionQuery.matches) {
         rafId = requestAnimationFrame(animate);
       }
     };
 
     const activatePointer = (x, y) => {
+      if (!isVisibleRef.current || document.hidden || motionQuery.matches) return;
+
       cursorRef.current.x = x;
       cursorRef.current.y = y;
       startAnimation();
@@ -220,8 +234,16 @@ const TextPressure = ({
     const handleVisibilityChange = () => {
       if (document.hidden) {
         stopAnimation();
-        resetSpans();
       } else if (isVisibleRef.current) {
+        startAnimation();
+      }
+    };
+
+    const handleMotionPreferenceChange = () => {
+      if (motionQuery.matches) {
+        stopAnimation();
+        resetSpans();
+      } else if (isVisibleRef.current && !document.hidden) {
         startAnimation();
       }
     };
@@ -245,7 +267,6 @@ const TextPressure = ({
       if (!isVisibleRef.current) return;
       isVisibleRef.current = false;
       stopAnimation();
-      resetSpans();
     };
 
     const checkViewportVisibility = () => {
@@ -278,6 +299,7 @@ const TextPressure = ({
     window.addEventListener('portfolio:hero-locked-pointer', handleLockedPointer);
     window.addEventListener('scroll', handleScroll, { passive: true });
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    motionQuery.addEventListener('change', handleMotionPreferenceChange);
 
     return () => {
       stopAnimation();
@@ -290,6 +312,7 @@ const TextPressure = ({
       window.removeEventListener('portfolio:hero-locked-pointer', handleLockedPointer);
       window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      motionQuery.removeEventListener('change', handleMotionPreferenceChange);
     };
   }, [width, weight, italic, alpha, calculateSpans]);
 

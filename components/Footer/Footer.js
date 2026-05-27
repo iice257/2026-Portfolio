@@ -110,7 +110,7 @@ const Footer = () => {
             waveAmpY={14}
             friction={0.76}
             tension={0.004}
-            maxCursorMove={70}
+            maxCursorMove={160}
             xGap={36}
             yGap={22}
             pixelRatio={0.38}

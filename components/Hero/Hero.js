@@ -490,7 +490,7 @@ const Hero = () => {
             xGap={28}
             yGap={16}
             pixelRatio={0.48}
-            targetFps={22}
+            targetFps={0}
             maxPixelCount={520000}
             mouseInteraction={!isLockViewport || isLocked}
             paused={isHeroBackdropPaused}
