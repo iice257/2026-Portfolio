@@ -114,7 +114,7 @@ const Footer = () => {
             xGap={36}
             yGap={22}
             pixelRatio={0.38}
-            targetFps={22}
+            targetFps={0}
             maxPixelCount={220000}
             mouseInteraction
             paused={isFooterBackdropPaused}

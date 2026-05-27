@@ -104,7 +104,7 @@ const StaggeredMenu = ({
       </button>
 
       {/* Navigation Items - LEFT ALIGNED */}
-      <nav aria-label="Primary navigation" className="flex-1 pl-6 md:pl-[3.75rem] pr-6 pt-24 md:pt-9 pb-7 flex flex-col justify-start items-start gap-7 sm:gap-7 md:gap-[1.2rem] w-full">
+      <nav aria-label="Primary navigation" className="min-h-[calc(100dvh-2rem)] pl-6 md:pl-[3.75rem] pr-6 pt-24 md:pt-9 pb-7 flex flex-col justify-between items-start gap-7 w-full">
         {items.map((item, index) => {
           const renderLabelContent = () => (
             <>
