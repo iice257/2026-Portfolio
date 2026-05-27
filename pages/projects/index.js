@@ -733,7 +733,7 @@ export default function ProjectsIndex() {
           </div>
 
           <div
-            className="featured-project-grid grid grid-cols-1 lg:grid-cols-2"
+            className="featured-project-grid grid grid-cols-1"
             data-cursor-group="cards"
             data-cursor-label="Click for more details"
             data-cursor-variant="project"
@@ -749,23 +749,25 @@ export default function ProjectsIndex() {
                 onMouseLeave={clearProjectCursor}
                 onClick={clearProjectCursor}
               >
-                <article className="relative">
+                <article className={`featured-project-row relative ${index % 2 === 1 ? "is-reversed" : ""}`}>
                   <div className="featured-project-thumb relative overflow-hidden outline outline-1 outline-[var(--border)]">
                     <ProjectVisual project={project} priority={index === 0} metallic />
                   </div>
-                  <span className="featured-project-kicker text-micro block" style={{ color: "var(--fg-muted)" }}>
-                    {String(index + 1).padStart(2, "0")} / Featured
-                  </span>
-                  <h3
-                    className="featured-project-title font-light whitespace-nowrap group-hover:translate-x-2 transition-transform duration-300"
-                    style={{ color: "var(--fg-primary)" }}
-                  >
-                    <ShuffleText text={project.name} duration={0.45} shuffleTimes={3} textAlign="left" />
-                  </h3>
-                  <p className="featured-project-description max-w-3xl" style={{ color: "var(--fg-secondary)" }}>
-                    {project.description}
-                  </p>
-                  <TagList tags={project.tech} />
+                  <div className="featured-project-copy">
+                    <span className="featured-project-kicker text-micro block" style={{ color: "var(--fg-muted)" }}>
+                      {String(index + 1).padStart(2, "0")} / Featured
+                    </span>
+                    <h3
+                      className="featured-project-title font-light whitespace-nowrap group-hover:translate-x-2 transition-transform duration-300"
+                      style={{ color: "var(--fg-primary)" }}
+                    >
+                      <ShuffleText text={project.name} duration={0.45} shuffleTimes={3} textAlign="left" />
+                    </h3>
+                    <p className="featured-project-description max-w-3xl" style={{ color: "var(--fg-secondary)" }}>
+                      {project.description}
+                    </p>
+                    <TagList tags={project.tech} />
+                  </div>
                 </article>
               </Link>
             ))}
