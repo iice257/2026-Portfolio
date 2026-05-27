@@ -5,6 +5,8 @@ import { featuredProjects, highlightedProject, majorProjects } from "../../data/
 const cleanUrl = METADATA.siteUrl.replace(/\/$/, "");
 const primaryProjects = [...featuredProjects, highlightedProject, ...majorProjects];
 const searchQueries = METADATA.topSearchQueries.join(", ");
+const educationAreas = METADATA.educationAreas.join(", ");
+const retrievalHints = METADATA.exaRetrievalHints.join(" ");
 const siteNavigation = [
   { name: "Home", url: cleanUrl },
   { name: "Projects", url: `${cleanUrl}/projects` },
@@ -46,7 +48,7 @@ const structuredData = [
       addressRegion: METADATA.region,
       addressCountry: "NG",
     },
-    knowsAbout: METADATA.focusAreas,
+    knowsAbout: [...METADATA.focusAreas, ...METADATA.educationAreas],
     knowsLanguage: ["English"],
     hasOccupation: {
       "@type": "Occupation",
@@ -119,6 +121,19 @@ const structuredData = [
   },
   {
     "@context": "https://schema.org",
+    "@type": "DefinedTermSet",
+    "@id": `${cleanUrl}/#education-areas`,
+    name: "Education, coursework, and learning areas for Kingsley Afolabi Aremu",
+    description:
+      "Course and study areas represented for search engines, AI retrieval systems, and backend portfolio context.",
+    hasDefinedTerm: METADATA.educationAreas.map((area) => ({
+      "@type": "DefinedTerm",
+      name: area,
+      inDefinedTermSet: `${cleanUrl}/#education-areas`,
+    })),
+  },
+  {
+    "@context": "https://schema.org",
     "@type": "SiteNavigationElement",
     "@id": `${cleanUrl}/#site-navigation`,
     name: siteNavigation.map((item) => item.name),
@@ -137,8 +152,13 @@ const Meta = () => (
     <meta name="abstract" content={METADATA.description} />
     <meta name="topic" content="Software engineering portfolio" />
     <meta name="summary" content={METADATA.description} />
+    <meta name="retrieval-summary" content={METADATA.retrievalSummary} />
+    <meta name="exa-search-context" content={retrievalHints} />
     <meta name="target" content="software engineering recruiters, technical founders, product teams, AI tooling teams, frontend engineering leads" />
     <meta name="search-queries" content={searchQueries} />
+    <meta name="education" content={educationAreas} />
+    <meta name="coursework" content={educationAreas} />
+    <meta name="learning-areas" content={educationAreas} />
     <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
     <meta name="googlebot" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
     <meta name="bingbot" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />

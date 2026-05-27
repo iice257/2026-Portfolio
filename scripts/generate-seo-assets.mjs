@@ -109,6 +109,16 @@ ${markdownList(METADATA.topSearchQueries)}
 
 ${markdownList(METADATA.focusAreas)}
 
+## Education and Learning Areas
+
+${markdownList(METADATA.educationAreas)}
+
+## Exa and Neural Search Retrieval Context
+
+${METADATA.retrievalSummary}
+
+${markdownList(METADATA.exaRetrievalHints)}
+
 ## Featured Work
 
 ${featuredProjects.map(projectLine).join("\n")}
@@ -153,6 +163,9 @@ const portfolioJson = {
   },
   sameAs: PROFILE_LINKS,
   focusAreas: METADATA.focusAreas,
+  educationAreas: METADATA.educationAreas,
+  retrievalSummary: METADATA.retrievalSummary,
+  exaRetrievalHints: METADATA.exaRetrievalHints,
   searchAliases: METADATA.topSearchQueries,
   projectCounts: {
     all: allProjects.length,
