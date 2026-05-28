@@ -137,6 +137,7 @@ const Skills = () => {
             <div key={category.name} className="skill-item">
               {/* Category Header - Clickable */}
               <button
+                type="button"
                 onClick={() => handleCategoryClick(category.name)}
                 onMouseEnter={() => setExpandedCategory(category.name)}
                 onFocus={() => setExpandedCategory(category.name)}
@@ -218,7 +219,7 @@ const Skills = () => {
                                   I will keep it inside the inline-flex.
                                */ }
                               {i < category.skills.length - 1 && (
-                                <span className="ml-2" style={{ color: 'var(--fg-muted)' }}>•</span>
+                                <span className="ml-2" style={{ color: 'var(--fg-muted)' }}>&bull;</span>
                               )}
                             </span>
                           </span>

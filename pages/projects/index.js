@@ -17,6 +17,8 @@ import Footer from "@/components/Footer/Footer";
 import ProjectVisual from "@/components/Projects/ProjectVisual";
 import ShuffleText from "@/components/ReactBits/ShuffleText";
 import { useCursor } from "../../context/CursorContext";
+import { useBodyScrollLock } from "../../utils/useBodyScrollLock";
+import { useDialogFocus } from "../../utils/useDialogFocus";
 
 const TagList = ({ tags = [] }) => (
   <div className="flex flex-wrap gap-2">
@@ -213,6 +215,9 @@ const lightboxPanelVariants = {
 
 const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompactPreview = false, onClose, onNavigate, onToggleVariant }) => {
   const fullscreenRef = useRef(null);
+  const dialogRef = useDialogFocus(Boolean(active));
+  useBodyScrollLock(Boolean(active));
+
   useEffect(() => {
     if (!active) return undefined;
 
@@ -243,6 +248,7 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompa
 
   return (
     <motion.div
+      ref={dialogRef}
       className="mockup-lightbox"
       data-cursor-label="Click to close"
       data-cursor-variant="project"
@@ -253,9 +259,10 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompa
       role="dialog"
       aria-modal="true"
       aria-label={`${isMobile ? "Mobile" : "Desktop"} mockup previews`}
+      tabIndex={-1}
     >
       <button type="button" className="mockup-lightbox-nav is-prev" onClick={(event) => { event.stopPropagation(); onNavigate(-1); }} aria-label="Previous mockup">
-        <span aria-hidden="true">‹</span>
+        <span aria-hidden="true">&lsaquo;</span>
       </button>
       <motion.div
         className={`mockup-lightbox-panel ${isMobile ? "is-mobile" : "is-desktop"}`}
@@ -276,10 +283,10 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompa
             <button type="button" className="mockup-lightbox-fullscreen" data-clickable="true" onClick={openFullscreen} aria-label="Open mockup fullscreen">
               <IconFullscreen />
             </button>
-          <button type="button" className="mockup-lightbox-close" data-clickable="true" onClick={onClose} aria-label="Close mockup preview">
-            ×
-          </button>
-        </div>
+            <button type="button" className="mockup-lightbox-close" data-clickable="true" onClick={onClose} aria-label="Close mockup preview">
+              &times;
+            </button>
+          </div>
         </div>
 
         <div
@@ -308,7 +315,16 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompa
                   style={{ width: `${100 / items.length}%` }}
                 >
                   {itemPreview.type === "video" && (
-                    <video src={itemPreview.src} autoPlay={itemKey === activeKey} muted loop playsInline controls className="h-full w-full object-cover" />
+                    <video
+                      src={itemPreview.src}
+                      autoPlay={itemKey === activeKey}
+                      muted
+                      loop
+                      playsInline
+                      controls
+                      className="h-full w-full object-cover"
+                      aria-label={`${item.project.name} ${previewLabel(item.variant)} preview video`}
+                    />
                   )}
                   {itemPreview.type === "image" && (
                     <Image src={itemPreview.src} alt={`${item.project.name} ${previewLabel(item.variant)} mockup`} fill sizes="90vw" className="object-contain" />
@@ -336,7 +352,7 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompa
         )}
       </motion.div>
       <button type="button" className="mockup-lightbox-nav is-next" onClick={(event) => { event.stopPropagation(); onNavigate(1); }} aria-label="Next mockup">
-        <span aria-hidden="true">›</span>
+        <span aria-hidden="true">&rsaquo;</span>
       </button>
     </motion.div>
   );

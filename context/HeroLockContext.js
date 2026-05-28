@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 const HeroLockContext = createContext({
   isHeroLocked: false,
@@ -28,8 +28,10 @@ export const HeroLockProvider = ({ children }) => {
     document.documentElement.removeAttribute("data-hero-locked");
   }, [isHeroLocked]);
 
+  const value = useMemo(() => ({ isHeroLocked, setIsHeroLocked }), [isHeroLocked]);
+
   return (
-    <HeroLockContext.Provider value={{ isHeroLocked, setIsHeroLocked }}>
+    <HeroLockContext.Provider value={value}>
       {children}
     </HeroLockContext.Provider>
   );

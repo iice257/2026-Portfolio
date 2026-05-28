@@ -1,41 +1,38 @@
 import styles from "./Button.module.scss";
-import PropTypes from "prop-types";
 
-const Button = ({ href, onClick, children, classes, type, ...otherProps }) => {
-  let additionalClasses = "";
-  if (classes) {
-    additionalClasses = classes;
-  }
+const Button = ({ href, onClick, children, classes = "", type, disable = false, tabIndex, ...otherProps }) => {
+  const handleClick = (event) => {
+    if (disable) {
+      event.preventDefault();
+      return;
+    }
+
+    onClick?.(event);
+  };
 
   return (
     <a
-      href={href}
-      onClick={onClick}
+      href={disable ? undefined : href}
+      onClick={handleClick}
+      aria-disabled={disable || undefined}
+      tabIndex={disable ? -1 : tabIndex}
       className={`
         ${
           type === "primary"
-            ? !otherProps.disable
+            ? !disable
               ? styles.primary__button
               : styles.primary__disabledButton
-            : !otherProps.disable
+            : !disable
             ? styles.secondary__button
             : styles.secondary__disabledButton
         }
-          ${additionalClasses}
+          ${classes}
       `}
       {...otherProps}
     >
       {children}
     </a>
   );
-};
-
-Button.propTypes = {
-  href: PropTypes.string,
-  onClick: PropTypes.func,
-  children: PropTypes.string.isRequired,
-  classes: PropTypes.string,
-  type: PropTypes.string,
 };
 
 export default Button;

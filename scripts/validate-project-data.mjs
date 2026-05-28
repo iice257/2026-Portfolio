@@ -10,7 +10,7 @@ const projectDataSource = fs
 
 const projectData = vm.runInNewContext(
   `${projectDataSource}
-  ({ allProjects, featuredProjects, githubProjectCount, majorProjectCount });`,
+  ({ allProjects, featuredProjects, githubProjectCount, majorProjectCount, majorProjects });`,
   {},
   { filename: "data/projects.js" }
 );
@@ -20,6 +20,7 @@ const {
   featuredProjects,
   githubProjectCount,
   majorProjectCount,
+  majorProjects,
 } = projectData;
 const errors = [];
 const warnings = [];
@@ -37,12 +38,22 @@ const featuredRequiredFields = [
 ];
 
 const seenSlugs = new Set();
+const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const httpsUrlPattern = /^https:\/\/[^\s]+$/i;
 
 for (const project of allProjects) {
   for (const field of requiredFields) {
     if (!project[field] || (Array.isArray(project[field]) && project[field].length === 0)) {
       errors.push(`${project.name || "Unknown project"} is missing ${field}.`);
     }
+  }
+
+  if (!slugPattern.test(project.slug || "")) {
+    errors.push(`${project.name || "Unknown project"} has an invalid slug: ${project.slug}.`);
+  }
+
+  if (!Array.isArray(project.tech) || project.tech.some((item) => typeof item !== "string" || !item.trim())) {
+    errors.push(`${project.name || "Unknown project"} must have a non-empty string tech list.`);
   }
 
   if (!project.status && !project.currentStatus) {
@@ -67,6 +78,18 @@ for (const project of allProjects) {
   if (project.url !== "#" && !/^https:\/\/github\.com\/[\w.-]+\/[\w.-]+/.test(project.url)) {
     warnings.push(`${project.name} has a non-standard repository URL: ${project.url}.`);
   }
+
+  if (project.liveUrl && !httpsUrlPattern.test(project.liveUrl)) {
+    errors.push(`${project.name} has an invalid live URL: ${project.liveUrl}.`);
+  }
+}
+
+if (featuredProjects.length !== 4) {
+  errors.push("featuredProjects should contain the four premium project pages.");
+}
+
+if (majorProjects.length !== 6) {
+  errors.push("majorProjects should contain exactly six major projects.");
 }
 
 for (const project of featuredProjects) {

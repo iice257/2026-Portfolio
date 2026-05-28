@@ -30,12 +30,11 @@ export default function Home() {
     : {};
 
   useEffect(() => {
-    const { orientation } = window;
-    const result =
-      typeof orientation === "undefined" &&
-      navigator.userAgent.indexOf("IEMobile") === -1;
+    const desktopQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const updatePointerMode = () => setIsDesktop(desktopQuery.matches);
 
-    setIsDesktop(result);
+    updatePointerMode();
+    desktopQuery.addEventListener("change", updatePointerMode);
 
     // Smooth scroll clean section links while keeping them as real-looking paths.
     const handleSectionLinkClick = (e) => {
@@ -54,7 +53,10 @@ export default function Home() {
     };
 
     document.addEventListener("click", handleSectionLinkClick);
-    return () => document.removeEventListener("click", handleSectionLinkClick);
+    return () => {
+      desktopQuery.removeEventListener("change", updatePointerMode);
+      document.removeEventListener("click", handleSectionLinkClick);
+    };
   }, []);
 
   useEffect(() => {
@@ -94,11 +96,9 @@ export default function Home() {
       });
     };
 
-    const observer = new MutationObserver(updateUrlFromViewport);
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
+    const resizeObserver =
+      typeof ResizeObserver !== "undefined" ? new ResizeObserver(updateUrlFromViewport) : null;
+    resizeObserver?.observe(document.body);
 
     window.addEventListener("scroll", updateUrlFromViewport, { passive: true });
     window.addEventListener("resize", updateUrlFromViewport);
@@ -130,7 +130,7 @@ export default function Home() {
       if (frameId !== null) {
         window.cancelAnimationFrame(frameId);
       }
-      observer.disconnect();
+      resizeObserver?.disconnect();
       window.removeEventListener("scroll", updateUrlFromViewport);
       window.removeEventListener("resize", updateUrlFromViewport);
     };

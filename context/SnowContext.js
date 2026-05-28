@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { safeStorage } from "../utils/storage";
 
 const SnowContext = createContext({
@@ -29,10 +29,11 @@ export const SnowProvider = ({ children }) => {
     safeStorage.set(window.sessionStorage, "isSnowing", isSnowing);
   }, [hasLoadedSnowPreference, isSnowing]);
 
-  const toggleSnow = () => setIsSnowing((prev) => !prev);
+  const toggleSnow = useCallback(() => setIsSnowing((prev) => !prev), []);
+  const value = useMemo(() => ({ isSnowing, toggleSnow }), [isSnowing, toggleSnow]);
 
   return (
-    <SnowContext.Provider value={{ isSnowing, toggleSnow }}>
+    <SnowContext.Provider value={value}>
       {children}
     </SnowContext.Provider>
   );

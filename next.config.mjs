@@ -19,6 +19,25 @@ const securityHeaders = [
     key: "X-Frame-Options",
     value: "DENY",
   },
+  {
+    key: "X-Permitted-Cross-Domain-Policies",
+    value: "none",
+  },
+  {
+    key: "X-Download-Options",
+    value: "noopen",
+  },
+  {
+    key: "Origin-Agent-Cluster",
+    value: "?1",
+  },
+];
+
+const publicAssetCacheHeaders = [
+  {
+    key: "Cache-Control",
+    value: "public, max-age=86400, stale-while-revalidate=604800",
+  },
 ];
 
 const localBuildCompatibility =
@@ -63,6 +82,10 @@ const nextConfig = {
         headers: securityHeaders,
       },
       {
+        source: "/projects/:path*",
+        headers: publicAssetCacheHeaders,
+      },
+      {
         source: "/projects/videos/:path*",
         headers: [
           {
@@ -70,6 +93,18 @@ const nextConfig = {
             value: "public, max-age=31536000, immutable",
           },
         ],
+      },
+      {
+        source: "/favicons/:path*",
+        headers: publicAssetCacheHeaders,
+      },
+      {
+        source: "/icon-:path*",
+        headers: publicAssetCacheHeaders,
+      },
+      {
+        source: "/:path(favicon.svg|logo.svg|manifest.json|portfolio.json|llms.txt|sitemap.xml|robots.txt)",
+        headers: publicAssetCacheHeaders,
       },
     ];
   },

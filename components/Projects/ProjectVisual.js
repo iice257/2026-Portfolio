@@ -1,6 +1,10 @@
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { useMemo } from "react";
-import MetallicPaint from "../ReactBits/MetallicPaint";
+
+const MetallicPaint = dynamic(() => import("../ReactBits/MetallicPaint"), {
+  ssr: false,
+});
 
 const escapeSvgText = (value = "") =>
   String(value)

@@ -22,7 +22,7 @@ const ProgressIndicator = () => {
   }, []);
 
   return (
-    <div className="progress">
+    <div className="progress" aria-hidden="true">
       <div ref={progressRef} className="progress-bar" />
     </div>
   );

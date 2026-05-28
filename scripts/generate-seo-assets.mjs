@@ -5,7 +5,11 @@ import vm from "node:vm";
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const publicDir = path.join(root, "public");
-const today = "2026-05-26";
+const isoDatePattern = /^\d{4}-\d{2}-\d{2}$/;
+const configuredDate = process.env.SEO_GENERATED_DATE;
+const today = isoDatePattern.test(configuredDate || "")
+  ? configuredDate
+  : new Date().toISOString().slice(0, 10);
 
 const evalModule = (relativePath, expression) => {
   const source = fs

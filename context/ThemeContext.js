@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { safeStorage } from "../utils/storage";
 
 const ThemeContext = createContext({
@@ -30,16 +30,18 @@ export const ThemeProvider = ({ children }) => {
     }
   }, [theme, mounted]);
 
-  const toggleTheme = () => {
+  const toggleTheme = useCallback(() => {
     setTheme((prev) => {
       const nextTheme = prev === "dark" ? "light" : "dark";
       safeStorage.set(window.localStorage, "theme", nextTheme);
       return nextTheme;
     });
-  };
+  }, []);
+
+  const value = useMemo(() => ({ theme, toggleTheme }), [theme, toggleTheme]);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );

@@ -138,6 +138,7 @@ const AppContent = ({ Component, pageProps }) => {
       <button type="button" onClick={skipToContent} className="skip-link">
         Skip to content
       </button>
+      <div id="site-portal-root" />
       {isFinePointer && <CustomCursor />}
       <Header />
 

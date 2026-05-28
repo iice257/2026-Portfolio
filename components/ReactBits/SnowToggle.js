@@ -153,6 +153,7 @@ const SnowToggle = () => {
   return (
     <div className="relative z-[60]">
       <button
+        type="button"
         onClick={handleToggle}
         onMouseEnter={handleHint}
         onFocus={handleHint}

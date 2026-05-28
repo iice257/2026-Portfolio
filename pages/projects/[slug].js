@@ -8,6 +8,8 @@ import Footer from "@/components/Footer/Footer";
 import ProjectVisual from "@/components/Projects/ProjectVisual";
 import ShuffleText from "@/components/ReactBits/ShuffleText";
 import { useCursor } from "../../context/CursorContext";
+import { useBodyScrollLock } from "../../utils/useBodyScrollLock";
+import { useDialogFocus } from "../../utils/useDialogFocus";
 
 export async function getStaticPaths() {
   const paths = featuredProjects.map((project) => ({
@@ -215,6 +217,7 @@ const ProjectMediaPreview = ({ project, variant = "desktop", priority = false, o
             loop={isLooping}
             playsInline
             preload={priority ? "auto" : "metadata"}
+            aria-label={`${project.name} ${isMobile ? "mobile" : "desktop"} preview video`}
           />
         ) : (
           <div className="relative h-full w-full overflow-hidden">
@@ -323,6 +326,8 @@ const lightboxPanelVariants = {
 
 const ProjectMediaLightbox = ({ active, activeIndex, items, direction = 0, onClose, onNavigate }) => {
   const fullscreenRef = useRef(null);
+  const dialogRef = useDialogFocus(true);
+  useBodyScrollLock(true);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -350,6 +355,7 @@ const ProjectMediaLightbox = ({ active, activeIndex, items, direction = 0, onClo
 
   return (
     <motion.div
+      ref={dialogRef}
       className="mockup-lightbox"
       data-cursor-label="Click to close"
       data-cursor-variant="project"
@@ -360,6 +366,7 @@ const ProjectMediaLightbox = ({ active, activeIndex, items, direction = 0, onClo
       role="dialog"
       aria-modal="true"
       aria-label={`${active.project.name} ${isMobile ? "mobile" : "desktop"} preview`}
+      tabIndex={-1}
     >
       <button type="button" className="mockup-lightbox-nav is-prev" onClick={(event) => { event.stopPropagation(); onNavigate(-1); }} aria-label="Previous mockup">
         <span aria-hidden="true">&lsaquo;</span>
@@ -414,7 +421,16 @@ const ProjectMediaLightbox = ({ active, activeIndex, items, direction = 0, onClo
                   style={{ width: `${100 / items.length}%` }}
                 >
                   {itemVideoSrc ? (
-                    <video src={itemVideoSrc} autoPlay={itemKey === activeKey} muted loop playsInline controls className="h-full w-full object-cover" />
+                    <video
+                      src={itemVideoSrc}
+                      autoPlay={itemKey === activeKey}
+                      muted
+                      loop
+                      playsInline
+                      controls
+                      className="h-full w-full object-cover"
+                      aria-label={`${item.project.name} ${itemIsMobile ? "Mobile" : "Desktop"} preview video`}
+                    />
                   ) : (
                     <ProjectVisual project={item.project} priority={itemKey === activeKey} compact={itemIsMobile} />
                   )}

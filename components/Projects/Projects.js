@@ -177,7 +177,7 @@ const Projects = ({ isDesktop }) => {
                           {tech}
                         </span>
                         {i < project.tech.length - 1 && (
-                          <span className="ml-3" style={{ color: 'var(--fg-muted)' }}>•</span>
+                          <span className="ml-3" style={{ color: 'var(--fg-muted)' }}>&bull;</span>
                         )}
                       </span>
                     ))}

@@ -1,4 +1,4 @@
-import { createContext, useContext, useCallback, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
 
 export const requestCursorRefresh = () => {
   if (typeof window === "undefined") return;
@@ -20,17 +20,18 @@ export const CursorProvider = ({ children }) => {
   const [cursorVariant, setCursorVariant] = useState("default");
   const [isRouteLoading, setIsRouteLoading] = useState(false);
   const refreshCursor = useCallback(() => requestCursorRefresh(), []);
+  const value = useMemo(() => ({
+    cursorText,
+    setCursorText,
+    cursorVariant,
+    setCursorVariant,
+    isRouteLoading,
+    setIsRouteLoading,
+    requestCursorRefresh: refreshCursor,
+  }), [cursorText, cursorVariant, isRouteLoading, refreshCursor]);
 
   return (
-    <CursorContext.Provider value={{
-      cursorText,
-      setCursorText,
-      cursorVariant,
-      setCursorVariant,
-      isRouteLoading,
-      setIsRouteLoading,
-      requestCursorRefresh: refreshCursor,
-    }}>
+    <CursorContext.Provider value={value}>
       {children}
     </CursorContext.Provider>
   );

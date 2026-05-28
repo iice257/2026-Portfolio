@@ -1,7 +1,9 @@
 import Link from "next/link";
-import { useCallback, useState, useEffect, useRef } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useCursor } from '../../context/CursorContext';
+import { useBodyScrollLock } from '../../utils/useBodyScrollLock';
+import { useDialogFocus } from '../../utils/useDialogFocus';
 
 /**
  * StaggeredMenu - Full-screen navigation menu with staggered animations
@@ -21,7 +23,7 @@ const StaggeredMenu = ({
   const [isOpen, setIsOpen] = useState(false);
   const { setCursorVariant } = useCursor();
   const [mounted, setMounted] = useState(false);
-  const closeButtonRef = useRef(null);
+  const overlayRef = useDialogFocus(isOpen);
   const overlayId = "site-menu-overlay";
 
   useEffect(() => {
@@ -50,18 +52,7 @@ const StaggeredMenu = ({
     onItemClick?.(item, index);
   };
 
-  // Prevent body scroll when menu is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      closeButtonRef.current?.focus();
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
+  useBodyScrollLock(isOpen);
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -77,20 +68,22 @@ const StaggeredMenu = ({
   }, [closeMenu, isOpen]);
 
   const buttonColor = isOpen && changeMenuColorOnOpen ? openMenuButtonColor : menuButtonColor;
+  const portalTarget = mounted ? document.getElementById("site-portal-root") || document.body : null;
 
   const MenuOverlay = (
     <div
+      ref={overlayRef}
       id={overlayId}
       role="dialog"
       aria-modal="true"
       aria-label="Site navigation"
       aria-hidden={!isOpen}
+      tabIndex={-1}
       className={`fixed inset-0 z-[99999] flex flex-col items-start overflow-y-auto py-0 transition-transform duration-500 ease-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       style={{ backgroundColor: '#000000' }}
     >
       <button
-        ref={closeButtonRef}
         type="button"
         onClick={toggleMenu}
         aria-label="Close menu"
@@ -175,23 +168,27 @@ const StaggeredMenu = ({
       {/* Social Links */}
       {displaySocials && socialItems.length > 0 && (
         <div className="relative mt-auto flex gap-8 pl-6 md:pl-[3.75rem] pb-10 md:pb-12">
-          {socialItems.map((social, index) => (
-            <a
-              key={social.link}
-              href={social.link}
-              tabIndex={isOpen ? 0 : -1}
-              className={`relative text-sm md:text-base text-white transition-all duration-500 cursor-none group ${isOpen ? 'opacity-60 translate-y-0' : 'opacity-0 translate-y-4'
-                }`}
-              style={{ transitionDelay: isOpen ? `${0.3 + index * 0.05}s` : '0s', cursor: 'none' }}
-              target="_blank"
-              rel="noopener noreferrer"
-              onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-              onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
-            >
-              {social.label}
-              <span className="absolute left-0 bottom-0 w-full h-[1px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-            </a>
-          ))}
+          {socialItems.map((social, index) => {
+            const opensNewTab = /^https?:\/\//i.test(social.link);
+
+            return (
+              <a
+                key={social.link}
+                href={social.link}
+                tabIndex={isOpen ? 0 : -1}
+                className={`relative text-sm md:text-base text-white transition-all duration-500 cursor-none group ${isOpen ? 'opacity-60 translate-y-0' : 'opacity-0 translate-y-4'
+                  }`}
+                style={{ transitionDelay: isOpen ? `${0.3 + index * 0.05}s` : '0s', cursor: 'none' }}
+                target={opensNewTab ? "_blank" : undefined}
+                rel={opensNewTab ? "noopener noreferrer" : undefined}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
+              >
+                {social.label}
+                <span className="absolute left-0 bottom-0 w-full h-[1px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+              </a>
+            );
+          })}
         </div>
       )}
     </div>
@@ -201,6 +198,7 @@ const StaggeredMenu = ({
     <>
       {/* Menu Toggle Button - Fixed hamburger icon */}
       <button
+        type="button"
         className={`w-10 h-10 relative z-[100000] flex items-center justify-center cursor-none transition-opacity duration-300 ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
           }`}
         onClick={toggleMenu}
@@ -232,7 +230,7 @@ const StaggeredMenu = ({
       </button>
 
       {/* Render Menu Overlay via Portal */}
-      {mounted && createPortal(MenuOverlay, document.body)}
+      {portalTarget && createPortal(MenuOverlay, portalTarget)}
     </>
   );
 };

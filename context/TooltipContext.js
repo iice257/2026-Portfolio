@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useMemo, useState } from "react";
 
 const TooltipContext = createContext({
   showSnowTooltip: false,
@@ -14,15 +14,17 @@ export const TooltipProvider = ({ children }) => {
   const [showNiceTooltip, setShowNiceTooltip] = useState(false);
   const [snowTooltipWasShown, setSnowTooltipWasShown] = useState(false);
 
-  return (
-    <TooltipContext.Provider value={{
+  const value = useMemo(() => ({
       showSnowTooltip,
       setShowSnowTooltip,
       showNiceTooltip,
       setShowNiceTooltip,
       snowTooltipWasShown,
       setSnowTooltipWasShown,
-    }}>
+  }), [showNiceTooltip, showSnowTooltip, snowTooltipWasShown]);
+
+  return (
+    <TooltipContext.Provider value={value}>
       {children}
     </TooltipContext.Provider>
   );
