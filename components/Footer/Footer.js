@@ -2,17 +2,15 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { CONTACT_LINKS, MENULINKS } from "../../constants";
+import { PORTFOLIO_GALAXY_CONFIG } from "../ReactBits/galaxyConfig";
 import ShuffleText from "../ReactBits/ShuffleText";
-import { useTheme } from "../../context/ThemeContext";
 import { getSectionHref, scrollToSection, SECTION_IDS } from "../../utils/sectionNavigation";
 
 const Galaxy = dynamic(() => import("../ReactBits/Galaxy"), { ssr: false });
-const Waves = dynamic(() => import("../ReactBits/Waves"), { ssr: false });
 
 const Footer = () => {
   const footerRef = useRef(null);
   const currentYear = new Date().getFullYear();
-  const { theme } = useTheme();
   const [canRenderFooterBackdrop, setCanRenderFooterBackdrop] = useState(true);
   const [isFooterBackdropPaused, setIsFooterBackdropPaused] = useState(true);
   const navLinks = MENULINKS.filter((link) => link.ref !== "home");
@@ -79,44 +77,10 @@ const Footer = () => {
         borderTop: "1px solid var(--border)",
       }}
     >
-      {canRenderFooterBackdrop && theme === "dark" && (
+      {canRenderFooterBackdrop && (
         <div className="footer-effect footer-effect-galaxy" aria-hidden="true">
           <Galaxy
-            mouseRepulsion={false}
-            mouseInteraction={false}
-            density={1.38}
-            glowIntensity={0.07}
-            saturation={0.42}
-            hueShift={0}
-            twinkleIntensity={0.32}
-            rotationSpeed={0}
-            speed={0.045}
-            pixelRatio={0.38}
-            targetFps={18}
-            maxPixelCount={240000}
-            paused={isFooterBackdropPaused}
-          />
-        </div>
-      )}
-
-      {canRenderFooterBackdrop && theme === "light" && (
-        <div className="footer-effect footer-effect-waves" aria-hidden="true">
-          <Waves
-            lineColor="#6f6f6f"
-            backgroundColor="transparent"
-            waveSpeedX={0.007}
-            waveSpeedY={0.007}
-            waveAmpX={28}
-            waveAmpY={14}
-            friction={0.76}
-            tension={0.004}
-            maxCursorMove={160}
-            xGap={36}
-            yGap={22}
-            pixelRatio={0.38}
-            targetFps={0}
-            maxPixelCount={220000}
-            mouseInteraction
+            {...PORTFOLIO_GALAXY_CONFIG}
             paused={isFooterBackdropPaused}
           />
         </div>
@@ -163,7 +127,7 @@ const Footer = () => {
                       }}
                     >
                       <span>{link.name}</span>
-                      {link.ref === "projects" && <span aria-hidden="true">↗</span>}
+                      {link.ref === "projects" && <span aria-hidden="true">&nearr;</span>}
                     </Link>
                   </li>
                 ))}

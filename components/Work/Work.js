@@ -224,7 +224,7 @@ const Work = () => {
                       transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
                       style={{ overflow: "hidden" }}
                     >
-                      <div className="pb-8 pl-14">
+                      <div className="pb-8 pl-0 md:pl-14">
                         <p
                           className="text-editorial font-light leading-relaxed max-w-3xl"
                           style={{ color: "var(--fg-secondary)" }}
@@ -236,11 +236,11 @@ const Work = () => {
                             Location: <span className="redacted-text">REDACTED</span>
                           </p>
                         )}
-                        <ul className="mt-6 space-y-3 max-w-3xl">
+                        <ul className="work-detail-list mt-6 max-w-3xl">
                           {exp.details.map((detail) => (
-                            <li key={detail} className="flex gap-4 text-body-md" style={{ color: "var(--fg-secondary)" }}>
-                              <span className="work-detail-line mt-[0.75em] h-px w-5 shrink-0" />
-                              <span>{detail}</span>
+                            <li key={detail} className="work-detail-item text-body-md" style={{ color: "var(--fg-secondary)" }}>
+                              <span className="work-detail-line" aria-hidden="true" />
+                              <span className="work-detail-text">{detail}</span>
                             </li>
                           ))}
                         </ul>
@@ -262,23 +262,50 @@ const Work = () => {
           <div style={{ borderTop: "1px solid var(--border)" }} />
         </div>
 
-        <p
-          className="text-micro py-6 border-b"
-          style={{ color: "var(--fg-muted)", borderColor: "var(--border)" }}
-        >
-          5+ years building for the web · Multiple client websites shipped · Frontend, UI, and IT systems experience · Applied AI/ML learning in progress
-        </p>
+        <div className="work-practice-block">
+          <div className="work-practice-strip text-micro" style={{ color: "var(--fg-muted)" }}>
+            <span>5+ years building for the web</span>
+            <span>Multiple client websites shipped</span>
+            <span>Frontend, UI, and IT systems experience</span>
+            <span>Applied AI/ML learning in progress</span>
+          </div>
 
-        <div className="pt-10 max-w-4xl">
-          <p className="text-micro mb-4" style={{ color: "var(--fg-muted)" }}>
-            AI & Machine Learning Practice
-          </p>
-          <p className="text-body-lg font-light leading-relaxed" style={{ color: "var(--fg-secondary)" }}>
-            Currently building deeper machine learning foundations through Deep Learning with Python, neural network fundamentals, and applied exploration of modern AI systems. Focused on understanding how models learn, how they are evaluated, and how AI can be integrated into real products with strong UX and reliable systems thinking.
-          </p>
-          <p className="text-micro mt-5" style={{ color: "var(--fg-muted)" }}>
-            Deep Learning · Neural Networks · LLMs · AI Agents · Model Evaluation · Product UX
-          </p>
+          <div className="work-practice-grid">
+            <div className="work-practice-heading">
+              <p className="text-micro mb-5" style={{ color: "var(--fg-muted)" }}>
+                AI & Machine Learning Practice
+              </p>
+              <h3 className="text-display-md md:text-display-lg font-extralight leading-tight" style={{ color: "var(--fg-primary)" }}>
+                Building AI fluency into product engineering.
+              </h3>
+            </div>
+
+            <div className="work-practice-copy">
+              <p className="text-body-lg font-light leading-relaxed" style={{ color: "var(--fg-secondary)" }}>
+                Currently strengthening machine learning foundations through Deep Learning with Python, neural network fundamentals, and applied exploration of modern AI systems.
+              </p>
+              <ul className="work-practice-list">
+                <li>
+                  <span className="text-micro">01</span>
+                  <p>Understand how models learn, fail, and get evaluated.</p>
+                </li>
+                <li>
+                  <span className="text-micro">02</span>
+                  <p>Translate AI concepts into real product UX and reliable systems.</p>
+                </li>
+                <li>
+                  <span className="text-micro">03</span>
+                  <p>Keep the practice grounded in useful tools, not novelty for its own sake.</p>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="work-practice-tags text-micro" style={{ color: "var(--fg-muted)" }}>
+            {["Deep Learning", "Neural Networks", "LLMs", "AI Agents", "Model Evaluation", "Product UX"].map((item) => (
+              <span key={item}>{item}</span>
+            ))}
+          </div>
         </div>
       </div>
     </section>

@@ -5,6 +5,7 @@ import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { MENULINKS } from "../../constants";
 import { useHeroLock } from "../../context/HeroLockContext";
 import { useTheme } from "../../context/ThemeContext";
+import { PORTFOLIO_GALAXY_CONFIG, PORTFOLIO_WAVES_CONFIG } from "../ReactBits/galaxyConfig";
 import TextPressure from "../ReactBits/TextPressure";
 import styles from "./Hero.module.scss";
 
@@ -458,18 +459,7 @@ const Hero = () => {
       {canRenderHeroBackdrop && theme === "dark" && (
         <div className={styles.galaxyBackdrop} aria-hidden="true">
           <Galaxy
-            mouseRepulsion={false}
-            mouseInteraction={false}
-            density={0.54}
-            glowIntensity={0.08}
-            saturation={0.65}
-            hueShift={0}
-            twinkleIntensity={0.45}
-            rotationSpeed={0}
-            speed={0.08}
-            pixelRatio={0.48}
-            targetFps={22}
-            maxPixelCount={520000}
+            {...PORTFOLIO_GALAXY_CONFIG}
             paused={isHeroBackdropPaused}
           />
         </div>
@@ -478,20 +468,7 @@ const Hero = () => {
       {canRenderHeroBackdrop && theme === "light" && (
         <div className={styles.wavesBackdrop} aria-hidden="true">
           <Waves
-            lineColor="#a4a4a4"
-            backgroundColor="transparent"
-            waveSpeedX={0.008}
-            waveSpeedY={0.008}
-            waveAmpX={28}
-            waveAmpY={14}
-            friction={0.72}
-            tension={0.005}
-            maxCursorMove={160}
-            xGap={28}
-            yGap={16}
-            pixelRatio={0.48}
-            targetFps={0}
-            maxPixelCount={520000}
+            {...PORTFOLIO_WAVES_CONFIG}
             mouseInteraction={!isLockViewport || isLocked}
             paused={isHeroBackdropPaused}
           />
