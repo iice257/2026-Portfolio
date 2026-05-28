@@ -11,13 +11,12 @@ export const PORTFOLIO_GALAXY_CONFIG = {
   autoCenterRepulsion: 0,
   starSpeed: 0.5,
   speed: 0.1,
-  pixelRatio: 1.25,
-  targetFps: 24,
-  maxPixelCount: 2600000,
+  pixelRatio: 0.8,
+  targetFps: 20,
+  maxPixelCount: 900000,
 };
 
-export const PORTFOLIO_WAVES_CONFIG = {
-  lineColor: "#a4a4a4",
+const PORTFOLIO_WAVES_BASE_CONFIG = {
   backgroundColor: "transparent",
   waveSpeedX: 0.008,
   waveSpeedY: 0.008,
@@ -28,8 +27,21 @@ export const PORTFOLIO_WAVES_CONFIG = {
   maxCursorMove: 160,
   xGap: 28,
   yGap: 16,
-  pixelRatio: 1.25,
-  targetFps: 24,
-  maxPixelCount: 2600000,
-  mouseInteraction: true,
+  pixelRatio: 0.8,
+  targetFps: 20,
+  maxPixelCount: 900000,
+  mouseInteraction: false,
+};
+
+export const PORTFOLIO_WAVES_CONFIG = {
+  ...PORTFOLIO_WAVES_BASE_CONFIG,
+  lineColor: "#a4a4a4",
+};
+
+export const PORTFOLIO_WAVES_THEME_CONFIG = {
+  light: PORTFOLIO_WAVES_CONFIG,
+  dark: {
+    ...PORTFOLIO_WAVES_BASE_CONFIG,
+    lineColor: "#404040",
+  },
 };

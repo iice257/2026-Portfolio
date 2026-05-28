@@ -4,13 +4,19 @@ import { useEffect, useRef, useState } from "react";
 import { CONTACT_LINKS, MENULINKS } from "../../constants";
 import { PORTFOLIO_GALAXY_CONFIG } from "../ReactBits/galaxyConfig";
 import ShuffleText from "../ReactBits/ShuffleText";
+import { useTheme } from "../../context/ThemeContext";
 import { getSectionHref, scrollToSection, SECTION_IDS } from "../../utils/sectionNavigation";
 
 const Galaxy = dynamic(() => import("../ReactBits/Galaxy"), { ssr: false });
 
 const Footer = () => {
   const footerRef = useRef(null);
+  const trailRef = useRef(null);
+  const trailFrameRef = useRef(null);
+  const trailFadeTimerRef = useRef(null);
+  const trailPointRef = useRef({ x: 0, y: 0 });
   const currentYear = new Date().getFullYear();
+  const { theme } = useTheme();
   const [canRenderFooterBackdrop, setCanRenderFooterBackdrop] = useState(true);
   const [isFooterBackdropPaused, setIsFooterBackdropPaused] = useState(true);
   const navLinks = MENULINKS.filter((link) => link.ref !== "home");
@@ -68,6 +74,57 @@ const Footer = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const footer = footerRef.current;
+    const trail = trailRef.current;
+    if (!footer || !trail || theme !== "light" || !canRenderFooterBackdrop) {
+      return undefined;
+    }
+
+    const renderTrail = () => {
+      trailFrameRef.current = null;
+      trail.style.setProperty("--trail-x", `${trailPointRef.current.x}px`);
+      trail.style.setProperty("--trail-y", `${trailPointRef.current.y}px`);
+      trail.classList.add("is-active");
+    };
+
+    const handlePointerMove = (event) => {
+      const rect = footer.getBoundingClientRect();
+      trailPointRef.current = {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top,
+      };
+
+      if (trailFrameRef.current === null) {
+        trailFrameRef.current = window.requestAnimationFrame(renderTrail);
+      }
+
+      window.clearTimeout(trailFadeTimerRef.current);
+      trailFadeTimerRef.current = window.setTimeout(() => {
+        trail.classList.remove("is-active");
+      }, 180);
+    };
+
+    const handlePointerLeave = () => {
+      window.clearTimeout(trailFadeTimerRef.current);
+      trail.classList.remove("is-active");
+    };
+
+    footer.addEventListener("pointermove", handlePointerMove, { passive: true });
+    footer.addEventListener("pointerleave", handlePointerLeave);
+
+    return () => {
+      footer.removeEventListener("pointermove", handlePointerMove);
+      footer.removeEventListener("pointerleave", handlePointerLeave);
+      window.clearTimeout(trailFadeTimerRef.current);
+      if (trailFrameRef.current !== null) {
+        window.cancelAnimationFrame(trailFrameRef.current);
+        trailFrameRef.current = null;
+      }
+      trail.classList.remove("is-active");
+    };
+  }, [theme, canRenderFooterBackdrop]);
+
   return (
     <footer
       ref={footerRef}
@@ -77,13 +134,18 @@ const Footer = () => {
         borderTop: "1px solid var(--border)",
       }}
     >
-      {canRenderFooterBackdrop && (
+      {canRenderFooterBackdrop && theme === "dark" && (
         <div className="footer-effect footer-effect-galaxy" aria-hidden="true">
           <Galaxy
             {...PORTFOLIO_GALAXY_CONFIG}
+            mouseInteraction={false}
             paused={isFooterBackdropPaused}
           />
         </div>
+      )}
+
+      {canRenderFooterBackdrop && theme === "light" && (
+        <div ref={trailRef} className="footer-shooting-star-trail" aria-hidden="true" />
       )}
 
       <div
@@ -127,7 +189,7 @@ const Footer = () => {
                       }}
                     >
                       <span>{link.name}</span>
-                      {link.ref === "projects" && <span aria-hidden="true">&nearr;</span>}
+                      {link.ref === "projects" && <span aria-hidden="true">↗</span>}
                     </Link>
                   </li>
                 ))}

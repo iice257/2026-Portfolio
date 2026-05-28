@@ -186,9 +186,9 @@ export default function Galaxy({
   rotationSpeed = 0.1,
   autoCenterRepulsion = 0,
   transparent = true,
-  pixelRatio = 1.25,
+  pixelRatio = 0.8,
   targetFps = 24,
-  maxPixelCount = 2600000,
+  maxPixelCount = 900000,
   paused = false,
   ...rest
 }) {
@@ -236,7 +236,7 @@ export default function Galaxy({
     function resize() {
       const width = Math.max(1, ctn.offsetWidth);
       const height = Math.max(1, ctn.offsetHeight);
-      const requestedScale = Math.max(1, Math.min(pixelRatio, window.devicePixelRatio || 1));
+      const requestedScale = Math.max(0.65, Math.min(pixelRatio, window.devicePixelRatio || 1));
       const pixelBudgetScale = Math.sqrt(maxPixelCount / (width * height));
       const scale = Math.min(requestedScale, Number.isFinite(pixelBudgetScale) ? pixelBudgetScale : requestedScale);
 

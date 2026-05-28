@@ -413,7 +413,7 @@ html[data-hero-locked="true"] [data-hide-when-hero-locked="true"] {
   inset: 0;
   z-index: 0;
   overflow: hidden;
-  pointer-events: auto;
+  pointer-events: none;
   contain: strict;
 }
 
@@ -423,13 +423,7 @@ html[data-hero-locked="true"] [data-hide-when-hero-locked="true"] {
 }
 
 .footer-effect-galaxy {
-  opacity: 0.56;
-}
-
-[data-theme="light"] .footer-effect-galaxy {
-  opacity: 0.34;
-  filter: invert(1) contrast(1.12);
-  mix-blend-mode: multiply;
+  opacity: 0.48;
 }
 
 .footer-effect canvas {
@@ -438,21 +432,71 @@ html[data-hero-locked="true"] [data-hide-when-hero-locked="true"] {
   height: 100%;
 }
 
+.footer-shooting-star-trail {
+  --trail-x: 50%;
+  --trail-y: 50%;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.footer-shooting-star-trail::before,
+.footer-shooting-star-trail::after {
+  content: "";
+  position: absolute;
+  left: var(--trail-x);
+  top: var(--trail-y);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+  will-change: transform, opacity;
+}
+
+.footer-shooting-star-trail::before {
+  width: clamp(5.5rem, 12vw, 10rem);
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--fg-primary) 14%, transparent) 34%,
+    color-mix(in srgb, var(--fg-primary) 52%, transparent) 78%,
+    transparent 100%
+  );
+  filter: blur(0.4px);
+  transform: translate3d(-18%, -50%, 0) rotate(-18deg);
+}
+
+.footer-shooting-star-trail::after {
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--fg-primary) 70%, transparent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--fg-primary) 26%, transparent);
+  transform: translate3d(-50%, -50%, 0);
+}
+
+.footer-shooting-star-trail.is-active::before,
+.footer-shooting-star-trail.is-active::after {
+  opacity: 1;
+}
+
 .contact-effect {
   position: absolute;
   inset: 0;
   z-index: 0;
   overflow: hidden;
-  pointer-events: auto;
+  pointer-events: none;
   contain: strict;
 }
 
-.contact-effect-galaxy {
-  opacity: 0.68;
+.contact-effect-waves {
+  opacity: 0.36;
 }
 
-.contact-effect-waves {
-  opacity: 0.42;
+[data-theme="dark"] .contact-effect-waves {
+  opacity: 0.22;
 }
 
 .contact-effect canvas {

@@ -4,9 +4,8 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { CONTACT_LINKS, MENULINKS } from "../../constants";
 import { useTheme } from "../../context/ThemeContext";
-import { PORTFOLIO_GALAXY_CONFIG, PORTFOLIO_WAVES_CONFIG } from "../ReactBits/galaxyConfig";
+import { PORTFOLIO_WAVES_THEME_CONFIG } from "../ReactBits/galaxyConfig";
 
-const Galaxy = dynamic(() => import("../ReactBits/Galaxy"), { ssr: false });
 const Waves = dynamic(() => import("../ReactBits/Waves"), { ssr: false });
 
 const Contact = () => {
@@ -82,19 +81,10 @@ const Contact = () => {
       className="relative overflow-hidden section-spacing-lg"
       style={{ backgroundColor: "var(--bg-primary)" }}
     >
-      {canRenderContactBackdrop && theme === "dark" && (
-        <div className="contact-effect contact-effect-galaxy" aria-hidden="true">
-          <Galaxy
-            {...PORTFOLIO_GALAXY_CONFIG}
-            paused={isContactBackdropPaused}
-          />
-        </div>
-      )}
-
-      {canRenderContactBackdrop && theme === "light" && (
+      {canRenderContactBackdrop && (
         <div className="contact-effect contact-effect-waves" aria-hidden="true">
           <Waves
-            {...PORTFOLIO_WAVES_CONFIG}
+            {...(PORTFOLIO_WAVES_THEME_CONFIG[theme] || PORTFOLIO_WAVES_THEME_CONFIG.light)}
             paused={isContactBackdropPaused}
           />
         </div>
