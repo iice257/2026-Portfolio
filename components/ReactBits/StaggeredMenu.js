@@ -1,9 +1,40 @@
 import Link from "next/link";
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useCursor } from '../../context/CursorContext';
+import { useTheme } from '../../context/ThemeContext';
 import { useBodyScrollLock } from '../../utils/useBodyScrollLock';
 import { useDialogFocus } from '../../utils/useDialogFocus';
+
+const MENU_TRAIL_POINT_COUNT = 26;
+const MENU_TRAIL_MIN_DISTANCE = 4;
+
+const getSmoothTrailPath = (points) => {
+  if (points.length < 2) return "";
+
+  const formatPoint = (point) => `${point.x.toFixed(1)} ${point.y.toFixed(1)}`;
+  const [firstPoint] = points;
+  const commands = [`M ${formatPoint(firstPoint)}`];
+
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const previous = points[index - 1] || points[index];
+    const current = points[index];
+    const next = points[index + 1];
+    const afterNext = points[index + 2] || next;
+    const controlOne = {
+      x: current.x + (next.x - previous.x) / 6,
+      y: current.y + (next.y - previous.y) / 6,
+    };
+    const controlTwo = {
+      x: next.x - (afterNext.x - current.x) / 6,
+      y: next.y - (afterNext.y - current.y) / 6,
+    };
+
+    commands.push(`C ${formatPoint(controlOne)} ${formatPoint(controlTwo)} ${formatPoint(next)}`);
+  }
+
+  return commands.join(" ");
+};
 
 /**
  * StaggeredMenu - Full-screen navigation menu with staggered animations
@@ -22,9 +53,26 @@ const StaggeredMenu = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { setCursorVariant } = useCursor();
+  const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const overlayRef = useDialogFocus(isOpen);
+  const menuSurfaceRef = useRef(null);
+  const trailRef = useRef(null);
+  const trailLineRef = useRef(null);
+  const trailGradientRef = useRef(null);
+  const trailFrameRef = useRef(null);
+  const trailFadeTimerRef = useRef(null);
+  const trailPointsRef = useRef([]);
+  const trailHasPointerRef = useRef(false);
   const overlayId = "site-menu-overlay";
+  const menuForeground = theme === "light" ? "#0a0a0a" : "#fafafa";
+  const menuMuted = theme === "light" ? "rgba(10, 10, 10, 0.52)" : "rgba(250, 250, 250, 0.55)";
+  const menuBorder = theme === "light" ? "rgba(10, 10, 10, 0.18)" : "rgba(250, 250, 250, 0.2)";
+
+  const setOverlayRefs = useCallback((node) => {
+    overlayRef.current = node;
+    menuSurfaceRef.current = node;
+  }, [overlayRef]);
 
   useEffect(() => {
     setMounted(true);
@@ -67,12 +115,111 @@ const StaggeredMenu = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [closeMenu, isOpen]);
 
+  useEffect(() => {
+    const menuSurface = menuSurfaceRef.current;
+    const trail = trailRef.current;
+    const trailLine = trailLineRef.current;
+    const trailGradient = trailGradientRef.current;
+    if (!isOpen || !menuSurface || !trail || !trailLine || !trailGradient) {
+      return undefined;
+    }
+
+    const shouldReduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (shouldReduce) return undefined;
+
+    const setTrailActive = (value) => {
+      trail.classList.toggle("is-active", value);
+    };
+
+    const renderTrail = () => {
+      const points = trailPointsRef.current;
+      const pathPoints = points.length > 1 ? [...points].reverse() : points;
+      const tail = pathPoints[0];
+      const head = pathPoints[pathPoints.length - 1];
+
+      trailLine.setAttribute("d", getSmoothTrailPath(pathPoints));
+
+      if (tail && head) {
+        trailGradient.setAttribute("x1", tail.x.toFixed(1));
+        trailGradient.setAttribute("y1", tail.y.toFixed(1));
+        trailGradient.setAttribute("x2", head.x.toFixed(1));
+        trailGradient.setAttribute("y2", head.y.toFixed(1));
+      }
+
+      trailFrameRef.current = null;
+    };
+
+    const ensureTrailFrame = () => {
+      if (trailFrameRef.current === null) {
+        trailFrameRef.current = window.requestAnimationFrame(renderTrail);
+      }
+    };
+
+    const handlePointerMove = (event) => {
+      const rect = menuSurface.getBoundingClientRect();
+      const nextPoint = {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top,
+      };
+
+      if (!trailHasPointerRef.current) {
+        trailPointsRef.current = [nextPoint];
+        trailHasPointerRef.current = true;
+      } else {
+        const [lastPoint] = trailPointsRef.current;
+        const distance = Math.hypot(nextPoint.x - lastPoint.x, nextPoint.y - lastPoint.y);
+
+        if (distance >= MENU_TRAIL_MIN_DISTANCE) {
+          trailPointsRef.current = [
+            nextPoint,
+            ...trailPointsRef.current,
+          ].slice(0, MENU_TRAIL_POINT_COUNT);
+        } else {
+          trailPointsRef.current = [
+            nextPoint,
+            ...trailPointsRef.current.slice(1),
+          ];
+        }
+      }
+
+      setTrailActive(true);
+      window.clearTimeout(trailFadeTimerRef.current);
+      trailFadeTimerRef.current = window.setTimeout(() => {
+        setTrailActive(false);
+      }, 520);
+      ensureTrailFrame();
+    };
+
+    const handlePointerLeave = () => {
+      window.clearTimeout(trailFadeTimerRef.current);
+      setTrailActive(false);
+      ensureTrailFrame();
+    };
+
+    menuSurface.addEventListener("pointermove", handlePointerMove, { passive: true });
+    menuSurface.addEventListener("pointerleave", handlePointerLeave);
+
+    return () => {
+      menuSurface.removeEventListener("pointermove", handlePointerMove);
+      menuSurface.removeEventListener("pointerleave", handlePointerLeave);
+      window.clearTimeout(trailFadeTimerRef.current);
+      if (trailFrameRef.current !== null) {
+        window.cancelAnimationFrame(trailFrameRef.current);
+        trailFrameRef.current = null;
+      }
+      trail.classList.remove("is-active");
+      trailHasPointerRef.current = false;
+      trailPointsRef.current = [];
+      trailLine.setAttribute("d", "");
+    };
+  }, [isOpen]);
+
   const buttonColor = isOpen && changeMenuColorOnOpen ? openMenuButtonColor : menuButtonColor;
   const portalTarget = mounted ? document.getElementById("site-portal-root") || document.body : null;
 
   const MenuOverlay = (
     <div
-      ref={overlayRef}
+      ref={setOverlayRefs}
       id={overlayId}
       role="dialog"
       aria-modal="true"
@@ -81,8 +228,28 @@ const StaggeredMenu = ({
       tabIndex={-1}
       className={`fixed inset-0 z-[99999] flex flex-col items-start overflow-y-auto py-0 transition-transform duration-500 ease-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
-      style={{ backgroundColor: '#000000' }}
+      style={{
+        backgroundColor: 'var(--bg-primary)',
+        color: 'var(--fg-primary)',
+        '--menu-fg': menuForeground,
+        '--menu-muted': menuMuted,
+        '--menu-border': menuBorder,
+        '--menu-trail-color': menuForeground,
+      }}
     >
+      <div ref={trailRef} className="menu-mouse-trail" aria-hidden="true">
+        <svg className="menu-mouse-trail__svg">
+          <defs>
+            <linearGradient ref={trailGradientRef} id="menu-mouse-trail-gradient" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="currentColor" stopOpacity="0" />
+              <stop offset="30%" stopColor="currentColor" stopOpacity="0.16" />
+              <stop offset="100%" stopColor="currentColor" stopOpacity="0.86" />
+            </linearGradient>
+          </defs>
+          <path ref={trailLineRef} className="menu-mouse-trail__line" d="" />
+        </svg>
+      </div>
+
       <button
         type="button"
         onClick={toggleMenu}
@@ -92,8 +259,8 @@ const StaggeredMenu = ({
           }`}
         style={{ cursor: 'none' }}
       >
-        <span className="absolute h-[2px] w-6 rotate-45 bg-white" />
-        <span className="absolute h-[2px] w-6 -rotate-45 bg-white" />
+        <span className="absolute h-[2px] w-6 rotate-45" style={{ backgroundColor: 'var(--menu-fg)' }} />
+        <span className="absolute h-[2px] w-6 -rotate-45" style={{ backgroundColor: 'var(--menu-fg)' }} />
       </button>
 
       {/* Navigation Items - LEFT ALIGNED */}
@@ -114,16 +281,17 @@ const StaggeredMenu = ({
           );
 
           return (
-          <div key={item.label} className="border-b border-white/20 w-auto max-w-4xl">
+          <div key={item.label} className="relative z-[1] border-b w-auto max-w-4xl" style={{ borderColor: 'var(--menu-border)' }}>
             <Link
               href={item.link}
               tabIndex={isOpen ? 0 : -1}
-              className={`group relative flex items-center gap-4 xs:gap-5 md:gap-8 py-4 xs:py-5 md:py-5 text-white transition-all duration-500 cursor-none ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              className={`group relative flex items-center gap-4 xs:gap-5 md:gap-8 py-4 xs:py-5 md:py-5 transition-all duration-500 cursor-none ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                 }`}
               style={{
                 transitionDelay: isOpen ? `${0.1 + index * 0.05}s` : '0s',
                 fontSize: 'var(--site-menu-item-size, clamp(2.45rem, 4.25vw, 3.85rem))',
                 fontWeight: 300, // Reduced weight for elegance
+                color: 'var(--menu-fg)',
                 cursor: 'none'
               }}
               aria-label={item.ariaLabel || item.label}
@@ -136,7 +304,7 @@ const StaggeredMenu = ({
               {displayItemNumbering && (
                 <span
                   className="relative z-10 text-sm xs:text-base md:text-lg font-light w-9 xs:w-10 md:w-12 opacity-50 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{ color: '#ffffff' }}
+                  style={{ color: 'var(--menu-fg)' }}
                 >
                   {String(index + 1).padStart(2, '0')}
                 </span>
@@ -149,15 +317,18 @@ const StaggeredMenu = ({
                 <span className="flex items-start gap-2 transition-transform duration-500 ease-in-out group-hover:-translate-y-full">
                   {renderLabelContent()}
                 </span>
-                <span className="absolute top-0 left-0 flex items-start gap-2 translate-y-full transition-transform duration-500 ease-in-out group-hover:translate-y-0 text-white/50">
+                <span
+                  className="absolute top-0 left-0 flex items-start gap-2 translate-y-full transition-transform duration-500 ease-in-out group-hover:translate-y-0"
+                  style={{ color: 'var(--menu-muted)' }}
+                >
                   {renderLabelContent()}
                 </span>
               </span>
 
               {/* Underline line - absolute to the link container */}
               <span
-                className="absolute z-0 left-20 right-0 h-[2px] bg-white transform origin-left scale-x-0 transition-transform duration-500 ease-out group-hover:scale-x-100"
-                style={{ bottom: '1.35rem' }} // Adjust based on padding
+                className="absolute z-0 left-20 right-0 h-[2px] transform origin-left scale-x-0 transition-transform duration-500 ease-out group-hover:scale-x-100"
+                style={{ bottom: '1.35rem', backgroundColor: 'var(--menu-fg)' }} // Adjust based on padding
               />
             </Link>
           </div>
@@ -167,7 +338,7 @@ const StaggeredMenu = ({
 
       {/* Social Links */}
       {displaySocials && socialItems.length > 0 && (
-        <div className="relative mt-auto flex flex-wrap gap-x-5 gap-y-3 sm:gap-8 pl-6 md:pl-[3.75rem] pr-6 pb-8 md:pb-12">
+        <div className="relative z-[1] mt-auto flex flex-wrap gap-x-5 gap-y-3 sm:gap-8 pl-6 md:pl-[3.75rem] pr-6 pb-8 md:pb-12">
           {socialItems.map((social, index) => {
             const opensNewTab = /^https?:\/\//i.test(social.link);
 
@@ -176,16 +347,20 @@ const StaggeredMenu = ({
                 key={social.link}
                 href={social.link}
                 tabIndex={isOpen ? 0 : -1}
-                className={`relative text-sm md:text-base text-white transition-all duration-500 cursor-none group ${isOpen ? 'opacity-60 translate-y-0' : 'opacity-0 translate-y-4'
+                className={`relative text-sm md:text-base transition-all duration-500 cursor-none group ${isOpen ? 'opacity-60 translate-y-0' : 'opacity-0 translate-y-4'
                   }`}
-                style={{ transitionDelay: isOpen ? `${0.3 + index * 0.05}s` : '0s', cursor: 'none' }}
+                style={{
+                  transitionDelay: isOpen ? `${0.3 + index * 0.05}s` : '0s',
+                  color: 'var(--menu-fg)',
+                  cursor: 'none',
+                }}
                 target={opensNewTab ? "_blank" : undefined}
                 rel={opensNewTab ? "noopener noreferrer" : undefined}
                 onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
                 onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
               >
                 {social.label}
-                <span className="absolute left-0 bottom-0 w-full h-[1px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                <span className="absolute left-0 bottom-0 w-full h-[1px] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" style={{ backgroundColor: 'var(--menu-fg)' }} />
               </a>
             );
           })}

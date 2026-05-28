@@ -174,3 +174,40 @@
   transform: translateY(0);
   transition-delay: 0.05s;
 }
+
+.menu-mouse-trail {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  color: var(--menu-trail-color, var(--fg-primary));
+  pointer-events: none;
+  overflow: hidden;
+  contain: strict;
+}
+
+.menu-mouse-trail__svg {
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 420ms ease;
+}
+
+.menu-mouse-trail.is-active .menu-mouse-trail__svg {
+  opacity: 1;
+}
+
+.menu-mouse-trail__line {
+  fill: none;
+  stroke: url("#menu-mouse-trail-gradient");
+  stroke-width: 2.25px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 0.35rem color-mix(in srgb, var(--menu-trail-color, var(--fg-primary)) 18%, transparent));
+  vector-effect: non-scaling-stroke;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .menu-mouse-trail {
+    display: none;
+  }
+}

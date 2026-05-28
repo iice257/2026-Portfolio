@@ -446,38 +446,17 @@ html[data-hero-locked="true"] [data-hide-when-hero-locked="true"] {
   height: 100%;
 }
 
-.footer-mouse-trail {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-  contain: strict;
-  mix-blend-mode: multiply;
-  color: #0a0a0a;
+.footer-effect-splash {
+  opacity: 0.9;
 }
 
-.footer-mouse-trail__svg {
+.footer-splash-cursor {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  opacity: 0;
-  transition: opacity 420ms ease;
-}
-
-.footer-mouse-trail.is-active .footer-mouse-trail__svg {
-  opacity: 1;
-}
-
-.footer-mouse-trail__line {
-  fill: none;
-  stroke: url("#footer-mouse-trail-gradient");
-  stroke-width: 2.25px;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  filter: drop-shadow(0 0 0.35rem color-mix(in srgb, #0a0a0a 18%, transparent));
-  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+  overflow: hidden;
 }
 
 .contact-effect {
@@ -2165,10 +2144,6 @@ a {
 }
 
 @media (hover: none), (pointer: coarse) {
-  .footer-mouse-trail {
-    display: none;
-  }
-
   .mockup-preview-trigger:hover,
   .mockup-preview-trigger:focus-visible,
   .project-media-preview:hover .project-media-frame,
