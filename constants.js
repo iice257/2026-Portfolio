@@ -48,8 +48,9 @@ export const METADATA = {
     "Lagos",
     "Nigeria",
   ].join(", "),
-  image:
-    "https://res.cloudinary.com/dywdhyojt/image/upload/v1721378510/social-preview.png",
+  image: "https://kingsleyaremu.vercel.app/hero-preview.png",
+  imageWidth: 1200,
+  imageHeight: 630,
   language: "English",
   themeColor: "#0a0a0a",
   jobTitle: "Full-Stack Developer and Creative Engineer",

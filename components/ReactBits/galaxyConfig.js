@@ -42,6 +42,6 @@ export const PORTFOLIO_WAVES_THEME_CONFIG = {
   light: PORTFOLIO_WAVES_CONFIG,
   dark: {
     ...PORTFOLIO_WAVES_BASE_CONFIG,
-    lineColor: "#404040",
+    lineColor: "#707070",
   },
 };

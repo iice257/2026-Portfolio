@@ -188,6 +188,9 @@ const Meta = () => (
     <meta property="og:title" content={METADATA.title} />
     <meta property="og:description" content={METADATA.description} />
     <meta property="og:image" content={METADATA.image} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content={String(METADATA.imageWidth)} />
+    <meta property="og:image:height" content={String(METADATA.imageHeight)} />
     <meta property="og:image:alt" content={`${METADATA.author} portfolio preview`} />
     <meta property="og:url" content={METADATA.siteUrl} />
     <meta property="og:site_name" content={METADATA.title} />

@@ -432,54 +432,38 @@ html[data-hero-locked="true"] [data-hide-when-hero-locked="true"] {
   height: 100%;
 }
 
-.footer-shooting-star-trail {
-  --trail-x: 50%;
-  --trail-y: 50%;
+.footer-mouse-trail {
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
+  contain: strict;
+  mix-blend-mode: multiply;
+  color: #0a0a0a;
 }
 
-.footer-shooting-star-trail::before,
-.footer-shooting-star-trail::after {
-  content: "";
+.footer-mouse-trail__svg {
   position: absolute;
-  left: var(--trail-x);
-  top: var(--trail-y);
+  inset: 0;
+  width: 100%;
+  height: 100%;
   opacity: 0;
-  pointer-events: none;
-  transition: opacity 220ms ease;
-  will-change: transform, opacity;
+  transition: opacity 420ms ease;
 }
 
-.footer-shooting-star-trail::before {
-  width: clamp(5.5rem, 12vw, 10rem);
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    color-mix(in srgb, var(--fg-primary) 14%, transparent) 34%,
-    color-mix(in srgb, var(--fg-primary) 52%, transparent) 78%,
-    transparent 100%
-  );
-  filter: blur(0.4px);
-  transform: translate3d(-18%, -50%, 0) rotate(-18deg);
-}
-
-.footer-shooting-star-trail::after {
-  width: 0.38rem;
-  height: 0.38rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--fg-primary) 70%, transparent);
-  box-shadow: 0 0 16px color-mix(in srgb, var(--fg-primary) 26%, transparent);
-  transform: translate3d(-50%, -50%, 0);
-}
-
-.footer-shooting-star-trail.is-active::before,
-.footer-shooting-star-trail.is-active::after {
+.footer-mouse-trail.is-active .footer-mouse-trail__svg {
   opacity: 1;
+}
+
+.footer-mouse-trail__line {
+  fill: none;
+  stroke: url("#footer-mouse-trail-gradient");
+  stroke-width: 2.25px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 0.35rem color-mix(in srgb, #0a0a0a 18%, transparent));
+  vector-effect: non-scaling-stroke;
 }
 
 .contact-effect {
@@ -496,7 +480,7 @@ html[data-hero-locked="true"] [data-hide-when-hero-locked="true"] {
 }
 
 [data-theme="dark"] .contact-effect-waves {
-  opacity: 0.22;
+  opacity: 0.34;
 }
 
 .contact-effect canvas {
@@ -746,17 +730,18 @@ html[data-hero-locked="true"] [data-hide-when-hero-locked="true"] {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
-  gap: 0.55rem 0.75rem;
+  gap: 0.45rem 0.55rem;
   text-align: left;
 }
 
 .work-stack-tags span {
   display: inline-flex;
   align-items: center;
-  min-height: 1.85rem;
-  padding: 0.35rem 0.65rem;
+  min-height: 1.6rem;
+  padding: 0.28rem 0.5rem;
   border: 1px solid var(--border);
   color: var(--fg-muted);
+  font-size: 0.58rem;
   white-space: nowrap;
 }
 

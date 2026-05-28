@@ -9,12 +9,45 @@ import { getSectionHref, scrollToSection, SECTION_IDS } from "../../utils/sectio
 
 const Galaxy = dynamic(() => import("../ReactBits/Galaxy"), { ssr: false });
 
+const FOOTER_TRAIL_POINT_COUNT = 26;
+const FOOTER_TRAIL_MIN_DISTANCE = 4;
+
+const getSmoothTrailPath = (points) => {
+  if (points.length < 2) return "";
+
+  const formatPoint = (point) => `${point.x.toFixed(1)} ${point.y.toFixed(1)}`;
+  const [firstPoint] = points;
+  const commands = [`M ${formatPoint(firstPoint)}`];
+
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const previous = points[index - 1] || points[index];
+    const current = points[index];
+    const next = points[index + 1];
+    const afterNext = points[index + 2] || next;
+    const controlOne = {
+      x: current.x + (next.x - previous.x) / 6,
+      y: current.y + (next.y - previous.y) / 6,
+    };
+    const controlTwo = {
+      x: next.x - (afterNext.x - current.x) / 6,
+      y: next.y - (afterNext.y - current.y) / 6,
+    };
+
+    commands.push(`C ${formatPoint(controlOne)} ${formatPoint(controlTwo)} ${formatPoint(next)}`);
+  }
+
+  return commands.join(" ");
+};
+
 const Footer = () => {
   const footerRef = useRef(null);
   const trailRef = useRef(null);
+  const trailLineRef = useRef(null);
+  const trailGradientRef = useRef(null);
   const trailFrameRef = useRef(null);
   const trailFadeTimerRef = useRef(null);
-  const trailPointRef = useRef({ x: 0, y: 0 });
+  const trailPointsRef = useRef([]);
+  const trailHasPointerRef = useRef(false);
   const currentYear = new Date().getFullYear();
   const { theme } = useTheme();
   const [canRenderFooterBackdrop, setCanRenderFooterBackdrop] = useState(true);
@@ -77,37 +110,79 @@ const Footer = () => {
   useEffect(() => {
     const footer = footerRef.current;
     const trail = trailRef.current;
-    if (!footer || !trail || theme !== "light" || !canRenderFooterBackdrop) {
+    const trailLine = trailLineRef.current;
+    const trailGradient = trailGradientRef.current;
+    if (!footer || !trail || !trailLine || !trailGradient || theme !== "light" || !canRenderFooterBackdrop) {
       return undefined;
     }
 
+    const setTrailActive = (value) => {
+      trail.classList.toggle("is-active", value);
+    };
+
     const renderTrail = () => {
+      const points = trailPointsRef.current;
+      const pathPoints = points.length > 1 ? [...points].reverse() : points;
+      const tail = pathPoints[0];
+      const head = pathPoints[pathPoints.length - 1];
+
+      trailLine.setAttribute("d", getSmoothTrailPath(pathPoints));
+
+      if (tail && head) {
+        trailGradient.setAttribute("x1", tail.x.toFixed(1));
+        trailGradient.setAttribute("y1", tail.y.toFixed(1));
+        trailGradient.setAttribute("x2", head.x.toFixed(1));
+        trailGradient.setAttribute("y2", head.y.toFixed(1));
+      }
+
       trailFrameRef.current = null;
-      trail.style.setProperty("--trail-x", `${trailPointRef.current.x}px`);
-      trail.style.setProperty("--trail-y", `${trailPointRef.current.y}px`);
-      trail.classList.add("is-active");
+    };
+
+    const ensureTrailFrame = () => {
+      if (trailFrameRef.current === null) {
+        trailFrameRef.current = window.requestAnimationFrame(renderTrail);
+      }
     };
 
     const handlePointerMove = (event) => {
       const rect = footer.getBoundingClientRect();
-      trailPointRef.current = {
+      const nextPoint = {
         x: event.clientX - rect.left,
         y: event.clientY - rect.top,
       };
 
-      if (trailFrameRef.current === null) {
-        trailFrameRef.current = window.requestAnimationFrame(renderTrail);
+      if (!trailHasPointerRef.current) {
+        trailPointsRef.current = [nextPoint];
+        trailHasPointerRef.current = true;
+      } else {
+        const [lastPoint] = trailPointsRef.current;
+        const distance = Math.hypot(nextPoint.x - lastPoint.x, nextPoint.y - lastPoint.y);
+
+        if (distance >= FOOTER_TRAIL_MIN_DISTANCE) {
+          trailPointsRef.current = [
+            nextPoint,
+            ...trailPointsRef.current,
+          ].slice(0, FOOTER_TRAIL_POINT_COUNT);
+        } else {
+          trailPointsRef.current = [
+            nextPoint,
+            ...trailPointsRef.current.slice(1),
+          ];
+        }
       }
 
+      setTrailActive(true);
       window.clearTimeout(trailFadeTimerRef.current);
       trailFadeTimerRef.current = window.setTimeout(() => {
-        trail.classList.remove("is-active");
-      }, 180);
+        setTrailActive(false);
+      }, 520);
+      ensureTrailFrame();
     };
 
     const handlePointerLeave = () => {
       window.clearTimeout(trailFadeTimerRef.current);
-      trail.classList.remove("is-active");
+      setTrailActive(false);
+      ensureTrailFrame();
     };
 
     footer.addEventListener("pointermove", handlePointerMove, { passive: true });
@@ -122,6 +197,9 @@ const Footer = () => {
         trailFrameRef.current = null;
       }
       trail.classList.remove("is-active");
+      trailHasPointerRef.current = false;
+      trailPointsRef.current = [];
+      trailLine.setAttribute("d", "");
     };
   }, [theme, canRenderFooterBackdrop]);
 
@@ -145,7 +223,18 @@ const Footer = () => {
       )}
 
       {canRenderFooterBackdrop && theme === "light" && (
-        <div ref={trailRef} className="footer-shooting-star-trail" aria-hidden="true" />
+        <div ref={trailRef} className="footer-mouse-trail" aria-hidden="true">
+          <svg className="footer-mouse-trail__svg">
+            <defs>
+              <linearGradient ref={trailGradientRef} id="footer-mouse-trail-gradient" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="currentColor" stopOpacity="0" />
+                <stop offset="30%" stopColor="currentColor" stopOpacity="0.16" />
+                <stop offset="100%" stopColor="currentColor" stopOpacity="0.86" />
+              </linearGradient>
+            </defs>
+            <path ref={trailLineRef} className="footer-mouse-trail__line" d="" />
+          </svg>
+        </div>
       )}
 
       <div
