@@ -90,7 +90,7 @@ const Projects = ({ isDesktop }) => {
         <h2
           ref={titleRef}
           className="text-massive font-extralight"
-          style={{ color: 'var(--fg-primary)', whiteSpace: 'nowrap' }}
+          style={{ color: 'var(--fg-primary)', whiteSpace: isDesktop ? 'nowrap' : 'normal' }}
         >
           <ShuffleText text="What I've done" duration={0.6} shuffleTimes={4} />
         </h2>
@@ -110,7 +110,7 @@ const Projects = ({ isDesktop }) => {
             <Link
               key={project.name}
               href={`/projects/${project.slug}`}
-              className="project-panel min-h-screen grid grid-cols-1 lg:grid-cols-2 group cursor-none"
+              className="project-panel min-h-0 lg:min-h-screen grid grid-cols-1 lg:grid-cols-2 group cursor-none"
               data-cursor-label="Click for more details"
               data-cursor-variant="project"
               onMouseEnter={setProjectCursor}
@@ -121,7 +121,7 @@ const Projects = ({ isDesktop }) => {
             >
               {/* Image Side - Full height image */}
               <div
-                className={`relative min-h-[50vh] lg:min-h-screen ${isEven ? 'order-2 lg:order-2' : 'order-2 lg:order-1'}`}
+                className={`relative min-h-[42vh] xs:min-h-[48vh] lg:min-h-screen ${isEven ? 'order-2 lg:order-2' : 'order-2 lg:order-1'}`}
               >
                 <div className="absolute inset-0 transition-transform duration-700 ease-out">
                   <Image
@@ -137,11 +137,11 @@ const Projects = ({ isDesktop }) => {
 
               {/* Info Side - Simple text details details - CENTERED SQUARE */}
               <div
-                className={`relative min-h-[52vh] lg:min-h-screen grid place-items-center p-8 py-16 md:p-12 lg:p-16 ${isEven ? 'order-1 lg:order-1' : 'order-1 lg:order-2'
+                className={`relative min-h-0 lg:min-h-screen grid place-items-center p-6 py-12 xs:p-8 xs:py-14 md:p-12 lg:p-16 ${isEven ? 'order-1 lg:order-1' : 'order-1 lg:order-2'
                   }`}
                 style={{ backgroundColor: 'var(--bg-primary)' }}
               >
-                <div className="w-full max-w-[40rem] min-h-[min(56vh,38rem)] flex flex-col items-center justify-center text-center mx-auto">
+                <div className="w-full max-w-[40rem] min-h-0 md:min-h-[min(48vh,34rem)] lg:min-h-[min(56vh,38rem)] flex flex-col items-center justify-center text-center mx-auto">
 
                   {/* Project Number (top-right of content?) or keep at bottom? User said "bring them to the center into a square" */}
                   {/* I'll put project name on top, then desc, then tags. */}
@@ -155,7 +155,7 @@ const Projects = ({ isDesktop }) => {
 
                   <h3
                     className="text-display-lg font-bold uppercase mb-6 leading-none"
-                    style={{ color: 'var(--fg-primary)' }}
+                    style={{ color: 'var(--fg-primary)', overflowWrap: 'anywhere' }}
                   >
                     {project.name}
                   </h3>

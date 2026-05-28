@@ -448,7 +448,7 @@ const MajorProjectExpandedCard = ({ project, index, onFlip, onHover, onLeave, on
             <span className="text-micro mb-4 block" style={{ color: "var(--fg-muted)" }}>
               {String(index + 5).padStart(2, "0")} / Expanded
             </span>
-            <h3 className="text-display-md font-light mb-4 whitespace-nowrap" style={{ color: "var(--fg-primary)" }}>
+            <h3 className="text-display-md font-light mb-4 lg:whitespace-nowrap" style={{ color: "var(--fg-primary)" }}>
               <ShuffleText text={project.name} duration={0.45} shuffleTimes={3} textAlign="left" />
             </h3>
             <p className="text-body-lg mb-5" style={{ color: "var(--fg-secondary)" }}>
@@ -516,7 +516,7 @@ const MajorProjectCard = ({ project, index, onFlip, onHover, onLeave, dimmed }) 
         <span className="text-micro mb-4 block" style={{ color: "var(--fg-muted)" }}>
           {String(index + 5).padStart(2, "0")}
         </span>
-        <h3 className="text-display-sm font-light mb-3 whitespace-nowrap" style={{ color: "var(--fg-primary)" }}>
+        <h3 className="text-display-sm font-light mb-3 lg:whitespace-nowrap" style={{ color: "var(--fg-primary)" }}>
           <ShuffleText text={project.name} duration={0.45} shuffleTimes={3} textAlign="left" />
         </h3>
       </div>
@@ -786,7 +786,7 @@ export default function ProjectsIndex() {
                       {String(index + 1).padStart(2, "0")} / Featured
                     </span>
                     <h3
-                      className="featured-project-title font-light whitespace-nowrap group-hover:translate-x-2 transition-transform duration-300"
+                      className="featured-project-title font-light lg:whitespace-nowrap group-hover:translate-x-2 transition-transform duration-300"
                       style={{ color: "var(--fg-primary)" }}
                     >
                       <ShuffleText text={project.name} duration={0.45} shuffleTimes={3} textAlign="left" />
@@ -963,7 +963,7 @@ export default function ProjectsIndex() {
                     <span className="text-micro md:col-span-2" style={{ color: "var(--fg-muted)" }}>
                       {String(index + 11).padStart(2, "0")}
                     </span>
-                    <span className="archive-project-title md:col-span-5 min-w-0 text-body-xl font-light whitespace-nowrap overflow-hidden text-ellipsis" style={{ color: "var(--fg-primary)" }}>
+                    <span className="archive-project-title md:col-span-5 min-w-0 text-body-xl font-light md:whitespace-nowrap md:overflow-hidden md:text-ellipsis" style={{ color: "var(--fg-primary)" }}>
                       <ShuffleText text={project.name} duration={0.4} shuffleTimes={2} textAlign="left" />
                     </span>
                     <span className="md:col-span-4 text-body-md" style={{ color: "var(--fg-secondary)" }}>

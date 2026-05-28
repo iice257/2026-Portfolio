@@ -595,7 +595,7 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
               <IconList />
               <span>All projects</span>
             </Link>
-            <div className="project-detail-action-group ml-auto flex flex-wrap items-center justify-end gap-3" data-cursor-group="buttons">
+            <div className="project-detail-action-group flex w-full flex-wrap items-center justify-start gap-3 sm:ml-auto sm:w-auto sm:justify-end" data-cursor-group="buttons">
               {projectActions.map((action) => (
                 <a
                   key={action.label}
@@ -621,7 +621,7 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
                   "--project-title-size": PROJECT_TITLE_SIZES[project.slug],
                 }}
               >
-                <ShuffleText text={project.name} duration={0.52} shuffleTimes={4} textAlign="left" className="block whitespace-nowrap" />
+                <ShuffleText text={project.name} duration={0.52} shuffleTimes={4} textAlign="left" className="block md:whitespace-nowrap" />
               </h1>
               <p className="text-editorial font-light max-w-3xl" style={{ color: "var(--fg-secondary)" }}>
                 {project.longDescription}
@@ -672,7 +672,7 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
         </section>
 
         <section className="section-container py-16" style={{ borderTop: "1px solid var(--border)" }}>
-          <div className="grid grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-8">
             {prevProject ? (
               <Link href={`/projects/${prevProject.slug}`} className="project-nav-link group is-prev justify-self-start items-center gap-4" data-clickable="true">
                 <span className="project-nav-caret" aria-hidden="true">

@@ -97,7 +97,7 @@ const StaggeredMenu = ({
       </button>
 
       {/* Navigation Items - LEFT ALIGNED */}
-      <nav aria-label="Primary navigation" className="min-h-[calc(100dvh-2rem)] pl-6 md:pl-[3.75rem] pr-6 pt-24 md:pt-9 pb-7 flex flex-col justify-between items-start gap-7 w-full">
+      <nav aria-label="Primary navigation" className="min-h-[calc(100dvh-2rem)] pl-6 md:pl-[3.75rem] pr-6 pt-20 xs:pt-24 md:pt-9 pb-7 flex flex-col justify-between items-start gap-5 xs:gap-6 md:gap-7 w-full">
         {items.map((item, index) => {
           const renderLabelContent = () => (
             <>
@@ -107,7 +107,7 @@ const StaggeredMenu = ({
                   aria-hidden="true"
                   className="mt-[0.16em] inline-block text-[0.36em] leading-none opacity-70 transition-transform duration-500 ease-in-out group-hover:translate-x-1 group-hover:-translate-y-1"
                 >
-                  ↗
+                  &nearr;
                 </span>
               )}
             </>
@@ -118,11 +118,11 @@ const StaggeredMenu = ({
             <Link
               href={item.link}
               tabIndex={isOpen ? 0 : -1}
-              className={`group relative flex items-center gap-5 md:gap-8 py-6 md:py-5 text-white transition-all duration-500 cursor-none ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              className={`group relative flex items-center gap-4 xs:gap-5 md:gap-8 py-4 xs:py-5 md:py-5 text-white transition-all duration-500 cursor-none ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                 }`}
               style={{
                 transitionDelay: isOpen ? `${0.1 + index * 0.05}s` : '0s',
-                fontSize: 'clamp(2.45rem, 4.25vw, 3.85rem)',
+                fontSize: 'var(--site-menu-item-size, clamp(2.45rem, 4.25vw, 3.85rem))',
                 fontWeight: 300, // Reduced weight for elegance
                 cursor: 'none'
               }}
@@ -135,7 +135,7 @@ const StaggeredMenu = ({
               {/* Number */}
               {displayItemNumbering && (
                 <span
-                  className="relative z-10 text-base md:text-lg font-light w-12 opacity-50 group-hover:opacity-100 transition-opacity duration-300"
+                  className="relative z-10 text-sm xs:text-base md:text-lg font-light w-9 xs:w-10 md:w-12 opacity-50 group-hover:opacity-100 transition-opacity duration-300"
                   style={{ color: '#ffffff' }}
                 >
                   {String(index + 1).padStart(2, '0')}
@@ -167,7 +167,7 @@ const StaggeredMenu = ({
 
       {/* Social Links */}
       {displaySocials && socialItems.length > 0 && (
-        <div className="relative mt-auto flex gap-8 pl-6 md:pl-[3.75rem] pb-10 md:pb-12">
+        <div className="relative mt-auto flex flex-wrap gap-x-5 gap-y-3 sm:gap-8 pl-6 md:pl-[3.75rem] pr-6 pb-8 md:pb-12">
           {socialItems.map((social, index) => {
             const opensNewTab = /^https?:\/\//i.test(social.link);
 

@@ -143,27 +143,27 @@ const Skills = () => {
                 onFocus={() => setExpandedCategory(category.name)}
                 aria-expanded={expandedCategory === category.name}
                 aria-controls={`skills-panel-${category.name.toLowerCase().replace(/\s+/g, "-")}`}
-                className="skill-content w-full flex items-center justify-between py-6 group text-left"
+                className="skill-content w-full flex items-center justify-between gap-4 py-6 group text-left"
                 style={{ borderTop: index === 0 ? 'none' : '1px solid var(--border)' }}
               >
-                <div className="flex items-center gap-6">
+                <div className="flex min-w-0 items-center gap-4 md:gap-6">
                   <span
-                    className="text-micro w-8"
+                    className="text-micro w-7 shrink-0 md:w-8"
                     style={{ color: 'var(--fg-muted)' }}
                   >
                     {String(index + 1).padStart(2, '0')}
                   </span>
                   <span
-                    className="text-display-sm font-light group-hover:font-black transition-all duration-300"
+                    className="min-w-0 text-display-sm font-light group-hover:font-black transition-all duration-300"
                     style={{ color: 'var(--fg-primary)' }}
                   >
                     {category.name}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex shrink-0 items-center gap-3 md:gap-4">
                   <span
-                    className="text-micro"
+                    className="hidden xs:inline text-micro"
                     style={{ color: 'var(--fg-muted)' }}
                   >
                     {category.skills.length} SKILLS
@@ -191,7 +191,7 @@ const Skills = () => {
                     style={{ overflow: 'hidden' }}
                   >
                     <div
-                      className="pb-8 pl-14"
+                      className="pb-8 pl-0 md:pl-14"
                       style={{ backgroundColor: 'var(--bg-primary)' }}
                     >
                       {/* Description */}

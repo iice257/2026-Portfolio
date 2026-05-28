@@ -179,15 +179,15 @@ const Work = () => {
                   aria-controls={`work-panel-${i}`}
                   onClick={() => toggleExperience(i)}
                   onFocus={() => setOpenExperience(i)}
-                  className="w-full flex items-center justify-between gap-6 py-6 text-left group"
+                  className="w-full flex items-center justify-between gap-4 md:gap-6 py-6 text-left group"
                 >
-                  <div className="flex items-center gap-6 min-w-0">
-                    <span className="text-micro w-8 shrink-0" style={{ color: "var(--fg-muted)" }}>
+                  <div className="flex items-center gap-4 md:gap-6 min-w-0">
+                    <span className="text-micro w-7 shrink-0 md:w-8" style={{ color: "var(--fg-muted)" }}>
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     <div className="min-w-0">
                       <h3
-                        className="text-display-sm font-light group-hover:font-black transition-all duration-300"
+                        className="text-display-sm font-light break-words group-hover:font-black transition-all duration-300"
                         style={{ color: "var(--fg-primary)" }}
                       >
                         {exp.role}

@@ -248,23 +248,27 @@
 
 @media (max-width: 420px) {
   .nameStack {
-    width: min(calc(100vw - 0.45rem), 36rem);
+    width: min(calc(100vw - 1.25rem), 36rem);
   }
 
   .firstName {
-    height: clamp(10.2rem, 51vw, 12.2rem);
-    max-width: min(calc(100vw - 0.45rem), 36rem);
+    height: clamp(9.6rem, 48vw, 11.4rem);
+    max-width: min(calc(100vw - 1.25rem), 36rem);
   }
 
   .lastName {
-    height: clamp(9.25rem, 45vw, 10.95rem);
-    max-width: min(calc(97vw - 0.45rem), 29rem);
+    height: clamp(8.75rem, 42vw, 10.25rem);
+    max-width: min(calc(95vw - 1.25rem), 29rem);
   }
 }
 
 @media (max-width: 767px) {
+  .heroTitleShell {
+    gap: clamp(1.05rem, 4vw, 1.45rem);
+  }
+
   .nameStack {
-    max-width: calc(100vw - 0.75rem);
+    max-width: calc(100vw - 1.25rem);
   }
 
   .firstName,
@@ -273,12 +277,12 @@
   }
 
   .firstName > div {
-    transform: scale(0.88);
+    transform: scale(0.84);
     transform-origin: center center;
   }
 
   .lastName > div {
-    transform: scale(0.9);
+    transform: scale(0.87);
     transform-origin: center center;
   }
 
@@ -290,6 +294,12 @@
   .heroCrafting,
   .heroPrecisionLine {
     white-space: nowrap;
+  }
+
+  .heroPrecisionLine {
+    max-width: min(100%, 23rem);
+    margin-inline: auto;
+    white-space: normal;
   }
 }
 
