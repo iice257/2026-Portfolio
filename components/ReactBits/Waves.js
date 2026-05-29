@@ -100,6 +100,7 @@ export default function Waves({
   waveAmpY = 16,
   xGap = 10,
   yGap = 32,
+  lineWidth = 1,
   friction = 0.925,
   tension = 0.005,
   maxCursorMove = 100,
@@ -140,6 +141,7 @@ export default function Waves({
     maxCursorMove,
     xGap,
     yGap,
+    lineWidth,
   });
   const frameIdRef = useRef(null);
   const pausedRef = useRef(paused);
@@ -167,8 +169,9 @@ export default function Waves({
       maxCursorMove,
       xGap,
       yGap,
+      lineWidth,
     };
-  }, [lineColor, waveSpeedX, waveSpeedY, waveAmpX, waveAmpY, friction, tension, maxCursorMove, xGap, yGap]);
+  }, [lineColor, waveSpeedX, waveSpeedY, waveAmpX, waveAmpY, friction, tension, maxCursorMove, xGap, yGap, lineWidth]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -277,6 +280,7 @@ export default function Waves({
       ctx.clearRect(0, 0, width, height);
       ctx.beginPath();
       ctx.strokeStyle = configRef.current.lineColor;
+      ctx.lineWidth = configRef.current.lineWidth;
 
       linesRef.current.forEach((points) => {
         let point = moved(points[0], false);

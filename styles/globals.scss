@@ -447,7 +447,8 @@ html[data-hero-locked="true"] [data-hide-when-hero-locked="true"] {
 }
 
 .footer-effect-splash {
-  opacity: 0.9;
+  opacity: 1;
+  mix-blend-mode: multiply;
 }
 
 .footer-splash-cursor {
@@ -469,11 +470,11 @@ html[data-hero-locked="true"] [data-hide-when-hero-locked="true"] {
 }
 
 .contact-effect-waves {
-  opacity: 0.36;
+  opacity: 0.5;
 }
 
 [data-theme="dark"] .contact-effect-waves {
-  opacity: 0.34;
+  opacity: 0.66;
 }
 
 .contact-effect canvas {

@@ -93,18 +93,18 @@ const Footer = () => {
       {canRenderFooterBackdrop && theme === "light" && !isFooterBackdropPaused && (
         <div className="footer-effect footer-effect-splash" aria-hidden="true">
           <SplashCursor
-            SIM_RESOLUTION={64}
-            DYE_RESOLUTION={512}
+            SIM_RESOLUTION={72}
+            DYE_RESOLUTION={768}
             CAPTURE_RESOLUTION={256}
-            DENSITY_DISSIPATION={4.5}
-            VELOCITY_DISSIPATION={2.4}
-            PRESSURE_ITERATIONS={12}
-            CURL={2}
-            SPLAT_RADIUS={0.16}
-            SPLAT_FORCE={4200}
-            SHADING={false}
+            DENSITY_DISSIPATION={2.35}
+            VELOCITY_DISSIPATION={1.45}
+            PRESSURE_ITERATIONS={14}
+            CURL={4}
+            SPLAT_RADIUS={0.23}
+            SPLAT_FORCE={7600}
+            SHADING
             RAINBOW_MODE={false}
-            COLOR="#494646"
+            COLOR="#444444"
             className="footer-splash-cursor"
           />
         </div>

@@ -27,6 +27,7 @@ const PORTFOLIO_WAVES_BASE_CONFIG = {
   maxCursorMove: 160,
   xGap: 28,
   yGap: 16,
+  lineWidth: 1.35,
   pixelRatio: 0.8,
   targetFps: 20,
   maxPixelCount: 900000,
@@ -35,13 +36,14 @@ const PORTFOLIO_WAVES_BASE_CONFIG = {
 
 export const PORTFOLIO_WAVES_CONFIG = {
   ...PORTFOLIO_WAVES_BASE_CONFIG,
-  lineColor: "#a4a4a4",
+  lineColor: "#858585",
 };
 
 export const PORTFOLIO_WAVES_THEME_CONFIG = {
   light: PORTFOLIO_WAVES_CONFIG,
   dark: {
     ...PORTFOLIO_WAVES_BASE_CONFIG,
-    lineColor: "#707070",
+    lineColor: "#b5b5b5",
+    lineWidth: 1.55,
   },
 };

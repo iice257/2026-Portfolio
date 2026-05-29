@@ -6,33 +6,37 @@ import { useTheme } from '../../context/ThemeContext';
 import { useBodyScrollLock } from '../../utils/useBodyScrollLock';
 import { useDialogFocus } from '../../utils/useDialogFocus';
 
-const MENU_TRAIL_POINT_COUNT = 26;
-const MENU_TRAIL_MIN_DISTANCE = 4;
+const MENU_TRAIL_POINT_COUNT = 22;
+const MENU_TRAIL_IDLE_DELAY = 320;
+const MENU_TRAIL_HEAD_EASE = 0.48;
+const MENU_TRAIL_BODY_EASE = 0.34;
+const MENU_TRAIL_SETTLE_DISTANCE = 0.55;
+const MENU_TRAIL_MIN_MOVE = 2.5;
 
 const getSmoothTrailPath = (points) => {
   if (points.length < 2) return "";
 
-  const formatPoint = (point) => `${point.x.toFixed(1)} ${point.y.toFixed(1)}`;
+  const formatPoint = (point) => `${point.x.toFixed(2)} ${point.y.toFixed(2)}`;
   const [firstPoint] = points;
   const commands = [`M ${formatPoint(firstPoint)}`];
 
-  for (let index = 0; index < points.length - 1; index += 1) {
-    const previous = points[index - 1] || points[index];
-    const current = points[index];
-    const next = points[index + 1];
-    const afterNext = points[index + 2] || next;
-    const controlOne = {
-      x: current.x + (next.x - previous.x) / 6,
-      y: current.y + (next.y - previous.y) / 6,
-    };
-    const controlTwo = {
-      x: next.x - (afterNext.x - current.x) / 6,
-      y: next.y - (afterNext.y - current.y) / 6,
-    };
-
-    commands.push(`C ${formatPoint(controlOne)} ${formatPoint(controlTwo)} ${formatPoint(next)}`);
+  if (points.length === 2) {
+    commands.push(`L ${formatPoint(points[1])}`);
+    return commands.join(" ");
   }
 
+  for (let index = 1; index < points.length - 1; index += 1) {
+    const current = points[index];
+    const next = points[index + 1];
+    const midpoint = {
+      x: (current.x + next.x) / 2,
+      y: (current.y + next.y) / 2,
+    };
+
+    commands.push(`Q ${formatPoint(current)} ${formatPoint(midpoint)}`);
+  }
+
+  commands.push(`T ${formatPoint(points[points.length - 1])}`);
   return commands.join(" ");
 };
 
@@ -62,8 +66,13 @@ const StaggeredMenu = ({
   const trailGradientRef = useRef(null);
   const trailFrameRef = useRef(null);
   const trailFadeTimerRef = useRef(null);
+  const trailClearTimerRef = useRef(null);
   const trailPointsRef = useRef([]);
   const trailHasPointerRef = useRef(false);
+  const trailTargetRef = useRef({ x: 0, y: 0 });
+  const trailIsDrawingRef = useRef(false);
+  const trailIsVisibleRef = useRef(false);
+  const trailLastMoveTimeRef = useRef(0);
   const overlayId = "site-menu-overlay";
   const menuForeground = theme === "light" ? "#0a0a0a" : "#fafafa";
   const menuMuted = theme === "light" ? "rgba(10, 10, 10, 0.52)" : "rgba(250, 250, 250, 0.55)";
@@ -131,13 +140,51 @@ const StaggeredMenu = ({
       trail.classList.toggle("is-active", value);
     };
 
+    const clearTrail = () => {
+      trailLine.setAttribute("d", "");
+      trailHasPointerRef.current = false;
+      trailPointsRef.current = [];
+    };
+
     const renderTrail = () => {
       const points = trailPointsRef.current;
-      const pathPoints = points.length > 1 ? [...points].reverse() : points;
+      const target = trailTargetRef.current;
+      const now = performance.now();
+
+      if (points.length === 0) {
+        trailFrameRef.current = null;
+        return;
+      }
+
+      if (trailIsDrawingRef.current && now - trailLastMoveTimeRef.current > MENU_TRAIL_IDLE_DELAY) {
+        trailIsDrawingRef.current = false;
+      }
+
+      let maxDrift = 0;
+      let span = 0;
+
+      points.forEach((point, index) => {
+        const leader = index === 0 ? target : points[index - 1];
+        const ease = index === 0
+          ? MENU_TRAIL_HEAD_EASE
+          : Math.max(0.26, MENU_TRAIL_BODY_EASE - index * 0.0016);
+        const dx = leader.x - point.x;
+        const dy = leader.y - point.y;
+
+        point.x += dx * ease;
+        point.y += dy * ease;
+
+        const drift = Math.hypot(dx, dy);
+        const pointSpan = Math.hypot(target.x - point.x, target.y - point.y);
+        maxDrift = Math.max(maxDrift, drift);
+        span = Math.max(span, pointSpan);
+      });
+
+      const pathPoints = [...points].reverse();
       const tail = pathPoints[0];
       const head = pathPoints[pathPoints.length - 1];
 
-      trailLine.setAttribute("d", getSmoothTrailPath(pathPoints));
+      trailLine.setAttribute("d", span > 0.3 ? getSmoothTrailPath(pathPoints) : "");
 
       if (tail && head) {
         trailGradient.setAttribute("x1", tail.x.toFixed(1));
@@ -146,7 +193,23 @@ const StaggeredMenu = ({
         trailGradient.setAttribute("y2", head.y.toFixed(1));
       }
 
+      const shouldKeepAnimating = trailIsDrawingRef.current
+        || maxDrift > MENU_TRAIL_SETTLE_DISTANCE
+        || span > MENU_TRAIL_SETTLE_DISTANCE;
+
+      if (shouldKeepAnimating) {
+        trailFrameRef.current = window.requestAnimationFrame(renderTrail);
+        return;
+      }
+
       trailFrameRef.current = null;
+
+      if (trailIsVisibleRef.current) {
+        trailIsVisibleRef.current = false;
+        setTrailActive(false);
+        window.clearTimeout(trailClearTimerRef.current);
+        trailClearTimerRef.current = window.setTimeout(clearTrail, 900);
+      }
     };
 
     const ensureTrailFrame = () => {
@@ -161,38 +224,42 @@ const StaggeredMenu = ({
         x: event.clientX - rect.left,
         y: event.clientY - rect.top,
       };
+      const previousTarget = trailTargetRef.current;
+      const movedDistance = Math.hypot(
+        nextPoint.x - previousTarget.x,
+        nextPoint.y - previousTarget.y
+      );
 
-      if (!trailHasPointerRef.current) {
-        trailPointsRef.current = [nextPoint];
-        trailHasPointerRef.current = true;
-      } else {
-        const [lastPoint] = trailPointsRef.current;
-        const distance = Math.hypot(nextPoint.x - lastPoint.x, nextPoint.y - lastPoint.y);
-
-        if (distance >= MENU_TRAIL_MIN_DISTANCE) {
-          trailPointsRef.current = [
-            nextPoint,
-            ...trailPointsRef.current,
-          ].slice(0, MENU_TRAIL_POINT_COUNT);
-        } else {
-          trailPointsRef.current = [
-            nextPoint,
-            ...trailPointsRef.current.slice(1),
-          ];
-        }
+      if (trailHasPointerRef.current && movedDistance < MENU_TRAIL_MIN_MOVE) {
+        return;
       }
 
+      trailTargetRef.current = nextPoint;
+      trailIsDrawingRef.current = true;
+      trailLastMoveTimeRef.current = performance.now();
+
+      if (!trailHasPointerRef.current) {
+        trailPointsRef.current = Array.from(
+          { length: MENU_TRAIL_POINT_COUNT },
+          () => ({ ...nextPoint })
+        );
+        trailHasPointerRef.current = true;
+      }
+
+      trailIsVisibleRef.current = true;
       setTrailActive(true);
       window.clearTimeout(trailFadeTimerRef.current);
+      window.clearTimeout(trailClearTimerRef.current);
       trailFadeTimerRef.current = window.setTimeout(() => {
-        setTrailActive(false);
-      }, 520);
+        trailIsDrawingRef.current = false;
+        ensureTrailFrame();
+      }, MENU_TRAIL_IDLE_DELAY);
       ensureTrailFrame();
     };
 
     const handlePointerLeave = () => {
       window.clearTimeout(trailFadeTimerRef.current);
-      setTrailActive(false);
+      trailIsDrawingRef.current = false;
       ensureTrailFrame();
     };
 
@@ -203,12 +270,15 @@ const StaggeredMenu = ({
       menuSurface.removeEventListener("pointermove", handlePointerMove);
       menuSurface.removeEventListener("pointerleave", handlePointerLeave);
       window.clearTimeout(trailFadeTimerRef.current);
+      window.clearTimeout(trailClearTimerRef.current);
       if (trailFrameRef.current !== null) {
         window.cancelAnimationFrame(trailFrameRef.current);
         trailFrameRef.current = null;
       }
       trail.classList.remove("is-active");
       trailHasPointerRef.current = false;
+      trailIsDrawingRef.current = false;
+      trailIsVisibleRef.current = false;
       trailPointsRef.current = [];
       trailLine.setAttribute("d", "");
     };
@@ -242,8 +312,9 @@ const StaggeredMenu = ({
           <defs>
             <linearGradient ref={trailGradientRef} id="menu-mouse-trail-gradient" gradientUnits="userSpaceOnUse">
               <stop offset="0%" stopColor="currentColor" stopOpacity="0" />
-              <stop offset="30%" stopColor="currentColor" stopOpacity="0.16" />
-              <stop offset="100%" stopColor="currentColor" stopOpacity="0.86" />
+              <stop offset="20%" stopColor="currentColor" stopOpacity="0.08" />
+              <stop offset="66%" stopColor="currentColor" stopOpacity="0.42" />
+              <stop offset="100%" stopColor="currentColor" stopOpacity="0.94" />
             </linearGradient>
           </defs>
           <path ref={trailLineRef} className="menu-mouse-trail__line" d="" />
@@ -274,7 +345,7 @@ const StaggeredMenu = ({
                   aria-hidden="true"
                   className="mt-[0.16em] inline-block text-[0.36em] leading-none opacity-70 transition-transform duration-500 ease-in-out group-hover:translate-x-1 group-hover:-translate-y-1"
                 >
-                  &nearr;
+                  {"\u2197"}
                 </span>
               )}
             </>
