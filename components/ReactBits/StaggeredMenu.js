@@ -1,44 +1,11 @@
 import Link from "next/link";
-import { useCallback, useState, useEffect, useRef } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useCursor } from '../../context/CursorContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useBodyScrollLock } from '../../utils/useBodyScrollLock';
 import { useDialogFocus } from '../../utils/useDialogFocus';
-
-const MENU_TRAIL_POINT_COUNT = 22;
-const MENU_TRAIL_IDLE_DELAY = 320;
-const MENU_TRAIL_HEAD_EASE = 0.48;
-const MENU_TRAIL_BODY_EASE = 0.34;
-const MENU_TRAIL_SETTLE_DISTANCE = 0.55;
-const MENU_TRAIL_MIN_MOVE = 2.5;
-
-const getSmoothTrailPath = (points) => {
-  if (points.length < 2) return "";
-
-  const formatPoint = (point) => `${point.x.toFixed(2)} ${point.y.toFixed(2)}`;
-  const [firstPoint] = points;
-  const commands = [`M ${formatPoint(firstPoint)}`];
-
-  if (points.length === 2) {
-    commands.push(`L ${formatPoint(points[1])}`);
-    return commands.join(" ");
-  }
-
-  for (let index = 1; index < points.length - 1; index += 1) {
-    const current = points[index];
-    const next = points[index + 1];
-    const midpoint = {
-      x: (current.x + next.x) / 2,
-      y: (current.y + next.y) / 2,
-    };
-
-    commands.push(`Q ${formatPoint(current)} ${formatPoint(midpoint)}`);
-  }
-
-  commands.push(`T ${formatPoint(points[points.length - 1])}`);
-  return commands.join(" ");
-};
+import InteractiveDots from './InteractiveDots';
 
 /**
  * StaggeredMenu - Full-screen navigation menu with staggered animations
@@ -60,27 +27,15 @@ const StaggeredMenu = ({
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const overlayRef = useDialogFocus(isOpen);
-  const menuSurfaceRef = useRef(null);
-  const trailRef = useRef(null);
-  const trailLineRef = useRef(null);
-  const trailGradientRef = useRef(null);
-  const trailFrameRef = useRef(null);
-  const trailFadeTimerRef = useRef(null);
-  const trailClearTimerRef = useRef(null);
-  const trailPointsRef = useRef([]);
-  const trailHasPointerRef = useRef(false);
-  const trailTargetRef = useRef({ x: 0, y: 0 });
-  const trailIsDrawingRef = useRef(false);
-  const trailIsVisibleRef = useRef(false);
-  const trailLastMoveTimeRef = useRef(0);
   const overlayId = "site-menu-overlay";
   const menuForeground = theme === "light" ? "#0a0a0a" : "#fafafa";
   const menuMuted = theme === "light" ? "rgba(10, 10, 10, 0.52)" : "rgba(250, 250, 250, 0.55)";
   const menuBorder = theme === "light" ? "rgba(10, 10, 10, 0.18)" : "rgba(250, 250, 250, 0.2)";
+  const menuBackground = theme === "light" ? "#f7f7f4" : "#050505";
+  const menuDotColor = theme === "light" ? "#151515" : "#f5f5f5";
 
   const setOverlayRefs = useCallback((node) => {
     overlayRef.current = node;
-    menuSurfaceRef.current = node;
   }, [overlayRef]);
 
   useEffect(() => {
@@ -124,166 +79,6 @@ const StaggeredMenu = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [closeMenu, isOpen]);
 
-  useEffect(() => {
-    const menuSurface = menuSurfaceRef.current;
-    const trail = trailRef.current;
-    const trailLine = trailLineRef.current;
-    const trailGradient = trailGradientRef.current;
-    if (!isOpen || !menuSurface || !trail || !trailLine || !trailGradient) {
-      return undefined;
-    }
-
-    const shouldReduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (shouldReduce) return undefined;
-
-    const setTrailActive = (value) => {
-      trail.classList.toggle("is-active", value);
-    };
-
-    const clearTrail = () => {
-      trailLine.setAttribute("d", "");
-      trailHasPointerRef.current = false;
-      trailPointsRef.current = [];
-    };
-
-    const renderTrail = () => {
-      const points = trailPointsRef.current;
-      const target = trailTargetRef.current;
-      const now = performance.now();
-
-      if (points.length === 0) {
-        trailFrameRef.current = null;
-        return;
-      }
-
-      if (trailIsDrawingRef.current && now - trailLastMoveTimeRef.current > MENU_TRAIL_IDLE_DELAY) {
-        trailIsDrawingRef.current = false;
-      }
-
-      let maxDrift = 0;
-      let span = 0;
-
-      points.forEach((point, index) => {
-        const leader = index === 0 ? target : points[index - 1];
-        const ease = index === 0
-          ? MENU_TRAIL_HEAD_EASE
-          : Math.max(0.26, MENU_TRAIL_BODY_EASE - index * 0.0016);
-        const dx = leader.x - point.x;
-        const dy = leader.y - point.y;
-
-        point.x += dx * ease;
-        point.y += dy * ease;
-
-        const drift = Math.hypot(dx, dy);
-        const pointSpan = Math.hypot(target.x - point.x, target.y - point.y);
-        maxDrift = Math.max(maxDrift, drift);
-        span = Math.max(span, pointSpan);
-      });
-
-      const pathPoints = [...points].reverse();
-      const tail = pathPoints[0];
-      const head = pathPoints[pathPoints.length - 1];
-
-      trailLine.setAttribute("d", span > 0.3 ? getSmoothTrailPath(pathPoints) : "");
-
-      if (tail && head) {
-        trailGradient.setAttribute("x1", tail.x.toFixed(1));
-        trailGradient.setAttribute("y1", tail.y.toFixed(1));
-        trailGradient.setAttribute("x2", head.x.toFixed(1));
-        trailGradient.setAttribute("y2", head.y.toFixed(1));
-      }
-
-      const shouldKeepAnimating = trailIsDrawingRef.current
-        || maxDrift > MENU_TRAIL_SETTLE_DISTANCE
-        || span > MENU_TRAIL_SETTLE_DISTANCE;
-
-      if (shouldKeepAnimating) {
-        trailFrameRef.current = window.requestAnimationFrame(renderTrail);
-        return;
-      }
-
-      trailFrameRef.current = null;
-
-      if (trailIsVisibleRef.current) {
-        trailIsVisibleRef.current = false;
-        setTrailActive(false);
-        window.clearTimeout(trailClearTimerRef.current);
-        trailClearTimerRef.current = window.setTimeout(clearTrail, 900);
-      }
-    };
-
-    const ensureTrailFrame = () => {
-      if (trailFrameRef.current === null) {
-        trailFrameRef.current = window.requestAnimationFrame(renderTrail);
-      }
-    };
-
-    const handlePointerMove = (event) => {
-      const rect = menuSurface.getBoundingClientRect();
-      const nextPoint = {
-        x: event.clientX - rect.left,
-        y: event.clientY - rect.top,
-      };
-      const previousTarget = trailTargetRef.current;
-      const movedDistance = Math.hypot(
-        nextPoint.x - previousTarget.x,
-        nextPoint.y - previousTarget.y
-      );
-
-      if (trailHasPointerRef.current && movedDistance < MENU_TRAIL_MIN_MOVE) {
-        return;
-      }
-
-      trailTargetRef.current = nextPoint;
-      trailIsDrawingRef.current = true;
-      trailLastMoveTimeRef.current = performance.now();
-
-      if (!trailHasPointerRef.current) {
-        trailPointsRef.current = Array.from(
-          { length: MENU_TRAIL_POINT_COUNT },
-          () => ({ ...nextPoint })
-        );
-        trailHasPointerRef.current = true;
-      }
-
-      trailIsVisibleRef.current = true;
-      setTrailActive(true);
-      window.clearTimeout(trailFadeTimerRef.current);
-      window.clearTimeout(trailClearTimerRef.current);
-      trailFadeTimerRef.current = window.setTimeout(() => {
-        trailIsDrawingRef.current = false;
-        ensureTrailFrame();
-      }, MENU_TRAIL_IDLE_DELAY);
-      ensureTrailFrame();
-    };
-
-    const handlePointerLeave = () => {
-      window.clearTimeout(trailFadeTimerRef.current);
-      trailIsDrawingRef.current = false;
-      ensureTrailFrame();
-    };
-
-    menuSurface.addEventListener("pointermove", handlePointerMove, { passive: true });
-    menuSurface.addEventListener("pointerleave", handlePointerLeave);
-
-    return () => {
-      menuSurface.removeEventListener("pointermove", handlePointerMove);
-      menuSurface.removeEventListener("pointerleave", handlePointerLeave);
-      window.clearTimeout(trailFadeTimerRef.current);
-      window.clearTimeout(trailClearTimerRef.current);
-      if (trailFrameRef.current !== null) {
-        window.cancelAnimationFrame(trailFrameRef.current);
-        trailFrameRef.current = null;
-      }
-      trail.classList.remove("is-active");
-      trailHasPointerRef.current = false;
-      trailIsDrawingRef.current = false;
-      trailIsVisibleRef.current = false;
-      trailPointsRef.current = [];
-      trailLine.setAttribute("d", "");
-    };
-  }, [isOpen]);
-
   const buttonColor = isOpen && changeMenuColorOnOpen ? openMenuButtonColor : menuButtonColor;
   const portalTarget = mounted ? document.getElementById("site-portal-root") || document.body : null;
 
@@ -299,27 +94,22 @@ const StaggeredMenu = ({
       className={`fixed inset-0 z-[99999] flex flex-col items-start overflow-y-auto py-0 transition-transform duration-500 ease-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       style={{
-        backgroundColor: 'var(--bg-primary)',
+        backgroundColor: menuBackground,
         color: 'var(--fg-primary)',
         '--menu-fg': menuForeground,
         '--menu-muted': menuMuted,
         '--menu-border': menuBorder,
-        '--menu-trail-color': menuForeground,
       }}
     >
-      <div ref={trailRef} className="menu-mouse-trail" aria-hidden="true">
-        <svg className="menu-mouse-trail__svg">
-          <defs>
-            <linearGradient ref={trailGradientRef} id="menu-mouse-trail-gradient" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="currentColor" stopOpacity="0" />
-              <stop offset="20%" stopColor="currentColor" stopOpacity="0.08" />
-              <stop offset="66%" stopColor="currentColor" stopOpacity="0.42" />
-              <stop offset="100%" stopColor="currentColor" stopOpacity="0.94" />
-            </linearGradient>
-          </defs>
-          <path ref={trailLineRef} className="menu-mouse-trail__line" d="" />
-        </svg>
-      </div>
+      <InteractiveDots
+        active={isOpen}
+        backgroundColor={menuBackground}
+        dotColor={menuDotColor}
+        gridSpacing={theme === "light" ? 28 : 30}
+        animationSpeed={0.004}
+        removeWaveLine
+        className="site-menu-dots"
+      />
 
       <button
         type="button"
