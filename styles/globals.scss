@@ -18,6 +18,10 @@
   --fg-muted: #a3a3a3;
   --border: #e5e5e5;
   --accent: #0a0a0a;
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
 }
 
 [data-theme="dark"] {
@@ -262,6 +266,18 @@ body {
 
 .section-container-wide {
   @apply max-w-[90rem] mx-auto px-6 md:px-12 lg:px-16;
+}
+
+.site-header-shell {
+  padding-top: 1rem;
+}
+
+.site-footer-shell {
+  padding-bottom: max(2rem, calc(var(--safe-area-bottom) + 1rem));
+}
+
+.contact-primary-cta {
+  min-width: min(100%, 18rem);
 }
 
 html[data-hero-locked="true"],
@@ -1156,6 +1172,10 @@ a {
   color: var(--fg-muted);
 }
 
+.project-number-carousel::-webkit-scrollbar {
+  display: none;
+}
+
 .project-action-link-compact {
   min-height: 2.45rem;
   padding: 0.68rem 0.86rem;
@@ -1184,6 +1204,7 @@ a {
   display: inline-flex;
   align-items: baseline;
   gap: 0.58rem;
+  flex: 0 0 auto;
   color: var(--fg-muted);
   text-decoration: none;
   font-size: clamp(1.35rem, 2.65vw, 1.95rem);
@@ -1757,6 +1778,7 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
+  flex-shrink: 0;
 }
 
 .mockup-lightbox-stage {
@@ -1978,7 +2000,81 @@ a {
   transform-origin: center;
 }
 
+@media (max-width: 1023px) {
+  .site-header-shell {
+    padding-top: max(0.85rem, calc(var(--safe-area-top) + 0.35rem));
+    padding-bottom: 0.85rem;
+  }
+
+  .project-number-carousel {
+    overflow-x: auto;
+    overflow-y: visible;
+    padding-bottom: 0.35rem;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .project-number-track {
+    width: max-content;
+    min-width: 100%;
+    padding-right: 0.75rem;
+    scroll-snap-type: x proximity;
+  }
+
+  .project-number-item {
+    scroll-snap-align: start;
+  }
+
+  .project-number-item.is-current {
+    font-size: clamp(2.65rem, 8vw, 4rem);
+  }
+
+  .project-media-preview.is-mobile {
+    max-width: min(15rem, 46vw);
+  }
+
+  .project-media-controls {
+    bottom: max(0.9rem, calc(var(--safe-area-bottom) * 0.28 + 0.7rem));
+  }
+
+  .project-media-controls-label,
+  .project-media-control-button,
+  .mockup-lightbox-close,
+  .mockup-lightbox-fullscreen,
+  .mockup-lightbox-nav {
+    min-height: 2.75rem;
+  }
+
+  .mockup-lightbox {
+    padding-top: max(0.85rem, calc(var(--safe-area-top) + 0.35rem));
+    padding-bottom: max(0.85rem, calc(var(--safe-area-bottom) + 0.45rem));
+  }
+
+  .archive-project-toggle {
+    padding-right: 3.6rem;
+    gap: 0.8rem;
+  }
+
+  .archive-project-plus {
+    top: 1.15rem;
+    right: 0.4rem;
+  }
+
+  .archive-project-expanded-content {
+    max-width: none;
+  }
+
+  .site-footer-grid {
+    gap: clamp(2.25rem, 6vw, 3.75rem);
+  }
+}
+
 @media (max-width: 767px) {
+  .site-header-shell {
+    padding-top: max(0.75rem, calc(var(--safe-area-top) + 0.25rem));
+    padding-bottom: 0.75rem;
+  }
+
   .featured-project-card {
     min-height: auto;
   }
@@ -2015,6 +2111,18 @@ a {
 
   .project-detail-title .shuffle-parent {
     white-space: normal !important;
+  }
+
+  .project-number-item {
+    font-size: clamp(1.05rem, 4.8vw, 1.45rem);
+  }
+
+  .project-number-item.is-current {
+    font-size: clamp(2.35rem, 12vw, 3.4rem);
+  }
+
+  .project-number-name {
+    display: none;
   }
 
   .project-detail-action-group {
@@ -2086,10 +2194,13 @@ a {
 
   .mockup-lightbox-nav {
     position: absolute;
-    top: 50%;
+    top: auto;
+    bottom: max(0.75rem, calc(var(--safe-area-bottom) + 0.25rem));
     z-index: 3;
-    width: 2.35rem;
-    transform: translateY(-50%);
+    width: 2.65rem;
+    min-width: 2.65rem;
+    height: 2.65rem;
+    transform: none;
   }
 
   .mockup-lightbox-nav.is-prev {
@@ -2114,7 +2225,7 @@ a {
 
   .archive-project-toggle {
     align-items: start;
-    padding-left: 0.35rem;
+    padding-left: 0;
   }
 
   .archive-project-title,
@@ -2141,6 +2252,23 @@ a {
     padding: 0.38rem 0.62rem;
     line-height: 1;
     white-space: nowrap;
+  }
+
+  .project-media-controls {
+    gap: 0.32rem;
+    padding: 0.34rem;
+  }
+
+  .project-media-control-button,
+  .mockup-lightbox-close,
+  .mockup-lightbox-fullscreen {
+    width: 2.65rem;
+    min-width: 2.65rem;
+    height: 2.65rem;
+  }
+
+  .contact-primary-cta {
+    width: 100%;
   }
 }
 

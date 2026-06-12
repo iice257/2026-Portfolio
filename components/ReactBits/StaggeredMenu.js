@@ -296,7 +296,7 @@ const StaggeredMenu = ({
       aria-label="Site navigation"
       aria-hidden={!isOpen}
       tabIndex={-1}
-      className={`fixed inset-0 z-[99999] flex flex-col items-start overflow-y-auto py-0 transition-transform duration-500 ease-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
+      className={`site-menu-panel fixed inset-0 z-[99999] flex flex-col items-start overflow-y-auto py-0 transition-transform duration-500 ease-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       style={{
         backgroundColor: 'var(--bg-primary)',
@@ -326,7 +326,7 @@ const StaggeredMenu = ({
         onClick={toggleMenu}
         aria-label="Close menu"
         tabIndex={isOpen ? 0 : -1}
-        className={`homepage-menu-close fixed z-[100001] h-10 w-10 flex items-center justify-center transition-all duration-300 cursor-none ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'
+        className={`site-menu-close homepage-menu-close fixed z-[100001] h-10 w-10 flex items-center justify-center transition-all duration-300 cursor-none ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'
           }`}
         style={{ cursor: 'none' }}
       >
@@ -335,7 +335,7 @@ const StaggeredMenu = ({
       </button>
 
       {/* Navigation Items - LEFT ALIGNED */}
-      <nav aria-label="Primary navigation" className="min-h-[calc(100dvh-2rem)] pl-6 md:pl-[3.75rem] pr-6 pt-20 xs:pt-24 md:pt-9 pb-7 flex flex-col justify-between items-start gap-5 xs:gap-6 md:gap-7 w-full">
+      <nav aria-label="Primary navigation" className="site-menu-nav min-h-[calc(100dvh-2rem)] pl-6 md:pl-[3.75rem] pr-6 pt-20 xs:pt-24 md:pt-9 pb-7 flex flex-col justify-between items-start gap-5 xs:gap-6 md:gap-7 w-full">
         {items.map((item, index) => {
           const renderLabelContent = () => (
             <>
@@ -409,7 +409,7 @@ const StaggeredMenu = ({
 
       {/* Social Links */}
       {displaySocials && socialItems.length > 0 && (
-        <div className="relative z-[1] mt-auto flex flex-wrap gap-x-5 gap-y-3 sm:gap-8 pl-6 md:pl-[3.75rem] pr-6 pb-8 md:pb-12">
+        <div className="site-menu-socials relative z-[1] mt-auto flex flex-wrap gap-x-5 gap-y-3 sm:gap-8 pl-6 md:pl-[3.75rem] pr-6 pb-8 md:pb-12">
           {socialItems.map((social, index) => {
             const opensNewTab = /^https?:\/\//i.test(social.link);
 

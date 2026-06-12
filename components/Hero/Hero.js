@@ -32,7 +32,7 @@ const HERO_CAPABILITY_PHRASES = [
 
 const HERO_CAPABILITY_TRANSITION_MS = 640;
 const LOCK_VIEWPORT_QUERY = "(max-width: 1023px)";
-const TOOLTIP_DELAY_MS = 5000;
+const TOOLTIP_DELAY_MS = 2400;
 const TOOLTIP_VISIBLE_MS = 3200;
 
 const LockIcon = ({ unlocked = false }) => (

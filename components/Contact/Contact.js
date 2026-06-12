@@ -114,7 +114,7 @@ const Contact = () => {
             I&apos;m always open. Really.
           </p>
 
-          <a href={CONTACT_LINKS[0].url} className="btn btn-primary contact-reveal">
+          <a href={CONTACT_LINKS[0].url} className="btn btn-primary contact-primary-cta contact-reveal">
             Send an Email
           </a>
 

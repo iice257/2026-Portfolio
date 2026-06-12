@@ -19,6 +19,7 @@ import ShuffleText from "@/components/ReactBits/ShuffleText";
 import { useCursor } from "../../context/CursorContext";
 import { useBodyScrollLock } from "../../utils/useBodyScrollLock";
 import { useDialogFocus } from "../../utils/useDialogFocus";
+import { useSwipeNavigation } from "../../utils/useSwipeNavigation";
 
 const TagList = ({ tags = [] }) => (
   <div className="flex flex-wrap gap-2">
@@ -216,6 +217,10 @@ const lightboxPanelVariants = {
 const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompactPreview = false, onClose, onNavigate, onToggleVariant }) => {
   const fullscreenRef = useRef(null);
   const dialogRef = useDialogFocus(Boolean(active));
+  const swipeHandlers = useSwipeNavigation({
+    enabled: Boolean(active) && items.length > 1,
+    onNavigate,
+  });
   useBodyScrollLock(Boolean(active));
 
   useEffect(() => {
@@ -295,6 +300,7 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompa
           data-cursor-variant="project"
           onClick={onClose}
           aria-label="Mockup preview"
+          {...swipeHandlers}
         >
           <motion.div
             className="mockup-lightbox-track"
@@ -381,14 +387,20 @@ const MockupChoiceButton = ({ project, onOpenPreview, onHover, onLeave }) => {
         data-clickable="true"
         onClick={(event) => {
           event.stopPropagation();
-          const isCompact = typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches;
+          const isCompact = typeof window !== "undefined"
+            && window.matchMedia("(max-width: 1023px), (hover: none), (pointer: coarse)").matches;
           if (isCompact) {
+            setIsChoosing(false);
             window.dispatchEvent(new CustomEvent("portfolio:cursor-clear"));
             onOpenPreview(project, "mobile");
             return;
           }
           setIsChoosing(true);
           window.dispatchEvent(new CustomEvent("portfolio:cursor-clear"));
+        }}
+        onBlur={(event) => {
+          if (event.currentTarget.parentElement?.contains(event.relatedTarget)) return;
+          setIsChoosing(false);
         }}
         onMouseEnter={() => onHover?.("")}
         aria-expanded={isChoosing}
@@ -406,6 +418,7 @@ const MockupChoiceButton = ({ project, onOpenPreview, onHover, onLeave }) => {
             tabIndex={isChoosing ? 0 : -1}
             onClick={(event) => {
               event.stopPropagation();
+              setIsChoosing(false);
               window.dispatchEvent(new CustomEvent("portfolio:cursor-clear"));
               onOpenPreview(project, variant);
             }}

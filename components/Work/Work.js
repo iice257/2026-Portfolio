@@ -195,6 +195,9 @@ const Work = () => {
                       <span className="text-body-md" style={{ color: "var(--fg-secondary)" }}>
                         {exp.redacted ? <span className="redacted-text">REDACTED</span> : exp.company}
                       </span>
+                      <span className="mt-2 block text-[0.7rem] font-medium uppercase tracking-[0.14em] md:hidden" style={{ color: "var(--fg-muted)" }}>
+                        {exp.period}
+                      </span>
                     </div>
                   </div>
 
@@ -236,6 +239,9 @@ const Work = () => {
                             Location: <span className="redacted-text">REDACTED</span>
                           </p>
                         )}
+                        <p className="text-micro mt-5 md:hidden" style={{ color: "var(--fg-muted)" }}>
+                          {exp.period}
+                        </p>
                         <ul className="work-detail-list mt-6 max-w-3xl">
                           {exp.details.map((detail) => (
                             <li key={detail} className="work-detail-item text-body-md" style={{ color: "var(--fg-secondary)" }}>

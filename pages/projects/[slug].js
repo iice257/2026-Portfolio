@@ -10,6 +10,7 @@ import ShuffleText from "@/components/ReactBits/ShuffleText";
 import { useCursor } from "../../context/CursorContext";
 import { useBodyScrollLock } from "../../utils/useBodyScrollLock";
 import { useDialogFocus } from "../../utils/useDialogFocus";
+import { useSwipeNavigation } from "../../utils/useSwipeNavigation";
 
 export async function getStaticPaths() {
   const paths = featuredProjects.map((project) => ({
@@ -327,6 +328,10 @@ const lightboxPanelVariants = {
 const ProjectMediaLightbox = ({ active, activeIndex, items, direction = 0, onClose, onNavigate }) => {
   const fullscreenRef = useRef(null);
   const dialogRef = useDialogFocus(true);
+  const swipeHandlers = useSwipeNavigation({
+    enabled: items.length > 1,
+    onNavigate,
+  });
   useBodyScrollLock(true);
 
   useEffect(() => {
@@ -401,6 +406,7 @@ const ProjectMediaLightbox = ({ active, activeIndex, items, direction = 0, onClo
           data-cursor-variant="project"
           onClick={onClose}
           aria-label="Mockup preview"
+          {...swipeHandlers}
         >
           <motion.div
             className="mockup-lightbox-track"

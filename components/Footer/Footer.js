@@ -74,7 +74,7 @@ const Footer = () => {
   return (
     <footer
       ref={footerRef}
-      className="relative overflow-hidden pt-20 md:pt-28 pb-8"
+      className="site-footer-shell relative overflow-hidden pt-20 md:pt-28 pb-8"
       style={{
         backgroundColor: "var(--bg-primary)",
         borderTop: "1px solid var(--border)",
@@ -116,7 +116,7 @@ const Footer = () => {
       />
 
       <div className="section-container relative z-[1]">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10">
+        <div className="site-footer-grid grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10">
           <div className="lg:col-span-7">
             <p className="text-micro mb-5" style={{ color: "var(--fg-muted)" }}>
               hit me up
