@@ -175,25 +175,24 @@
   transition-delay: 0.05s;
 }
 
-.menu-mouse-trail {
-  position: fixed;
+.interactive-dots,
+.site-menu-dots {
+  position: absolute;
   inset: 0;
   z-index: 0;
-  color: var(--menu-trail-color, var(--fg-primary));
-  pointer-events: none;
   overflow: hidden;
+  pointer-events: none;
   contain: strict;
 }
 
-.menu-mouse-trail__svg {
+.interactive-dots__canvas {
+  display: block;
   width: 100%;
   height: 100%;
-  opacity: 0;
-  transition: opacity 900ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.menu-mouse-trail.is-active .menu-mouse-trail__svg {
-  opacity: 1;
+.site-menu-dots {
+  opacity: 0.52;
 }
 
 .menu-mouse-trail__line {
@@ -245,4 +244,7 @@
   .menu-mouse-trail {
     display: none;
   }
+
+[data-theme="light"] .site-menu-dots {
+  opacity: 0.38;
 }
