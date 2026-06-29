@@ -244,6 +244,7 @@
   .menu-mouse-trail {
     display: none;
   }
+}
 
 [data-theme="light"] .site-menu-dots {
   opacity: 0.38;
