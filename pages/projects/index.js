@@ -645,7 +645,7 @@ export default function ProjectsIndex() {
       url: canonicalUrl,
       name: `Projects | ${METADATA.author}`,
       description:
-        "A structured project archive by Kingsley Afolabi Aremu covering featured product builds, AI-agent tooling, automation systems, frontend experiments, mobile concepts, and public GitHub repositories.",
+        "A curated project archive by Kingsley Afolabi Aremu covering AI tooling, product interfaces, agent workflows, frontend systems, and public repositories.",
       inLanguage: "en",
       isPartOf: {
         "@id": `${METADATA.siteUrl.replace(/\/$/, "")}/#website`,
@@ -692,13 +692,13 @@ export default function ProjectsIndex() {
         <title>{`Projects | ${METADATA.author}`}</title>
         <meta
           name="description"
-          content="A structured project archive by Kingsley Afolabi Aremu, including featured work, major projects, and the complete GitHub project list."
+          content="A curated project archive by Kingsley Afolabi Aremu, covering AI tooling, product interfaces, agent workflows, frontend systems, and public repositories."
         />
         <meta name="keywords" content="Kingsley Aremu projects, iice257 projects, Kingsley Afolabi Aremu GitHub, React portfolio projects, Next.js portfolio projects, AI agent tooling projects, frontend engineering projects, Lagos software engineer projects" />
         <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1" />
         <link rel="canonical" href={canonicalUrl} />
         <meta property="og:title" content={`Projects | ${METADATA.author}`} />
-        <meta property="og:description" content="A structured project archive by Kingsley Afolabi Aremu, including featured work, major projects, and the complete GitHub project list." />
+        <meta property="og:description" content="A curated project archive by Kingsley Afolabi Aremu, covering AI tooling, product interfaces, agent workflows, frontend systems, and public repositories." />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:image" content={METADATA.image} />
         <meta name="twitter:card" content="summary_large_image" />
@@ -722,7 +722,7 @@ export default function ProjectsIndex() {
                 <ShuffleText text="Projects" duration={0.48} shuffleTimes={3} textAlign="left" />
               </h1>
               <p className="text-editorial font-light max-w-3xl" style={{ color: "var(--fg-secondary)" }}>
-                A clearer hierarchy of product work, agent tooling, experiments, and public repositories. The top four are the premium featured projects, followed by six major projects and a complete compact archive.
+                A working archive of AI tools, product interfaces, agent workflows, and experiments. The strongest work is upfront; the rest stays lean for scanning.
               </p>
             </div>
             <div className="lg:col-span-4 grid grid-cols-2 gap-6">
@@ -731,7 +731,7 @@ export default function ProjectsIndex() {
                   {majorProjectCount}
                 </span>
                 <span className="text-micro" style={{ color: "var(--fg-muted)" }}>
-                  Major projects
+                  Selected builds
                 </span>
               </div>
               <div>
@@ -739,7 +739,7 @@ export default function ProjectsIndex() {
                   {githubProjectCount}
                 </span>
                 <span className="text-micro" style={{ color: "var(--fg-muted)" }}>
-                  GitHub repos covered
+                  Public repos
                 </span>
               </div>
             </div>
@@ -750,14 +750,14 @@ export default function ProjectsIndex() {
           <div className="mb-12 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
               <p className="text-micro mb-4" style={{ color: "var(--fg-muted)" }}>
-                Featured
+                Featured work
               </p>
-              <h2 className="text-display-lg font-light" style={{ color: "var(--fg-primary)" }}>
-                Premium project pages
+              <h2 className="text-display-md font-light" style={{ color: "var(--fg-primary)" }}>
+                Featured entries
               </h2>
             </div>
             <p className="text-body-md max-w-md" style={{ color: "var(--fg-secondary)" }}>
-              These four receive the richest treatment and have full writeups.
+              Short on the index, deeper after you choose a project.
             </p>
           </div>
 
@@ -822,9 +822,9 @@ export default function ProjectsIndex() {
           <div className="mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
               <p className="text-micro mb-4" style={{ color: "var(--fg-muted)" }}>
-                Highlight project
+                System note
               </p>
-              <h2 className="text-display-lg font-light" style={{ color: "var(--fg-primary)" }}>
+              <h2 className="text-display-md font-light" style={{ color: "var(--fg-primary)" }}>
                 This site, as a system
               </h2>
             </div>
@@ -868,13 +868,13 @@ export default function ProjectsIndex() {
         <section className="section-container pb-32">
           <div className="mb-12">
             <p className="text-micro mb-4" style={{ color: "var(--fg-muted)" }}>
-              Major
+              Selected builds
             </p>
-            <h2 className="text-display-lg font-light mb-4" style={{ color: "var(--fg-primary)" }}>
-              Six more substantial builds
+            <h2 className="text-display-md font-light mb-4" style={{ color: "var(--fg-primary)" }}>
+              Six builds with more context
             </h2>
             <p className="text-body-lg max-w-2xl" style={{ color: "var(--fg-secondary)" }}>
-              These complete the top ten. Tap or click a card to flip it for tools, status, and notes.
+              Short enough to scan, with just enough detail to show the product angle and technical shape.
             </p>
           </div>
 
@@ -934,13 +934,13 @@ export default function ProjectsIndex() {
         <section className="section-container pb-32">
           <div className="mb-10">
             <p className="text-micro mb-4" style={{ color: "var(--fg-muted)" }}>
-              Complete archive
+              Archive
             </p>
-            <h2 className="text-display-lg font-light mb-4" style={{ color: "var(--fg-primary)" }}>
-              Remaining projects
+            <h2 className="text-display-md font-light mb-4" style={{ color: "var(--fg-primary)" }}>
+              Smaller public work
             </h2>
             <p className="text-body-lg max-w-2xl" style={{ color: "var(--fg-secondary)" }}>
-              Everything else is sorted by perceived portfolio relevance first, with sparse forks and reference repos kept lower for completeness.
+              A lean record of experiments, utilities, learning work, forks, and older builds.
             </p>
           </div>
 
