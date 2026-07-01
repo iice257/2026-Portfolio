@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Head from "next/head";
 import Image from "next/image";
+import { useRouter } from "next/router";
 import { AnimatePresence, motion } from "framer-motion";
 import { METADATA } from "../../constants";
 import {
@@ -188,6 +189,33 @@ const chunkProjects = (projects, size = 2) => {
     rows.push(projects.slice(index, index + size));
   }
   return rows;
+};
+
+const normalizeSearchValue = (value = "") => value.toString().trim().toLowerCase();
+
+const projectSearchText = (project) => [
+  project.name,
+  project.repoName,
+  project.slug,
+  project.category,
+  project.subtitle,
+  project.description,
+  project.longDescription,
+  project.status,
+  project.currentStatus,
+  project.notes,
+  project.developerNotes,
+  ...(project.tech || []),
+  ...(project.toolsUsed || []),
+].filter(Boolean).join(" ");
+
+const projectArchiveHref = (project) => {
+  if (featuredProjects.some((item) => item.slug === project.slug)) {
+    return { href: `/projects/${project.slug}`, external: false };
+  }
+
+  const href = project.liveUrl || (project.url !== "#" ? project.url : "/projects");
+  return { href, external: href.startsWith("http") };
 };
 
 const lightboxStripTransition = {
@@ -548,11 +576,13 @@ const MajorProjectCard = ({ project, index, onFlip, onHover, onLeave, dimmed }) 
 };
 
 export default function ProjectsIndex() {
+  const router = useRouter();
   const [flippedCards, setFlippedCards] = useState({});
   const [openProject, setOpenProject] = useState(remainingProjects[0]?.slug);
   const [activePreview, setActivePreview] = useState(null);
   const [previewDirection, setPreviewDirection] = useState(0);
   const [isCompactPreview, setIsCompactPreview] = useState(false);
+  const [projectSearch, setProjectSearch] = useState("");
   const { setCursorText, setCursorVariant, requestCursorRefresh } = useCursor();
   const expandedSlug = Object.keys(flippedCards).find((slug) => flippedCards[slug]);
   const majorProjectRows = chunkProjects(majorProjects);
@@ -568,6 +598,20 @@ export default function ProjectsIndex() {
   const activePreviewIndex = activePreview
     ? visiblePreviewItems.findIndex((item) => item.project.slug === activePreview.project.slug && item.variant === activePreview.variant)
     : -1;
+  const normalizedProjectSearch = normalizeSearchValue(projectSearch);
+  const matchingProjects = useMemo(() => {
+    if (!normalizedProjectSearch) return [];
+
+    return allProjects.filter((project) => (
+      normalizeSearchValue(projectSearchText(project)).includes(normalizedProjectSearch)
+    ));
+  }, [normalizedProjectSearch]);
+
+  useEffect(() => {
+    if (!router.isReady) return;
+    const queryValue = Array.isArray(router.query.query) ? router.query.query[0] : router.query.query;
+    setProjectSearch(queryValue || "");
+  }, [router.isReady, router.query.query]);
 
   useEffect(() => {
     const query = window.matchMedia("(max-width: 767px)");
@@ -636,6 +680,25 @@ export default function ProjectsIndex() {
     window.dispatchEvent(new CustomEvent("portfolio:cursor-clear"));
     window.setTimeout(requestCursorRefresh, 0);
   }, [clearProjectCursor, requestCursorRefresh]);
+
+  const submitProjectSearch = useCallback((event) => {
+    event.preventDefault();
+    const query = projectSearch.trim();
+    router.replace(
+      {
+        pathname: "/projects",
+        query: query ? { query } : {},
+      },
+      undefined,
+      { shallow: true, scroll: false }
+    );
+  }, [projectSearch, router]);
+
+  const clearProjectSearch = useCallback(() => {
+    setProjectSearch("");
+    router.replace("/projects", undefined, { shallow: true, scroll: false });
+  }, [router]);
+
   const canonicalUrl = `${METADATA.siteUrl.replace(/\/$/, "")}/projects`;
   const projectsJsonLd = JSON.stringify([
     {
@@ -645,7 +708,7 @@ export default function ProjectsIndex() {
       url: canonicalUrl,
       name: `Projects | ${METADATA.author}`,
       description:
-        "A curated project archive by Kingsley Afolabi Aremu covering AI tooling, product interfaces, agent workflows, frontend systems, and public repositories.",
+        "A structured project archive by Kingsley Afolabi Aremu covering featured product builds, AI-agent tooling, automation systems, frontend experiments, mobile concepts, and public GitHub repositories.",
       inLanguage: "en",
       isPartOf: {
         "@id": `${METADATA.siteUrl.replace(/\/$/, "")}/#website`,
@@ -692,13 +755,13 @@ export default function ProjectsIndex() {
         <title>{`Projects | ${METADATA.author}`}</title>
         <meta
           name="description"
-          content="A curated project archive by Kingsley Afolabi Aremu, covering AI tooling, product interfaces, agent workflows, frontend systems, and public repositories."
+          content="A structured project archive by Kingsley Afolabi Aremu, including featured work, major projects, and the complete GitHub project list."
         />
         <meta name="keywords" content="Kingsley Aremu projects, iice257 projects, Kingsley Afolabi Aremu GitHub, React portfolio projects, Next.js portfolio projects, AI agent tooling projects, frontend engineering projects, Lagos software engineer projects" />
         <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1" />
         <link rel="canonical" href={canonicalUrl} />
         <meta property="og:title" content={`Projects | ${METADATA.author}`} />
-        <meta property="og:description" content="A curated project archive by Kingsley Afolabi Aremu, covering AI tooling, product interfaces, agent workflows, frontend systems, and public repositories." />
+        <meta property="og:description" content="A structured project archive by Kingsley Afolabi Aremu, including featured work, major projects, and the complete GitHub project list." />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:image" content={METADATA.image} />
         <meta name="twitter:card" content="summary_large_image" />
@@ -722,7 +785,7 @@ export default function ProjectsIndex() {
                 <ShuffleText text="Projects" duration={0.48} shuffleTimes={3} textAlign="left" />
               </h1>
               <p className="text-editorial font-light max-w-3xl" style={{ color: "var(--fg-secondary)" }}>
-                A working archive of AI tools, product interfaces, agent workflows, and experiments. The strongest work is upfront; the rest stays lean for scanning.
+                A clearer hierarchy of product work, agent tooling, experiments, and public repositories. The top four are the premium featured projects, followed by six major projects and a complete compact archive.
               </p>
             </div>
             <div className="lg:col-span-4 grid grid-cols-2 gap-6">
@@ -731,7 +794,7 @@ export default function ProjectsIndex() {
                   {majorProjectCount}
                 </span>
                 <span className="text-micro" style={{ color: "var(--fg-muted)" }}>
-                  Selected builds
+                  Major projects
                 </span>
               </div>
               <div>
@@ -739,25 +802,129 @@ export default function ProjectsIndex() {
                   {githubProjectCount}
                 </span>
                 <span className="text-micro" style={{ color: "var(--fg-muted)" }}>
-                  Public repos
+                  GitHub repos covered
                 </span>
               </div>
             </div>
           </div>
         </section>
 
+        <section className="section-container pb-20">
+          <form className="project-search-panel" role="search" onSubmit={submitProjectSearch}>
+            <div className="project-search-copy">
+              <p className="text-micro mb-3" style={{ color: "var(--fg-muted)" }}>
+                Archive search
+              </p>
+              <label htmlFor="project-search" className="project-search-label">
+                Find a project by name, stack, status, or product theme.
+              </label>
+            </div>
+            <div className="project-search-controls">
+              <input
+                id="project-search"
+                type="search"
+                value={projectSearch}
+                onChange={(event) => setProjectSearch(event.target.value)}
+                placeholder="Search AI, mobile, PWA, security..."
+                className="project-search-input"
+                autoComplete="off"
+              />
+              <button type="submit" className="project-action-link project-search-submit" data-clickable="true">
+                <span>Search</span>
+              </button>
+              {normalizedProjectSearch ? (
+                <button
+                  type="button"
+                  className="project-action-link project-action-link-secondary project-search-clear"
+                  data-clickable="true"
+                  onClick={clearProjectSearch}
+                >
+                  <span>Clear</span>
+                </button>
+              ) : null}
+            </div>
+          </form>
+
+          {normalizedProjectSearch ? (
+            <div className="project-search-results" aria-live="polite">
+              <div className="project-search-results-header">
+                <p className="text-micro" style={{ color: "var(--fg-muted)" }}>
+                  {matchingProjects.length} {matchingProjects.length === 1 ? "match" : "matches"}
+                </p>
+                <p className="text-body-sm" style={{ color: "var(--fg-secondary)" }}>
+                  Showing portfolio entries matching &quot;{projectSearch.trim()}&quot;.
+                </p>
+              </div>
+
+              {matchingProjects.length ? (
+                <div className="project-search-result-list">
+                  {matchingProjects.map((project) => {
+                    const resultLink = projectArchiveHref(project);
+                    const content = (
+                      <>
+                        <span className="project-search-result-kicker text-micro" style={{ color: "var(--fg-muted)" }}>
+                          {project.status || project.currentStatus || project.category || "Project"}
+                        </span>
+                        <span className="project-search-result-title" style={{ color: "var(--fg-primary)" }}>
+                          {project.name}
+                        </span>
+                        <span className="project-search-result-description" style={{ color: "var(--fg-secondary)" }}>
+                          {project.description}
+                        </span>
+                        <span className="project-search-result-tags">
+                          {(project.tech || []).slice(0, 4).map((tag) => (
+                            <span key={tag} className="tag">
+                              {tag}
+                            </span>
+                          ))}
+                        </span>
+                      </>
+                    );
+
+                    return resultLink.external ? (
+                      <a
+                        key={project.slug}
+                        href={resultLink.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="project-search-result"
+                        data-clickable="true"
+                      >
+                        {content}
+                      </a>
+                    ) : (
+                      <Link
+                        key={project.slug}
+                        href={resultLink.href}
+                        className="project-search-result"
+                        data-clickable="true"
+                      >
+                        {content}
+                      </Link>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="project-search-empty" style={{ color: "var(--fg-secondary)" }}>
+                  No matching projects yet. Try a broader product area or technology.
+                </p>
+              )}
+            </div>
+          ) : null}
+        </section>
+
         <section className="section-container pb-32">
           <div className="mb-12 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
               <p className="text-micro mb-4" style={{ color: "var(--fg-muted)" }}>
-                Featured work
+                Featured
               </p>
-              <h2 className="text-display-md font-light" style={{ color: "var(--fg-primary)" }}>
-                Featured entries
+              <h2 className="text-display-lg font-light" style={{ color: "var(--fg-primary)" }}>
+                Premium project pages
               </h2>
             </div>
             <p className="text-body-md max-w-md" style={{ color: "var(--fg-secondary)" }}>
-              Short on the index, deeper after you choose a project.
+              These four receive the richest treatment and have full writeups.
             </p>
           </div>
 
@@ -822,9 +989,9 @@ export default function ProjectsIndex() {
           <div className="mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
               <p className="text-micro mb-4" style={{ color: "var(--fg-muted)" }}>
-                System note
+                Highlight project
               </p>
-              <h2 className="text-display-md font-light" style={{ color: "var(--fg-primary)" }}>
+              <h2 className="text-display-lg font-light" style={{ color: "var(--fg-primary)" }}>
                 This site, as a system
               </h2>
             </div>
@@ -868,13 +1035,13 @@ export default function ProjectsIndex() {
         <section className="section-container pb-32">
           <div className="mb-12">
             <p className="text-micro mb-4" style={{ color: "var(--fg-muted)" }}>
-              Selected builds
+              Major
             </p>
-            <h2 className="text-display-md font-light mb-4" style={{ color: "var(--fg-primary)" }}>
-              Six builds with more context
+            <h2 className="text-display-lg font-light mb-4" style={{ color: "var(--fg-primary)" }}>
+              Six more substantial builds
             </h2>
             <p className="text-body-lg max-w-2xl" style={{ color: "var(--fg-secondary)" }}>
-              Short enough to scan, with just enough detail to show the product angle and technical shape.
+              These complete the top ten. Tap or click a card to flip it for tools, status, and notes.
             </p>
           </div>
 
@@ -934,13 +1101,13 @@ export default function ProjectsIndex() {
         <section className="section-container pb-32">
           <div className="mb-10">
             <p className="text-micro mb-4" style={{ color: "var(--fg-muted)" }}>
-              Archive
+              Complete archive
             </p>
-            <h2 className="text-display-md font-light mb-4" style={{ color: "var(--fg-primary)" }}>
-              Smaller public work
+            <h2 className="text-display-lg font-light mb-4" style={{ color: "var(--fg-primary)" }}>
+              Remaining projects
             </h2>
             <p className="text-body-lg max-w-2xl" style={{ color: "var(--fg-secondary)" }}>
-              A lean record of experiments, utilities, learning work, forks, and older builds.
+              Everything else is sorted by perceived portfolio relevance first, with sparse forks and reference repos kept lower for completeness.
             </p>
           </div>
 
