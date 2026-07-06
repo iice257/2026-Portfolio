@@ -35,7 +35,8 @@ const TextPressure = ({
   strokeColor = '#FF0000',
   className = '',
 
-  minFontSize = 24
+  minFontSize = 24,
+  targetFps = 60
 }) => {
   const containerRef = useRef(null);
   const titleRef = useRef(null);
@@ -125,7 +126,9 @@ const TextPressure = ({
   useEffect(() => {
     let rafId = null;
     let lastFrameTime = 0;
+    let lastRenderedTime = 0;
     const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const minFrameDuration = targetFps > 0 ? 1000 / targetFps : 0;
 
     const defaultSettings = `'wght' ${weight ? 100 : 400}, 'wdth' ${width ? 100 : 100}, 'ital' 0`;
 
@@ -153,11 +156,18 @@ const TextPressure = ({
 
       if (!isVisibleRef.current || document.hidden || motionQuery.matches) {
         lastFrameTime = 0;
+        lastRenderedTime = 0;
+        return;
+      }
+
+      if (minFrameDuration > 0 && lastRenderedTime && time - lastRenderedTime < minFrameDuration) {
+        rafId = requestAnimationFrame(animate);
         return;
       }
 
       const delta = lastFrameTime ? Math.min(48, time - lastFrameTime) : 16.67;
       lastFrameTime = time;
+      lastRenderedTime = time;
       const ease = 1 - Math.pow(0.9, delta / 16.67);
 
       mouseRef.current.x += (cursorRef.current.x - mouseRef.current.x) * ease;
@@ -314,7 +324,7 @@ const TextPressure = ({
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       motionQuery.removeEventListener('change', handleMotionPreferenceChange);
     };
-  }, [width, weight, italic, alpha, calculateSpans]);
+  }, [width, weight, italic, alpha, targetFps, calculateSpans]);
 
   const styleElement = useMemo(() => {
     const css = `

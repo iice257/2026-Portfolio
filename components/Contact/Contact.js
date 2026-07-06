@@ -85,12 +85,17 @@ const Contact = () => {
         <div className="contact-effect contact-effect-waves" aria-hidden="true">
           <Waves
             {...(PORTFOLIO_WAVES_THEME_CONFIG[theme] || PORTFOLIO_WAVES_THEME_CONFIG.light)}
+            pixelRatio={1}
+            targetFps={30}
+            maxPixelCount={1600000}
             paused={isContactBackdropPaused}
           />
         </div>
       )}
 
-      <div className="section-container relative z-[1]">
+      <div className="contact-top-feather" aria-hidden="true" />
+
+      <div className="section-container relative z-[2]">
         <div className="max-w-3xl mx-auto text-center">
           <p
             className="text-caption uppercase tracking-widest mb-4 contact-reveal"

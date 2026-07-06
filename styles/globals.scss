@@ -499,6 +499,27 @@ html[data-hero-locked="true"] [data-hide-when-hero-locked="true"] {
   height: 100%;
 }
 
+.contact-top-feather {
+  position: absolute;
+  inset-inline: 0;
+  top: -1px;
+  z-index: 1;
+  height: clamp(8rem, 22vh, 15rem);
+  pointer-events: none;
+  background:
+    linear-gradient(
+      to bottom,
+      var(--bg-primary) 0%,
+      color-mix(in srgb, var(--bg-primary) 84%, transparent) 34%,
+      color-mix(in srgb, var(--bg-primary) 38%, transparent) 68%,
+      color-mix(in srgb, var(--bg-primary) 0%, transparent) 100%
+    );
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  mask-image: linear-gradient(to bottom, black 0%, rgba(0, 0, 0, 0.84) 48%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, rgba(0, 0, 0, 0.84) 48%, transparent 100%);
+}
+
 .contact-title {
   font-size: clamp(1.95rem, 4.8vw, 4.35rem) !important;
   line-height: 0.98;
@@ -754,6 +775,15 @@ html[data-hero-locked="true"] [data-hide-when-hero-locked="true"] {
   font-size: clamp(1.15rem, 2vw, 1.65rem);
   font-weight: 300;
   line-height: 1.28;
+}
+
+@media (min-width: 1024px) {
+  .project-search-label {
+    max-width: none;
+    font-size: clamp(0.95rem, 1.15vw, 1.12rem);
+    line-height: 1.22;
+    white-space: nowrap;
+  }
 }
 
 .project-search-controls {

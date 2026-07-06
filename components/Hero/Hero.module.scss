@@ -17,26 +17,32 @@
 }
 
 .wavesBackdrop {
-  opacity: 0.42;
+  inset: -4vh 0 -10vh;
+  opacity: 0.46;
+  filter: blur(0.12px);
+  mask-image: linear-gradient(to bottom, black 0%, black 68%, rgba(0, 0, 0, 0.82) 78%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 68%, rgba(0, 0, 0, 0.82) 78%, transparent 100%);
 }
 
 .heroBottomFeather {
   position: absolute;
   inset-inline: 0;
-  bottom: 0;
+  bottom: -1px;
   z-index: 1;
-  height: clamp(5rem, 12vh, 8rem);
+  height: clamp(8rem, 22vh, 15rem);
   pointer-events: none;
   background:
     linear-gradient(
       to bottom,
       color-mix(in srgb, var(--bg-primary) 0%, transparent) 0%,
-      color-mix(in srgb, var(--bg-primary) 64%, transparent) 58%,
+      color-mix(in srgb, var(--bg-primary) 18%, transparent) 24%,
+      color-mix(in srgb, var(--bg-primary) 72%, transparent) 70%,
       var(--bg-primary) 100%
     );
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  mask-image: linear-gradient(to bottom, transparent 0%, black 38%, black 100%);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.72) 26%, black 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.72) 26%, black 100%);
 }
 
 .galaxyBackdrop canvas,

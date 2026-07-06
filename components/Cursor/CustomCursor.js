@@ -130,6 +130,7 @@ const CustomCursor = () => {
       const cursorGroup = target.closest(CURSOR_GROUP_SELECTOR);
       const buttonGroup = target.closest("[data-cursor-group='buttons']");
       const cardGroup = target.closest("[data-cursor-group='cards']");
+      const menuSurface = target.closest("[data-menu-cursor-surface='true']");
 
       if (interactiveLabel) {
         return {
@@ -185,6 +186,14 @@ const CustomCursor = () => {
         if (bridgeRoot && findNearbyInteractive(point.x, point.y, bridgeRoot)) {
           return { text: "", variant: "default", clickable: true };
         }
+      }
+
+      if (menuSurface) {
+        return {
+          text: menuSurface.getAttribute("data-menu-cursor-label") || "Click",
+          variant: "menu",
+          clickable: false,
+        };
       }
 
       return { text: "", variant: "default", clickable: false };
@@ -430,9 +439,9 @@ const CustomCursor = () => {
   }, [cursorText, welcomeText]);
 
   // Theme colors
-  const effectiveCursorText = cursorText || welcomeText;
-  const hasCursorLabel = Boolean(effectiveCursorText);
   const isMenu = cursorVariant === 'menu';
+  const effectiveCursorText = cursorText || (isMenu ? "" : welcomeText);
+  const hasCursorLabel = Boolean(effectiveCursorText);
   const cursorLabelKind = welcomeText && !cursorText ? "standard" : getCursorLabelKind(cursorText);
 
   return (

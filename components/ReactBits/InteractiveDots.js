@@ -18,6 +18,9 @@ const InteractiveDots = ({
   gridSpacing = 30,
   animationSpeed = 0.005,
   removeWaveLine = true,
+  trailOnMove = false,
+  trailInterval = 44,
+  trailMinDistance = 12,
   className = "",
 }) => {
   const canvasRef = useRef(null);
@@ -26,6 +29,9 @@ const InteractiveDots = ({
   const animationFrameRef = useRef(null);
   const pointerRef = useRef({ x: 0, y: 0, active: false });
   const ripplesRef = useRef([]);
+  const trailRipplesRef = useRef([]);
+  const trailPointsRef = useRef([]);
+  const lastTrailRef = useRef({ x: 0, y: 0, time: 0, set: false });
   const dotsRef = useRef([]);
   const colorRef = useRef(hexToRgb(dotColor));
 
@@ -87,6 +93,37 @@ const InteractiveDots = ({
     };
   }, []);
 
+  const addTrailRipple = useCallback((event) => {
+    updatePointer(event);
+    if (!trailOnMove || !pointerRef.current.active) return;
+
+    const now = performance.now();
+    const last = lastTrailRef.current;
+    const distance = last.set ? Math.hypot(pointerRef.current.x - last.x, pointerRef.current.y - last.y) : Infinity;
+
+    if (last.set && now - last.time < trailInterval && distance < trailMinDistance) return;
+
+    lastTrailRef.current = {
+      x: pointerRef.current.x,
+      y: pointerRef.current.y,
+      time: now,
+      set: true,
+    };
+
+    trailRipplesRef.current.push({
+      x: pointerRef.current.x,
+      y: pointerRef.current.y,
+      time: now,
+    });
+    trailRipplesRef.current = trailRipplesRef.current.slice(-24);
+    trailPointsRef.current.push({
+      x: pointerRef.current.x,
+      y: pointerRef.current.y,
+      time: now,
+    });
+    trailPointsRef.current = trailPointsRef.current.slice(-30);
+  }, [trailInterval, trailMinDistance, trailOnMove, updatePointer]);
+
   const addRipple = useCallback((event) => {
     updatePointer(event);
     if (!pointerRef.current.active) return;
@@ -129,6 +166,58 @@ const InteractiveDots = ({
     return Math.min(influence, 2);
   };
 
+  const getTrailInfluence = (x, y, now) => {
+    let influence = 0;
+
+    trailRipplesRef.current.forEach((ripple) => {
+      const age = now - ripple.time;
+      const maxAge = 690;
+      if (age >= maxAge) return;
+
+      const distance = Math.hypot(x - ripple.x, y - ripple.y);
+      const radius = 4 + (age / maxAge) * 55;
+      const width = 32;
+
+      if (Math.abs(distance - radius) < width) {
+        influence += (1 - age / maxAge) * 0.86 * (1 - Math.abs(distance - radius) / width);
+      }
+    });
+
+    return Math.min(influence, 1.15);
+  };
+
+  const drawTaperedTrailWash = (ctx, points, r, g, b) => {
+    if (points.length < 2) return;
+
+    ctx.save();
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.08)`;
+    ctx.shadowBlur = 18;
+    ctx.globalCompositeOperation = "source-over";
+
+    for (let i = 1; i < points.length; i += 1) {
+      const previous = points[i - 1];
+      const current = points[i];
+      const progress = i / Math.max(1, points.length - 1);
+      const segmentAlpha = ((previous.alpha || 0) + (current.alpha || 0)) / 2;
+      const width = 7 + progress * 21;
+      const alpha = (0.025 + progress * 0.075) * segmentAlpha;
+      const midX = (previous.x + current.x) / 2;
+      const midY = (previous.y + current.y) / 2;
+
+      ctx.beginPath();
+      ctx.moveTo(previous.x, previous.y);
+      ctx.quadraticCurveTo(previous.x, previous.y, midX, midY);
+      ctx.lineTo(current.x, current.y);
+      ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      ctx.lineWidth = width;
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  };
+
   const animate = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -145,10 +234,27 @@ const InteractiveDots = ({
     ctx.fillRect(0, 0, width, height);
 
     ripplesRef.current = ripplesRef.current.filter((ripple) => now - ripple.time < 3000);
+    trailRipplesRef.current = trailRipplesRef.current.filter((ripple) => now - ripple.time < 690);
+    trailPointsRef.current = trailPointsRef.current.filter((point) => now - point.time < 785);
+
+    const fadedTrailPoints = trailOnMove
+      ? trailPointsRef.current.map((point) => {
+        const progress = Math.min(1, (now - point.time) / 785);
+        return {
+          ...point,
+          alpha: 1 - progress,
+        };
+      }).filter((point) => point.alpha > 0.03)
+      : [];
+
+    if (trailOnMove) {
+      drawTaperedTrailWash(ctx, fadedTrailPoints, r, g, b);
+    }
 
     dotsRef.current.forEach((dot) => {
       const influence = getPointerInfluence(dot.originalX, dot.originalY)
-        + getRippleInfluence(dot.originalX, dot.originalY, now);
+        + getRippleInfluence(dot.originalX, dot.originalY, now)
+        + getTrailInfluence(dot.originalX, dot.originalY, now);
       const size = 1.7 + influence * 5.2 + Math.sin(timeRef.current + dot.phase) * 0.35;
       const opacity = Math.max(
         0.18,
@@ -175,8 +281,22 @@ const InteractiveDots = ({
       });
     }
 
+    if (trailOnMove) {
+      trailRipplesRef.current.forEach((ripple) => {
+        const age = now - ripple.time;
+        const progress = age / 690;
+        const alpha = (1 - progress) * 0.24;
+
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        ctx.lineWidth = 1.4 + (1 - progress) * 1;
+        ctx.arc(ripple.x, ripple.y, 4 + progress * 55, 0, Math.PI * 2);
+        ctx.stroke();
+      });
+    }
+
     animationFrameRef.current = window.requestAnimationFrame(animate);
-  }, [animationSpeed, backgroundColor, removeWaveLine]);
+  }, [animationSpeed, backgroundColor, removeWaveLine, trailOnMove]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -192,7 +312,7 @@ const InteractiveDots = ({
       pointerRef.current.active = false;
     };
 
-    window.addEventListener("pointermove", updatePointer, { passive: true });
+    window.addEventListener("pointermove", addTrailRipple, { passive: true });
     window.addEventListener("pointerdown", addRipple, { passive: true });
     window.addEventListener("pointerleave", handlePointerLeave);
 
@@ -209,7 +329,7 @@ const InteractiveDots = ({
 
     return () => {
       observer.disconnect();
-      window.removeEventListener("pointermove", updatePointer);
+      window.removeEventListener("pointermove", addTrailRipple);
       window.removeEventListener("pointerdown", addRipple);
       window.removeEventListener("pointerleave", handlePointerLeave);
       if (animationFrameRef.current) {
@@ -218,10 +338,13 @@ const InteractiveDots = ({
       }
       timeRef.current = 0;
       ripplesRef.current = [];
+      trailRipplesRef.current = [];
+      trailPointsRef.current = [];
       dotsRef.current = [];
       pointerRef.current.active = false;
+      lastTrailRef.current = { x: 0, y: 0, time: 0, set: false };
     };
-  }, [active, addRipple, animate, backgroundColor, resizeCanvas, updatePointer]);
+  }, [active, addRipple, addTrailRipple, animate, backgroundColor, resizeCanvas]);
 
   return (
     <div ref={containerRef} className={`interactive-dots ${className}`} aria-hidden="true">

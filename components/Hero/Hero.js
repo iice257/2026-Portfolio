@@ -469,6 +469,9 @@ const Hero = () => {
         <div className={styles.wavesBackdrop} aria-hidden="true">
           <Waves
             {...PORTFOLIO_WAVES_CONFIG}
+            pixelRatio={0.92}
+            targetFps={30}
+            maxPixelCount={1400000}
             mouseInteraction={!isLockViewport || isLocked}
             paused={isHeroBackdropPaused}
           />
@@ -523,6 +526,7 @@ const Hero = () => {
                 scale={false}
                 textColor="var(--fg-primary)"
                 minFontSize={42}
+                targetFps={60}
               />
             </div>
 
@@ -540,6 +544,7 @@ const Hero = () => {
                 scale={false}
                 textColor="var(--fg-primary)"
                 minFontSize={42}
+                targetFps={60}
               />
             </div>
           </div>

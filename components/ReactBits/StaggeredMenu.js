@@ -1,11 +1,13 @@
 import Link from "next/link";
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useCursor } from '../../context/CursorContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useBodyScrollLock } from '../../utils/useBodyScrollLock';
 import { useDialogFocus } from '../../utils/useDialogFocus';
 import InteractiveDots from './InteractiveDots';
+
+const MENU_INTERACTIVE_SELECTOR = 'a, button, [role="button"], input, textarea, select, summary, [data-clickable="true"]';
 
 /**
  * StaggeredMenu - Full-screen navigation menu with staggered animations
@@ -23,7 +25,10 @@ const StaggeredMenu = ({
   onItemClick,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { setCursorVariant } = useCursor();
+  const [menuCursorLabel, setMenuCursorLabel] = useState("Click");
+  const hasShownNiceRef = useRef(false);
+  const niceTimerRef = useRef(null);
+  const { setCursorText, setCursorVariant, requestCursorRefresh } = useCursor();
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const overlayRef = useDialogFocus(isOpen);
@@ -45,18 +50,33 @@ const StaggeredMenu = ({
 
   const closeMenu = useCallback(() => {
     setIsOpen(false);
+    setCursorText("");
     setCursorVariant('default');
     onMenuClose?.();
-  }, [onMenuClose, setCursorVariant]);
+  }, [onMenuClose, setCursorText, setCursorVariant]);
 
   const toggleMenu = () => {
     if (isOpen) {
       closeMenu();
     } else {
       setIsOpen(true);
+      setMenuCursorLabel("Click");
       setCursorVariant('menu');
       onMenuOpen?.();
     }
+  };
+
+  const handleMenuSurfaceClick = (event) => {
+    if (event.target.closest?.(MENU_INTERACTIVE_SELECTOR)) return;
+    if (hasShownNiceRef.current) return;
+
+    hasShownNiceRef.current = true;
+    setMenuCursorLabel("Nice");
+    window.clearTimeout(niceTimerRef.current);
+    niceTimerRef.current = window.setTimeout(() => {
+      setMenuCursorLabel("Click");
+      requestCursorRefresh();
+    }, 3000);
   };
 
   const handleItemClick = (item, index) => {
@@ -79,6 +99,19 @@ const StaggeredMenu = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [closeMenu, isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    requestCursorRefresh();
+    return () => {
+      window.clearTimeout(niceTimerRef.current);
+    };
+  }, [isOpen, requestCursorRefresh]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    requestCursorRefresh();
+  }, [isOpen, menuCursorLabel, requestCursorRefresh]);
+
   const buttonColor = isOpen && changeMenuColorOnOpen ? openMenuButtonColor : menuButtonColor;
   const portalTarget = mounted ? document.getElementById("site-portal-root") || document.body : null;
 
@@ -91,6 +124,9 @@ const StaggeredMenu = ({
       aria-label="Site navigation"
       aria-hidden={!isOpen}
       tabIndex={-1}
+      data-menu-cursor-surface="true"
+      data-menu-cursor-label={menuCursorLabel}
+      onClickCapture={handleMenuSurfaceClick}
       className={`site-menu-panel fixed inset-0 z-[99999] flex flex-col items-start overflow-y-auto py-0 transition-transform duration-500 ease-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       style={{
@@ -108,6 +144,9 @@ const StaggeredMenu = ({
         gridSpacing={theme === "light" ? 28 : 30}
         animationSpeed={0.004}
         removeWaveLine
+        trailOnMove
+        trailInterval={24}
+        trailMinDistance={6}
         className="site-menu-dots"
       />
 
@@ -208,7 +247,7 @@ const StaggeredMenu = ({
                 key={social.link}
                 href={social.link}
                 tabIndex={isOpen ? 0 : -1}
-                className={`relative text-sm md:text-base transition-all duration-500 cursor-none group ${isOpen ? 'opacity-60 translate-y-0' : 'opacity-0 translate-y-4'
+                className={`relative text-sm md:text-base transition-all duration-500 cursor-none group ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                   }`}
                 style={{
                   transitionDelay: isOpen ? `${0.3 + index * 0.05}s` : '0s',
@@ -218,7 +257,7 @@ const StaggeredMenu = ({
                 target={opensNewTab ? "_blank" : undefined}
                 rel={opensNewTab ? "noopener noreferrer" : undefined}
                 onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
               >
                 {social.label}
                 <span className="absolute left-0 bottom-0 w-full h-[1px] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" style={{ backgroundColor: 'var(--menu-fg)' }} />
