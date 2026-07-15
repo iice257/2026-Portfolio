@@ -1329,6 +1329,11 @@ a {
   padding: 0.68rem 0.9rem;
 }
 
+.project-detail-balanced-action {
+  inline-size: 9.25rem;
+  white-space: nowrap;
+}
+
 .project-detail-action-group {
   padding-left: clamp(1rem, 3vw, 2rem);
   border-left: 1px solid color-mix(in srgb, var(--fg-primary) 14%, transparent);

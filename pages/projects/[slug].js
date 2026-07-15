@@ -597,7 +597,7 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
       <main id="main-content" className="min-h-screen" style={{ backgroundColor: "var(--bg-primary)" }}>
         <section className="section-container pt-32 pb-12">
           <div className="mb-7 flex flex-wrap items-center justify-between gap-3">
-            <Link href="/projects" className="project-action-link project-action-link-secondary" data-clickable="true">
+            <Link href="/projects" className="project-action-link project-action-link-secondary project-detail-balanced-action" data-clickable="true">
               <IconList />
               <span>All projects</span>
             </Link>
@@ -608,7 +608,7 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
                   href={action.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="project-action-link project-action-link-compact"
+                  className={`project-action-link project-action-link-compact${action.label === "View on GitHub" ? " project-detail-balanced-action" : ""}`}
                   data-clickable="true"
                 >
                   <span>{action.label}</span>
