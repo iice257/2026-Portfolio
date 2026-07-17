@@ -3,7 +3,7 @@ import { useMemo, useRef } from "react";
 const SWIPE_THRESHOLD_PX = 48;
 const SWIPE_DIRECTION_RATIO = 1.15;
 
-export const useSwipeNavigation = ({ enabled = true, onNavigate }) => {
+export const useSwipeNavigation = ({ enabled = true, onNavigate, onSwipe }) => {
   const touchStartRef = useRef(null);
   const touchMoveRef = useRef(null);
 
@@ -48,8 +48,10 @@ export const useSwipeNavigation = ({ enabled = true, onNavigate }) => {
           return;
         }
 
-        onNavigate(deltaX > 0 ? -1 : 1);
+        const direction = deltaX > 0 ? -1 : 1;
+        onSwipe?.({ direction, deltaX, deltaY });
+        onNavigate(direction);
       },
     };
-  }, [enabled, onNavigate]);
+  }, [enabled, onNavigate, onSwipe]);
 };
