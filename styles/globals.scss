@@ -1800,6 +1800,10 @@ a {
   gap: 1.1rem;
 }
 
+.major-expanded-mobile-actions {
+  display: none;
+}
+
 @media (min-width: 768px) {
   .major-project-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1934,6 +1938,8 @@ a {
   height: min(68vh, 38rem);
   overflow: hidden;
   background: var(--bg-secondary);
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 .project-nav-list-icon {
@@ -2196,6 +2202,21 @@ a {
   .mockup-lightbox {
     padding-top: max(0.85rem, calc(var(--safe-area-top) + 0.35rem));
     padding-bottom: max(0.85rem, calc(var(--safe-area-bottom) + 0.45rem));
+  }
+
+  .major-expanded-preview-stack {
+    display: none;
+  }
+
+  .major-expanded-mobile-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .major-expanded-mobile-actions > .flex {
+    gap: 0.75rem;
   }
 
   .archive-project-toggle {

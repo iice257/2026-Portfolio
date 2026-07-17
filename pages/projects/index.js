@@ -244,10 +244,18 @@ const lightboxPanelVariants = {
 
 const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompactPreview = false, onClose, onNavigate, onToggleVariant }) => {
   const fullscreenRef = useRef(null);
+  const suppressStageClickRef = useRef(false);
   const dialogRef = useDialogFocus(Boolean(active));
   const swipeHandlers = useSwipeNavigation({
     enabled: Boolean(active) && items.length > 1,
     onNavigate,
+    onSwipe: () => {
+      // Some touch browsers dispatch a synthetic click after a completed swipe.
+      suppressStageClickRef.current = true;
+      window.setTimeout(() => {
+        suppressStageClickRef.current = false;
+      }, 0);
+    },
   });
   useBodyScrollLock(Boolean(active));
 
@@ -277,6 +285,15 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompa
 
     const fullscreenTarget = target.requestFullscreen || target.webkitRequestFullscreen || target.msRequestFullscreen;
     fullscreenTarget?.call(target)?.catch?.(() => {});
+  };
+
+  const handleStageClick = () => {
+    if (suppressStageClickRef.current) {
+      suppressStageClickRef.current = false;
+      return;
+    }
+
+    onClose();
   };
 
   return (
@@ -326,7 +343,7 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompa
           className="mockup-lightbox-stage"
           data-cursor-label="Click to close"
           data-cursor-variant="project"
-          onClick={onClose}
+          onClick={handleStageClick}
           aria-label="Mockup preview"
           {...swipeHandlers}
         >
@@ -356,6 +373,7 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompa
                       loop
                       playsInline
                       controls
+                      onClick={(event) => event.stopPropagation()}
                       className="h-full w-full object-cover"
                       aria-label={`${item.project.name} ${previewLabel(item.variant)} preview video`}
                     />
@@ -508,13 +526,19 @@ const MajorProjectExpandedCard = ({ project, index, onFlip, onHover, onLeave, on
           </div>
         </div>
         <div className="xl:col-span-8 flex flex-col gap-4">
-          <MockupPair
-            project={project}
-            onOpenPreview={onOpenPreview}
-            onHover={onHover}
-            onLeave={onLeave}
-            actions={<ProjectActionLinks project={project} />}
-          />
+          <div className="major-expanded-preview-stack">
+            <MockupPair
+              project={project}
+              onOpenPreview={onOpenPreview}
+              onHover={onHover}
+              onLeave={onLeave}
+              actions={<ProjectActionLinks project={project} />}
+            />
+          </div>
+          <div className="major-expanded-mobile-actions" data-cursor-group="buttons" onClick={(event) => event.stopPropagation()}>
+            <MockupChoiceButton project={project} onOpenPreview={onOpenPreview} onHover={onHover} onLeave={onLeave} />
+            <ProjectActionLinks project={project} />
+          </div>
         </div>
       </div>
     </motion.article>
@@ -585,7 +609,10 @@ export default function ProjectsIndex() {
   const [projectSearch, setProjectSearch] = useState("");
   const { setCursorText, setCursorVariant, requestCursorRefresh } = useCursor();
   const expandedSlug = Object.keys(flippedCards).find((slug) => flippedCards[slug]);
-  const majorProjectRows = chunkProjects(majorProjects);
+  const majorProjectRows = useMemo(
+    () => chunkProjects(majorProjects, isCompactPreview ? 1 : 2),
+    [isCompactPreview]
+  );
   const previewItems = useMemo(() => (
     [...featuredProjects, highlightedProject, ...majorProjects, ...remainingProjects].flatMap((project) => [
       { project, variant: "desktop" },
@@ -614,7 +641,7 @@ export default function ProjectsIndex() {
   }, [router.isReady, router.query.query]);
 
   useEffect(() => {
-    const query = window.matchMedia("(max-width: 767px)");
+    const query = window.matchMedia("(max-width: 1023px), (hover: none), (pointer: coarse)");
     const sync = () => setIsCompactPreview(query.matches);
     sync();
     query.addEventListener("change", sync);
@@ -1060,7 +1087,7 @@ export default function ProjectsIndex() {
                   transition={flipTransition}
                 >
                   {rowProjects.map((project, projectIndex) => {
-                    const absoluteIndex = rowIndex * 2 + projectIndex;
+                    const absoluteIndex = majorProjects.findIndex((item) => item.slug === project.slug);
                     const isExpandedRow = Boolean(expandedProject);
 
                     return (
