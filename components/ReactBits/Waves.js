@@ -144,6 +144,7 @@ export default function Waves({
     lineWidth,
   });
   const frameIdRef = useRef(null);
+  const resizeFrameRef = useRef(null);
   const pausedRef = useRef(paused);
   const resumeRef = useRef(() => {});
   const stopRef = useRef(() => {});
@@ -234,8 +235,10 @@ export default function Waves({
         maxCursorMove: maxMove,
       } = configRef.current;
 
-      lines.forEach((points) => {
-        points.forEach((point) => {
+      for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
+        const points = lines[lineIndex];
+        for (let pointIndex = 0; pointIndex < points.length; pointIndex += 1) {
+          const point = points[pointIndex];
           const move = noise.perlin2((point.x + time * speedX) * 0.002, (point.y + time * speedY) * 0.0015) * 12;
           point.wave.x = Math.cos(move) * ampX;
           point.wave.y = Math.sin(move) * ampY;
@@ -254,22 +257,18 @@ export default function Waves({
             }
           }
 
-          point.cursor.vx += (0 - point.cursor.x) * physicsTension;
-          point.cursor.vy += (0 - point.cursor.y) * physicsTension;
-          point.cursor.vx *= physicsFriction;
-          point.cursor.vy *= physicsFriction;
-          point.cursor.x += point.cursor.vx * 2;
-          point.cursor.y += point.cursor.vy * 2;
-          point.cursor.x = Math.min(maxMove, Math.max(-maxMove, point.cursor.x));
-          point.cursor.y = Math.min(maxMove, Math.max(-maxMove, point.cursor.y));
-        });
-      });
-    }
-
-    function moved(point, withCursor = true) {
-      const x = point.x + point.wave.x + (withCursor ? point.cursor.x : 0);
-      const y = point.y + point.wave.y + (withCursor ? point.cursor.y : 0);
-      return { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 };
+          if (mouseInteraction) {
+            point.cursor.vx += (0 - point.cursor.x) * physicsTension;
+            point.cursor.vy += (0 - point.cursor.y) * physicsTension;
+            point.cursor.vx *= physicsFriction;
+            point.cursor.vy *= physicsFriction;
+            point.cursor.x += point.cursor.vx * 2;
+            point.cursor.y += point.cursor.vy * 2;
+            point.cursor.x = Math.min(maxMove, Math.max(-maxMove, point.cursor.x));
+            point.cursor.y = Math.min(maxMove, Math.max(-maxMove, point.cursor.y));
+          }
+        }
+      }
     }
 
     function drawLines() {
@@ -282,18 +281,26 @@ export default function Waves({
       ctx.strokeStyle = configRef.current.lineColor;
       ctx.lineWidth = configRef.current.lineWidth;
 
-      linesRef.current.forEach((points) => {
-        let point = moved(points[0], false);
-        ctx.moveTo(point.x, point.y);
+      const lines = linesRef.current;
+      for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
+        const points = lines[lineIndex];
+        const firstPoint = points[0];
+        ctx.moveTo(
+          Math.round((firstPoint.x + firstPoint.wave.x) * 10) / 10,
+          Math.round((firstPoint.y + firstPoint.wave.y) * 10) / 10
+        );
 
-        points.forEach((sourcePoint, index) => {
+        for (let index = 0; index < points.length; index += 1) {
+          const sourcePoint = points[index];
           const isLast = index === points.length - 1;
-          point = moved(sourcePoint, !isLast);
-          const nextPoint = moved(points[index + 1] || points[points.length - 1], !isLast);
-          ctx.lineTo(point.x, point.y);
-          if (isLast) ctx.moveTo(nextPoint.x, nextPoint.y);
-        });
-      });
+          const cursorX = !isLast && mouseInteraction ? sourcePoint.cursor.x : 0;
+          const cursorY = !isLast && mouseInteraction ? sourcePoint.cursor.y : 0;
+          const x = Math.round((sourcePoint.x + sourcePoint.wave.x + cursorX) * 10) / 10;
+          const y = Math.round((sourcePoint.y + sourcePoint.wave.y + cursorY) * 10) / 10;
+          ctx.lineTo(x, y);
+          if (isLast) ctx.moveTo(x, y);
+        }
+      }
 
       ctx.stroke();
     }
@@ -327,22 +334,24 @@ export default function Waves({
 
       lastFrameTime = time;
 
-      const mouse = mouseRef.current;
-      mouse.sx += (mouse.x - mouse.sx) * 0.1;
-      mouse.sy += (mouse.y - mouse.sy) * 0.1;
+      if (mouseInteraction) {
+        const mouse = mouseRef.current;
+        mouse.sx += (mouse.x - mouse.sx) * 0.1;
+        mouse.sy += (mouse.y - mouse.sy) * 0.1;
 
-      const dx = mouse.x - mouse.lx;
-      const dy = mouse.y - mouse.ly;
-      const velocity = Math.hypot(dx, dy);
-      mouse.v = velocity;
-      mouse.vs += (velocity - mouse.vs) * 0.1;
-      mouse.vs = Math.min(100, mouse.vs);
-      mouse.lx = mouse.x;
-      mouse.ly = mouse.y;
-      mouse.a = Math.atan2(dy, dx);
+        const dx = mouse.x - mouse.lx;
+        const dy = mouse.y - mouse.ly;
+        const velocity = Math.hypot(dx, dy);
+        mouse.v = velocity;
+        mouse.vs += (velocity - mouse.vs) * 0.1;
+        mouse.vs = Math.min(100, mouse.vs);
+        mouse.lx = mouse.x;
+        mouse.ly = mouse.y;
+        mouse.a = Math.atan2(dy, dx);
 
-      container.style.setProperty("--x", `${mouse.sx}px`);
-      container.style.setProperty("--y", `${mouse.sy}px`);
+        container.style.setProperty("--x", `${mouse.sx}px`);
+        container.style.setProperty("--y", `${mouse.sy}px`);
+      }
 
       movePoints(time);
       drawLines();
@@ -352,6 +361,14 @@ export default function Waves({
     function rebuild() {
       setSize();
       setLines();
+    }
+
+    function scheduleRebuild() {
+      if (resizeFrameRef.current !== null) return;
+      resizeFrameRef.current = requestAnimationFrame(() => {
+        resizeFrameRef.current = null;
+        rebuild();
+      });
     }
 
     function updatePointer(clientX, clientY) {
@@ -393,7 +410,9 @@ export default function Waves({
     resumeRef.current = startLoop;
     stopRef.current = stopLoop;
     startLoop();
-    window.addEventListener("resize", rebuild);
+    const resizeObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(scheduleRebuild);
+    resizeObserver?.observe(container);
+    window.addEventListener("resize", scheduleRebuild);
     if (mouseInteraction) {
       window.addEventListener("mousemove", handleMouseMove);
       window.addEventListener("touchmove", handleTouchMove, { passive: false });
@@ -410,13 +429,18 @@ export default function Waves({
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      window.removeEventListener("resize", rebuild);
+      resizeObserver?.disconnect();
+      window.removeEventListener("resize", scheduleRebuild);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       if (mouseInteraction) {
         window.removeEventListener("mousemove", handleMouseMove);
         window.removeEventListener("touchmove", handleTouchMove);
       }
       stopLoop();
+      if (resizeFrameRef.current !== null) {
+        cancelAnimationFrame(resizeFrameRef.current);
+        resizeFrameRef.current = null;
+      }
       resumeRef.current = () => {};
       stopRef.current = () => {};
     };

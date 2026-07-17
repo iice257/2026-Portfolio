@@ -12,6 +12,7 @@ import { useCursor } from "../../context/CursorContext";
 import { useBodyScrollLock } from "../../utils/useBodyScrollLock";
 import { useDialogFocus } from "../../utils/useDialogFocus";
 import { useSwipeNavigation } from "../../utils/useSwipeNavigation";
+import { isPreviewWithinRenderWindow } from "../../utils/previewWindow";
 
 export async function getStaticPaths() {
   const paths = featuredProjects.map((project) => ({
@@ -415,9 +416,10 @@ const ProjectMediaLightbox = ({ active, activeIndex, items, direction = 0, onClo
             transition={lightboxStripTransition}
             style={{ width: `${items.length * 100}%` }}
           >
-            {items.map((item) => {
+            {items.map((item, itemIndex) => {
               const itemVideoSrc = item.variant === "desktop" ? item.project.desktopVideo : item.project.mobileVideo;
               const itemIsMobile = item.variant === "mobile";
+              const shouldRenderPreview = isPreviewWithinRenderWindow(itemIndex, safeActiveIndex, items.length);
               const itemKey = `${item.project.slug}-${item.variant}`;
 
               return (
@@ -427,7 +429,7 @@ const ProjectMediaLightbox = ({ active, activeIndex, items, direction = 0, onClo
                   className="mockup-lightbox-strip-item"
                   style={{ width: `${100 / items.length}%` }}
                 >
-                  {itemVideoSrc ? (
+                  {shouldRenderPreview && (itemVideoSrc ? (
                     <LightboxVideo
                       src={itemVideoSrc}
                       isActive={itemKey === activeKey}
@@ -440,7 +442,7 @@ const ProjectMediaLightbox = ({ active, activeIndex, items, direction = 0, onClo
                     />
                   ) : (
                     <ProjectVisual project={item.project} priority={itemKey === activeKey} compact={itemIsMobile} />
-                  )}
+                  ))}
                 </div>
               );
             })}

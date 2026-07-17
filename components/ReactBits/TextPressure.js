@@ -127,6 +127,7 @@ const TextPressure = ({
     let rafId = null;
     let lastFrameTime = 0;
     let lastRenderedTime = 0;
+    let settledFrames = 0;
     const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     const minFrameDuration = targetFps > 0 ? 1000 / targetFps : 0;
 
@@ -170,8 +171,10 @@ const TextPressure = ({
       lastRenderedTime = time;
       const ease = 1 - Math.pow(0.9, delta / 16.67);
 
-      mouseRef.current.x += (cursorRef.current.x - mouseRef.current.x) * ease;
-      mouseRef.current.y += (cursorRef.current.y - mouseRef.current.y) * ease;
+      const remainingX = cursorRef.current.x - mouseRef.current.x;
+      const remainingY = cursorRef.current.y - mouseRef.current.y;
+      mouseRef.current.x += remainingX * ease;
+      mouseRef.current.y += remainingY * ease;
 
       if (titleRef.current) {
         if (spanRects.current.length !== spansRef.current.length || spanRects.current.length === 0) {
@@ -212,7 +215,18 @@ const TextPressure = ({
         });
       }
 
-      rafId = requestAnimationFrame(animate);
+      if (Math.abs(remainingX) < 0.15 && Math.abs(remainingY) < 0.15) {
+        settledFrames += 1;
+      } else {
+        settledFrames = 0;
+      }
+
+      if (settledFrames < 3) {
+        rafId = requestAnimationFrame(animate);
+      } else {
+        lastFrameTime = 0;
+        lastRenderedTime = 0;
+      }
     };
 
     const startAnimation = () => {
@@ -226,6 +240,7 @@ const TextPressure = ({
 
       cursorRef.current.x = x;
       cursorRef.current.y = y;
+      settledFrames = 0;
       startAnimation();
     };
 
@@ -269,6 +284,7 @@ const TextPressure = ({
     const setVisibleState = (nextVisible) => {
       if (nextVisible) {
         isVisibleRef.current = true;
+        settledFrames = 0;
         calculateSpans();
         startAnimation();
         return;

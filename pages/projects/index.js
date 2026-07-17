@@ -22,6 +22,7 @@ import { useCursor } from "../../context/CursorContext";
 import { useBodyScrollLock } from "../../utils/useBodyScrollLock";
 import { useDialogFocus } from "../../utils/useDialogFocus";
 import { useSwipeNavigation } from "../../utils/useSwipeNavigation";
+import { isPreviewWithinRenderWindow } from "../../utils/previewWindow";
 
 const TagList = ({ tags = [] }) => (
   <div className="flex flex-wrap gap-2">
@@ -354,9 +355,10 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompa
             transition={lightboxStripTransition}
             style={{ width: `${items.length * 100}%` }}
           >
-            {items.map((item) => {
+            {items.map((item, itemIndex) => {
               const itemPreview = getProjectPreview(item.project, item.variant);
               const itemIsMobile = item.variant === "mobile";
+              const shouldRenderPreview = isPreviewWithinRenderWindow(itemIndex, safeActiveIndex, items.length);
               const itemKey = `${item.project.slug}-${item.variant}`;
 
               return (
@@ -366,7 +368,7 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompa
                   className="mockup-lightbox-strip-item"
                   style={{ width: `${100 / items.length}%` }}
                 >
-                  {itemPreview.type === "video" && (
+                  {shouldRenderPreview && itemPreview.type === "video" && (
                     <LightboxVideo
                       src={itemPreview.src}
                       isActive={itemKey === activeKey}
@@ -379,10 +381,10 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompa
                       aria-label={`${item.project.name} ${previewLabel(item.variant)} preview video`}
                     />
                   )}
-                  {itemPreview.type === "image" && (
+                  {shouldRenderPreview && itemPreview.type === "image" && (
                     <Image src={itemPreview.src} alt={`${item.project.name} ${previewLabel(item.variant)} mockup`} fill sizes="90vw" className="object-contain" />
                   )}
-                  {itemPreview.type === "mockup" && (
+                  {shouldRenderPreview && itemPreview.type === "mockup" && (
                     <ProjectMockupFrame project={item.project} variant={item.variant} className={itemIsMobile ? "h-full w-full p-5" : "h-full w-full p-6"} />
                   )}
                 </div>

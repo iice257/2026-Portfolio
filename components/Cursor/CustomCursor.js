@@ -15,17 +15,6 @@ const PREVIEW_LABEL_PATTERN = /^click to (open|close)$/i;
 const INTERACTIVE_BRIDGE_RADIUS = 38;
 const WELCOME_VISIT_KEY = "portfolio.cursor.welcomed";
 const WELCOME_TOOLTIP_MS = 5000;
-const INTERACTIVE_BRIDGE_OFFSETS = [
-  [0, 0],
-  [INTERACTIVE_BRIDGE_RADIUS, 0],
-  [-INTERACTIVE_BRIDGE_RADIUS, 0],
-  [0, INTERACTIVE_BRIDGE_RADIUS],
-  [0, -INTERACTIVE_BRIDGE_RADIUS],
-  [INTERACTIVE_BRIDGE_RADIUS, INTERACTIVE_BRIDGE_RADIUS],
-  [-INTERACTIVE_BRIDGE_RADIUS, INTERACTIVE_BRIDGE_RADIUS],
-  [INTERACTIVE_BRIDGE_RADIUS, -INTERACTIVE_BRIDGE_RADIUS],
-  [-INTERACTIVE_BRIDGE_RADIUS, -INTERACTIVE_BRIDGE_RADIUS],
-];
 
 const getCursorLabelKind = (text) => (
   PREVIEW_LABEL_PATTERN.test((text || "").trim()) ? "preview" : "standard"
@@ -92,19 +81,26 @@ const CustomCursor = () => {
     const findNearbyInteractive = (x, y, bridgeRoot) => {
       if (!bridgeRoot) return null;
 
-      for (const [offsetX, offsetY] of INTERACTIVE_BRIDGE_OFFSETS) {
-        const sampleX = Math.min(window.innerWidth - 1, Math.max(0, x + offsetX));
-        const sampleY = Math.min(window.innerHeight - 1, Math.max(0, y + offsetY));
-        const stack = document.elementsFromPoint(sampleX, sampleY);
-        const nearby = stack.find((element) => {
-          const interactive = element.closest?.(INTERACTIVE_SELECTOR);
-          return interactive && isUsableInteractive(interactive) && bridgeRoot.contains(interactive);
-        });
+      const interactives = bridgeRoot.querySelectorAll(INTERACTIVE_SELECTOR);
+      let nearest = null;
+      let nearestDistanceSq = INTERACTIVE_BRIDGE_RADIUS * INTERACTIVE_BRIDGE_RADIUS;
 
-        if (nearby) return nearby.closest(INTERACTIVE_SELECTOR);
+      for (let index = 0; index < interactives.length; index += 1) {
+        const interactive = interactives[index];
+        if (!isUsableInteractive(interactive)) continue;
+
+        const rect = interactive.getBoundingClientRect();
+        const dx = Math.max(rect.left - x, 0, x - rect.right);
+        const dy = Math.max(rect.top - y, 0, y - rect.bottom);
+        const distanceSq = dx * dx + dy * dy;
+
+        if (distanceSq <= nearestDistanceSq) {
+          nearest = interactive;
+          nearestDistanceSq = distanceSq;
+        }
       }
 
-      return null;
+      return nearest;
     };
 
     const isBridgedClickableGap = (target, point, labeledTarget) => {
