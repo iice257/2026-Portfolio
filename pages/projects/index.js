@@ -16,6 +16,7 @@ import {
 } from "../../data/projects";
 import Footer from "@/components/Footer/Footer";
 import ProjectVisual from "@/components/Projects/ProjectVisual";
+import LightboxVideo from "@/components/Projects/LightboxVideo";
 import ShuffleText from "@/components/ReactBits/ShuffleText";
 import { useCursor } from "../../context/CursorContext";
 import { useBodyScrollLock } from "../../utils/useBodyScrollLock";
@@ -366,9 +367,9 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompa
                   style={{ width: `${100 / items.length}%` }}
                 >
                   {itemPreview.type === "video" && (
-                    <video
+                    <LightboxVideo
                       src={itemPreview.src}
-                      autoPlay={itemKey === activeKey}
+                      isActive={itemKey === activeKey}
                       muted
                       loop
                       playsInline
@@ -485,6 +486,14 @@ const MajorProjectExpandedCard = ({ project, index, onFlip, onHover, onLeave, on
     onFlip();
   };
 
+  const handleCollapseKeyDown = (event) => {
+    if (event.target !== event.currentTarget) return;
+    if (event.key !== "Enter" && event.key !== " ") return;
+
+    event.preventDefault();
+    onFlip();
+  };
+
   return (
     <motion.article
       key={`${project.slug}-expanded`}
@@ -493,10 +502,12 @@ const MajorProjectExpandedCard = ({ project, index, onFlip, onHover, onLeave, on
       exit={{ opacity: 0, rotateY: 72, scale: 0.985 }}
       transition={flipTransition}
       role="region"
-      aria-label={`Collapse details for ${project.name}`}
+      tabIndex={0}
+      aria-label={`Expanded details for ${project.name}. Press Enter or Space to collapse.`}
       data-cursor-label="Click to collapse"
       data-cursor-variant="project"
       onClick={handleCollapse}
+      onKeyDown={handleCollapseKeyDown}
       onMouseEnter={() => onHover("Click to collapse")}
       onMouseLeave={onLeave}
       className="major-project-expanded cursor-none"
