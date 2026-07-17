@@ -486,6 +486,14 @@ const MajorProjectExpandedCard = ({ project, index, onFlip, onHover, onLeave, on
     onFlip();
   };
 
+  const handleCollapseKeyDown = (event) => {
+    if (event.target !== event.currentTarget) return;
+    if (event.key !== "Enter" && event.key !== " ") return;
+
+    event.preventDefault();
+    onFlip();
+  };
+
   return (
     <motion.article
       key={`${project.slug}-expanded`}
@@ -493,11 +501,14 @@ const MajorProjectExpandedCard = ({ project, index, onFlip, onHover, onLeave, on
       animate={{ opacity: 1, rotateY: 0, scale: 1 }}
       exit={{ opacity: 0, rotateY: 72, scale: 0.985 }}
       transition={flipTransition}
-      role="region"
+      role="button"
+      tabIndex={0}
+      aria-expanded="true"
       aria-label={`Collapse details for ${project.name}`}
       data-cursor-label="Click to collapse"
       data-cursor-variant="project"
       onClick={handleCollapse}
+      onKeyDown={handleCollapseKeyDown}
       onMouseEnter={() => onHover("Click to collapse")}
       onMouseLeave={onLeave}
       className="major-project-expanded cursor-none"
