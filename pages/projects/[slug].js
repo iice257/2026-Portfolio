@@ -6,6 +6,7 @@ import { featuredProjects } from "../../data/projects";
 import { METADATA } from "../../constants";
 import Footer from "@/components/Footer/Footer";
 import ProjectVisual from "@/components/Projects/ProjectVisual";
+import LightboxVideo from "@/components/Projects/LightboxVideo";
 import ShuffleText from "@/components/ReactBits/ShuffleText";
 import { useCursor } from "../../context/CursorContext";
 import { useBodyScrollLock } from "../../utils/useBodyScrollLock";
@@ -427,9 +428,9 @@ const ProjectMediaLightbox = ({ active, activeIndex, items, direction = 0, onClo
                   style={{ width: `${100 / items.length}%` }}
                 >
                   {itemVideoSrc ? (
-                    <video
+                    <LightboxVideo
                       src={itemVideoSrc}
-                      autoPlay={itemKey === activeKey}
+                      isActive={itemKey === activeKey}
                       muted
                       loop
                       playsInline

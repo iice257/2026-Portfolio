@@ -2,13 +2,13 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { CONTACT_LINKS, MENULINKS } from "../../constants";
-import { PORTFOLIO_GALAXY_CONFIG } from "../ReactBits/galaxyConfig";
+import { PORTFOLIO_GALAXY_CONFIG, PORTFOLIO_WAVES_CONFIG } from "../ReactBits/galaxyConfig";
 import ShuffleText from "../ReactBits/ShuffleText";
 import { useTheme } from "../../context/ThemeContext";
 import { getSectionHref, scrollToSection, SECTION_IDS } from "../../utils/sectionNavigation";
 
 const Galaxy = dynamic(() => import("../ReactBits/Galaxy"), { ssr: false });
-const SplashCursor = dynamic(() => import("../ReactBits/SplashCursor"), { ssr: false });
+const Waves = dynamic(() => import("../ReactBits/Waves"), { ssr: false });
 
 const Footer = () => {
   const footerRef = useRef(null);
@@ -91,21 +91,13 @@ const Footer = () => {
       )}
 
       {canRenderFooterBackdrop && theme === "light" && !isFooterBackdropPaused && (
-        <div className="footer-effect footer-effect-splash" aria-hidden="true">
-          <SplashCursor
-            SIM_RESOLUTION={72}
-            DYE_RESOLUTION={768}
-            CAPTURE_RESOLUTION={256}
-            DENSITY_DISSIPATION={2.35}
-            VELOCITY_DISSIPATION={1.45}
-            PRESSURE_ITERATIONS={14}
-            CURL={4}
-            SPLAT_RADIUS={0.23}
-            SPLAT_FORCE={7600}
-            SHADING
-            RAINBOW_MODE={false}
-            COLOR="#444444"
-            className="footer-splash-cursor"
+        <div className="footer-effect footer-effect-waves" aria-hidden="true">
+          <Waves
+            {...PORTFOLIO_WAVES_CONFIG}
+            mouseInteraction={false}
+            pixelRatio={0.55}
+            targetFps={16}
+            maxPixelCount={360000}
           />
         </div>
       )}

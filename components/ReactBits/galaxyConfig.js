@@ -1,6 +1,6 @@
 export const PORTFOLIO_GALAXY_CONFIG = {
   mouseRepulsion: false,
-  mouseInteraction: true,
+  mouseInteraction: false,
   density: 0.2,
   glowIntensity: 0.2,
   saturation: 0,

@@ -16,6 +16,7 @@ import {
 } from "../../data/projects";
 import Footer from "@/components/Footer/Footer";
 import ProjectVisual from "@/components/Projects/ProjectVisual";
+import LightboxVideo from "@/components/Projects/LightboxVideo";
 import ShuffleText from "@/components/ReactBits/ShuffleText";
 import { useCursor } from "../../context/CursorContext";
 import { useBodyScrollLock } from "../../utils/useBodyScrollLock";
@@ -366,9 +367,9 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompa
                   style={{ width: `${100 / items.length}%` }}
                 >
                   {itemPreview.type === "video" && (
-                    <video
+                    <LightboxVideo
                       src={itemPreview.src}
-                      autoPlay={itemKey === activeKey}
+                      isActive={itemKey === activeKey}
                       muted
                       loop
                       playsInline

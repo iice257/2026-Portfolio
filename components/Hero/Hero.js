@@ -469,9 +469,9 @@ const Hero = () => {
         <div className={styles.wavesBackdrop} aria-hidden="true">
           <Waves
             {...PORTFOLIO_WAVES_CONFIG}
-            pixelRatio={0.92}
-            targetFps={30}
-            maxPixelCount={1400000}
+            pixelRatio={0.8}
+            targetFps={24}
+            maxPixelCount={900000}
             mouseInteraction={!isLockViewport || isLocked}
             paused={isHeroBackdropPaused}
           />
