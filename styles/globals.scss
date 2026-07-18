@@ -2119,6 +2119,44 @@ a {
   transform: translateX(0.25rem);
 }
 
+.archive-project-quiet-link {
+  position: relative;
+  align-items: center;
+  transition:
+    background-color 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    padding-inline 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.archive-project-quiet-link:hover,
+.archive-project-quiet-link:focus-visible {
+  padding-inline: 0.75rem;
+  background: color-mix(in srgb, var(--fg-primary) 3.5%, transparent);
+}
+
+.archive-project-quiet-title,
+.archive-project-quiet-arrow {
+  transition:
+    color 180ms ease,
+    transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.archive-project-quiet-arrow {
+  justify-self: end;
+  color: var(--fg-muted);
+}
+
+.archive-project-quiet-link:hover .archive-project-quiet-title,
+.archive-project-quiet-link:focus-visible .archive-project-quiet-title,
+.archive-project-quiet-link:hover .archive-project-quiet-arrow,
+.archive-project-quiet-link:focus-visible .archive-project-quiet-arrow {
+  color: var(--fg-primary);
+}
+
+.archive-project-quiet-link:hover .archive-project-quiet-arrow,
+.archive-project-quiet-link:focus-visible .archive-project-quiet-arrow {
+  transform: translate(0.15rem, -0.15rem);
+}
+
 .archive-project-actions .mockup-choice.is-open .mockup-choice-options,
 .major-expanded-buttons .mockup-choice.is-open .mockup-choice-options {
   transform: translateX(0);

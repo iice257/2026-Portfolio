@@ -163,7 +163,16 @@ export const highlightedProject = {
   visual: { label: "KA", kicker: "Portfolio system", accent: "#F5F5F5", secondary: "#7CFFCB" },
 };
 
-export const remainingProjects = [
+const EXPANDABLE_ARCHIVE_NUMBERS = new Set([
+  11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+  24, 26, 27, 28, 32, 33, 52, 53, 54,
+]);
+
+const HIDDEN_ARCHIVE_NUMBERS = new Set([
+  34, 37, 38, 41, 42, 43, 44, 45, 46, 48, 49, 51,
+]);
+
+const archiveProjectSource = [
   { name: "Codexoors", repoName: "Codexoors", slug: "codexoors", description: "Early-access/waitlist experience with original Codexoors branding, identity connection, community tasks, and invite unlocks.", tech: ["css", "waitlist", "community"], status: "Brand/product page", notes: "Strong identity concept; kept near the top for polish potential.", url: repo("Codexoors") },
   { name: "PowergridApp", repoName: "PowergridApp", slug: "powergridapp", image: "/projects/powergrid.png", description: "Mobile app concept for navigating unreliable power supply in Nigeria with availability, usage, and management guidance.", tech: ["mobile", "energy", "utility"], status: "Product concept", notes: "Preserves the existing PowerGrid idea in the complete archive.", url: repo("PowergridApp") },
   { name: "DSTRKT", repoName: "DSTRKT", slug: "dstrkt", description: "An eCommerce webstore for the DSTRKT fashion brand.", tech: ["html", "commerce", "brand"], status: "Webstore build", notes: "Clear client-style commerce surface.", url: repo("DSTRKT"), liveUrl: "https://dstrkt-site.vercel.app" },
@@ -180,8 +189,8 @@ export const remainingProjects = [
   { name: "ILBE Event Page Redesign", repoName: "ILBE-event-page-redesign", slug: "ilbe-event-page-redesign", description: "Page redesign for the ILBE event in Ibadan.", tech: ["css", "event page", "frontend"], status: "Redesign", notes: "A focused visual redesign exercise.", url: repo("ILBE-event-page-redesign"), liveUrl: "https://ilbe-event-page-redesign.vercel.app" },
   { name: "Pages Forward Original", repoName: "Pages-Forward", slug: "pages-forward-original", description: "The original lighter Pages Forward bookstore website for buying physical books or ebooks and reading in-browser.", tech: ["html", "bookstore", "commerce"], status: "Earlier version", notes: "Kept as lineage for the featured rebuild.", url: repo("Pages-Forward"), liveUrl: "https://pages-forward.vercel.app" },
   { name: "Tickets", repoName: "Tickets", slug: "tickets", description: "Frontend clone of the Ticketmaster mobile experience built in a single HTML file.", tech: ["html", "clone", "mobile ui"], status: "Frontend exercise", notes: "Useful interaction/UI replication practice.", url: repo("Tickets"), liveUrl: "https://the-mayhem-tour.netlify.app" },
-  { name: "Solana dApp", repoName: "Solana-dApp", slug: "solana-dapp", description: "A light experiment building a Reddit-style dApp on Solana using Amazon Kiro IDE.", tech: ["typescript", "solana", "web3"], status: "Experiment", notes: "Functional scaffold, not production-ready.", url: repo("Solana-dApp"), liveUrl: "https://solana-d-app-ten.vercel.app" },
-  { name: "Nothing To Watch", repoName: "nothing-to-watch", slug: "nothing-to-watch", description: "Experimental WebGL gallery that visualizes tens of thousands of film posters as a Voronoi diagram.", tech: ["typescript", "webgl", "visualization"], status: "Visualization experiment", notes: "Technically interesting visual exploration.", url: repo("nothing-to-watch") },
+  { name: "Solana dApp", repoName: "Solana-dApp", slug: "solana-dapp", description: "A light experiment building a Reddit-style dApp on Solana using Amazon Kiro IDE.", tech: ["typescript", "solana", "web3"], status: "Experiment", notes: "Functional scaffold, not production-ready.", url: repo("Solana-dApp") },
+  { name: "What to Watch", repoName: "What-to-watch", slug: "what-to-watch", description: "An exploratory movie-discovery product that turns a large film catalog into a tactile WebGL field for browsing, previewing, and saving titles.", tech: ["typescript", "webgl", "visualization", "product ux"], status: "Active visualization product", notes: "Planned for featured treatment later; retained here as an expandable technical product record for now.", url: repo("What-to-watch"), liveUrl: "https://what-to-watch-brown.vercel.app" },
   { name: "Qwen Chat iOS", repoName: "qwen-chat-ios", slug: "qwen-chat-ios", description: "iOS chat experiment repository with limited public metadata.", tech: ["ios", "chat", "ai"], status: "Experiment", notes: "Kept in the archive because the repo is public but sparse.", url: repo("qwen-chat-ios") },
   { name: "StickerSmash", repoName: "StickerSmash", slug: "stickersmash", description: "Expo tutorial project completed as a quick hands-on mobile learning exercise.", tech: ["typescript", "expo", "mobile"], status: "Learning project", notes: "Useful as documented learning progression.", url: repo("StickerSmash") },
   { name: "Hyperball Airdrop", repoName: "Hyperballairdrop", slug: "hyperballairdrop", description: "Small airdrop page built for the Hyperball project.", tech: ["html", "airdrop", "landing page"], status: "Landing page", notes: "Compact campaign-style build.", url: repo("Hyperballairdrop"), liveUrl: "https://hyperballairdrop.netlify.app" },
@@ -205,8 +214,25 @@ export const remainingProjects = [
   { name: "Build Your Own X", repoName: "build-your-own-x", slug: "build-your-own-x", description: "Reference repository for mastering programming by recreating technologies from scratch.", tech: ["learning", "reference"], status: "Reference", notes: "Included for completeness; not original portfolio work.", url: repo("build-your-own-x") },
   { name: "Medusa Setup", repoName: "yt-medusajs-setup", slug: "yt-medusajs-setup", description: "Setup of a Medusa app.", tech: ["medusa", "commerce", "setup"], status: "Setup exercise", notes: "Small setup repository.", url: repo("yt-medusajs-setup") },
   { name: "Pix Plot", repoName: "pix-plot", slug: "pix-plot", description: "A WebGL viewer for UMAP or TSNE-clustered images.", tech: ["webgl", "visualization", "reference"], status: "Reference", notes: "Reference/visualization repo kept in the archive.", url: repo("pix-plot") },
+  { name: "VISUALICER", repoName: "VISUALICER", slug: "visualicer", description: "A local-first lyric and audio visualizer with configurable radial geometry, responsive seeking, curated themes, typography controls, and browser-only media handling.", tech: ["next.js", "audio", "visualization", "interaction design"], status: "Active creative product", notes: "Planned for the major-project tier later; retained here as an expandable product record for now.", url: repo("VISUALICER"), liveUrl: "https://lyric-audio-visualizer.vercel.app" },
+  { name: "Tuteria Task", repoName: "tuteria-task", slug: "tuteria-task", description: "A full-stack referral follow-up workflow with send, preview, and audit-log states, server-side email delivery, privacy-safe Supabase logging, and CI deployment.", tech: ["next.js", "supabase", "email", "workflow"], status: "Full-stack case study", notes: "A compact but complete implementation that demonstrates product UI, backend safeguards, persistence, and delivery automation.", url: repo("tuteria-task") },
+  { name: "AeroDesk 11", repoName: "windows-11-os-fork", slug: "aerodesk-11", description: "A Windows-inspired browser operating-system prototype with boot and login flows, window management, taskbar utilities, system applications, and local desktop workflows.", tech: ["typescript", "react", "window management", "systems ui"], status: "Browser OS prototype", notes: "A broad interface-systems experiment relevant to desktop interaction, state management, and application-shell design.", url: repo("windows-11-os-fork") },
 ];
 
+export const archiveProjectRecords = archiveProjectSource.map((project, index) => {
+  const archiveNumber = index + 11;
+  const archiveTier = HIDDEN_ARCHIVE_NUMBERS.has(archiveNumber)
+    ? "hidden"
+    : EXPANDABLE_ARCHIVE_NUMBERS.has(archiveNumber)
+      ? "expandable"
+      : "quiet";
+
+  return { ...project, archiveNumber, archiveTier };
+});
+
+export const expandableArchiveProjects = archiveProjectRecords.filter((project) => project.archiveTier === "expandable");
+export const quietArchiveProjects = archiveProjectRecords.filter((project) => project.archiveTier === "quiet");
+export const remainingProjects = archiveProjectRecords.filter((project) => project.archiveTier !== "hidden");
 export const allProjects = [...featuredProjects, highlightedProject, ...majorProjects, ...remainingProjects];
-export const githubProjectCount = 50;
+export const githubProjectCount = allProjects.filter((project) => project.url && project.url !== "#").length;
 export const majorProjectCount = featuredProjects.length + majorProjects.length;

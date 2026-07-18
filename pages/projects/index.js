@@ -7,12 +7,13 @@ import { AnimatePresence, motion } from "framer-motion";
 import { METADATA } from "../../constants";
 import {
   allProjects,
+  expandableArchiveProjects,
   featuredProjects,
   githubProjectCount,
   highlightedProject,
   majorProjectCount,
   majorProjects,
-  remainingProjects,
+  quietArchiveProjects,
 } from "../../data/projects";
 import Footer from "@/components/Footer/Footer";
 import ProjectVisual from "@/components/Projects/ProjectVisual";
@@ -615,7 +616,7 @@ const MajorProjectCard = ({ project, index, onFlip, onHover, onLeave, dimmed }) 
 export default function ProjectsIndex() {
   const router = useRouter();
   const [flippedCards, setFlippedCards] = useState({});
-  const [openProject, setOpenProject] = useState(remainingProjects[0]?.slug);
+  const [openProject, setOpenProject] = useState(expandableArchiveProjects[0]?.slug);
   const [activePreview, setActivePreview] = useState(null);
   const [previewDirection, setPreviewDirection] = useState(0);
   const [isCompactPreview, setIsCompactPreview] = useState(false);
@@ -627,7 +628,7 @@ export default function ProjectsIndex() {
     [isCompactPreview]
   );
   const previewItems = useMemo(() => (
-    [...featuredProjects, highlightedProject, ...majorProjects, ...remainingProjects].flatMap((project) => [
+    [...featuredProjects, highlightedProject, ...majorProjects, ...expandableArchiveProjects].flatMap((project) => [
       { project, variant: "desktop" },
       { project, variant: "mobile" },
     ])
@@ -748,7 +749,7 @@ export default function ProjectsIndex() {
       url: canonicalUrl,
       name: `Projects | ${METADATA.author}`,
       description:
-        "A structured project archive by Kingsley Afolabi Aremu covering featured product builds, AI-agent tooling, automation systems, frontend experiments, mobile concepts, and public GitHub repositories.",
+        "A structured project archive by Kingsley Afolabi Aremu covering featured product builds, AI-agent tooling, automation systems, frontend explorations, mobile products, and public GitHub repositories.",
       inLanguage: "en",
       isPartOf: {
         "@id": `${METADATA.siteUrl.replace(/\/$/, "")}/#website`,
@@ -795,13 +796,13 @@ export default function ProjectsIndex() {
         <title>{`Projects | ${METADATA.author}`}</title>
         <meta
           name="description"
-          content="A structured project archive by Kingsley Afolabi Aremu, including featured work, major projects, and the complete GitHub project list."
+          content="A curated project archive by Kingsley Afolabi Aremu, including featured work, major projects, technical builds, and selected public repositories."
         />
         <meta name="keywords" content="Kingsley Aremu projects, iice257 projects, Kingsley Afolabi Aremu GitHub, React portfolio projects, Next.js portfolio projects, AI agent tooling projects, frontend engineering projects, Lagos software engineer projects" />
         <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1" />
         <link rel="canonical" href={canonicalUrl} />
         <meta property="og:title" content={`Projects | ${METADATA.author}`} />
-        <meta property="og:description" content="A structured project archive by Kingsley Afolabi Aremu, including featured work, major projects, and the complete GitHub project list." />
+        <meta property="og:description" content="A curated project archive by Kingsley Afolabi Aremu, including featured work, major projects, technical builds, and selected public repositories." />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:image" content={METADATA.image} />
         <meta name="twitter:card" content="summary_large_image" />
@@ -825,7 +826,7 @@ export default function ProjectsIndex() {
                 <ShuffleText text="Projects" duration={0.48} shuffleTimes={3} textAlign="left" />
               </h1>
               <p className="text-editorial font-light max-w-3xl" style={{ color: "var(--fg-secondary)" }}>
-                A clearer hierarchy of product work, agent tooling, experiments, and public repositories. The top four are the premium featured projects, followed by six major projects and a complete compact archive.
+                A structured view of product work, agent tooling, implementation studies, and public repositories. Selected work is followed by additional builds and a curated archive.
               </p>
             </div>
             <div className="lg:col-span-4 grid grid-cols-2 gap-6">
@@ -842,7 +843,7 @@ export default function ProjectsIndex() {
                   {githubProjectCount}
                 </span>
                 <span className="text-micro" style={{ color: "var(--fg-muted)" }}>
-                  GitHub repos covered
+                  Portfolio records
                 </span>
               </div>
             </div>
@@ -1141,18 +1142,18 @@ export default function ProjectsIndex() {
         <section className="section-container pb-32">
           <div className="mb-10">
             <p className="text-micro mb-4" style={{ color: "var(--fg-muted)" }}>
-              Complete archive
+              Archive
             </p>
             <h2 className="text-display-lg font-light mb-4" style={{ color: "var(--fg-primary)" }}>
-              Remaining projects
+              Additional work
             </h2>
             <p className="text-body-lg max-w-2xl" style={{ color: "var(--fg-secondary)" }}>
-              Everything else is sorted by perceived portfolio relevance first, with sparse forks and reference repos kept lower for completeness.
+              Expandable records lead with authored product and technical work. Smaller public builds follow as direct, compact links.
             </p>
           </div>
 
           <div className="border-t" style={{ borderColor: "var(--border)" }}>
-            {remainingProjects.map((project, index) => {
+            {expandableArchiveProjects.map((project) => {
               const isOpen = openProject === project.slug;
 
               return (
@@ -1181,7 +1182,7 @@ export default function ProjectsIndex() {
                     aria-controls={`archive-${project.slug}`}
                   >
                     <span className="text-micro md:col-span-2" style={{ color: "var(--fg-muted)" }}>
-                      {String(index + 11).padStart(2, "0")}
+                      {String(project.archiveNumber).padStart(2, "0")}
                     </span>
                     <span className="archive-project-title md:col-span-5 min-w-0 text-body-xl font-light md:whitespace-nowrap md:overflow-hidden md:text-ellipsis" style={{ color: "var(--fg-primary)" }}>
                       <ShuffleText text={project.name} duration={0.4} shuffleTimes={2} textAlign="left" />
@@ -1239,6 +1240,33 @@ export default function ProjectsIndex() {
                       </motion.div>
                     )}
                   </AnimatePresence>
+                </article>
+              );
+            })}
+
+            {quietArchiveProjects.map((project) => {
+              const href = project.liveUrl || project.url;
+
+              return (
+                <article key={project.slug} className="archive-project-quiet border-b" style={{ borderColor: "var(--border)" }}>
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="archive-project-quiet-link grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 py-5 text-left cursor-none"
+                    aria-label={`Open ${project.name}`}
+                  >
+                    <span className="text-micro md:col-span-2" style={{ color: "var(--fg-muted)" }}>
+                      {String(project.archiveNumber).padStart(2, "0")}
+                    </span>
+                    <span className="archive-project-quiet-title md:col-span-5 min-w-0 text-body-lg font-light" style={{ color: "var(--fg-primary)" }}>
+                      {project.name}
+                    </span>
+                    <span className="md:col-span-4 text-body-sm" style={{ color: "var(--fg-muted)" }}>
+                      {project.status}
+                    </span>
+                    <span className="archive-project-quiet-arrow" aria-hidden="true">&nearr;</span>
+                  </a>
                 </article>
               );
             })}
