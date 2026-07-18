@@ -36,6 +36,7 @@ const TextPressure = ({
   className = '',
 
   minFontSize = 24,
+  baseWeight = 100,
   targetFps = 60
 }) => {
   const containerRef = useRef(null);
@@ -131,7 +132,7 @@ const TextPressure = ({
     const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     const minFrameDuration = targetFps > 0 ? 1000 / targetFps : 0;
 
-    const defaultSettings = `'wght' ${weight ? 100 : 400}, 'wdth' ${width ? 100 : 100}, 'ital' 0`;
+    const defaultSettings = `'wght' ${weight ? baseWeight : 400}, 'wdth' ${width ? 100 : 100}, 'ital' 0`;
 
     const resetSpans = () => {
       spansRef.current.forEach((span) => {
@@ -200,7 +201,7 @@ const TextPressure = ({
 
           const d = Math.sqrt(dSq);
           const wdth = width ? Math.floor(getAttr(d, maxDist, 5, 200)) : 100;
-          const wght = weight ? Math.floor(getAttr(d, maxDist, 100, 900)) : 400;
+          const wght = weight ? Math.max(baseWeight, Math.floor(getAttr(d, maxDist, 100, 900))) : 400;
           const italVal = italic ? getAttr(d, maxDist, 0, 1).toFixed(2) : 0;
           const alphaVal = alpha ? getAttr(d, maxDist, 0, 1).toFixed(2) : 1;
 
@@ -340,7 +341,7 @@ const TextPressure = ({
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       motionQuery.removeEventListener('change', handleMotionPreferenceChange);
     };
-  }, [width, weight, italic, alpha, targetFps, calculateSpans]);
+  }, [width, weight, italic, alpha, baseWeight, targetFps, calculateSpans]);
 
   const styleElement = useMemo(() => {
     const css = `
