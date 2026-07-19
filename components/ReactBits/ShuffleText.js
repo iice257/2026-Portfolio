@@ -26,6 +26,7 @@ const ShuffleText = ({
   triggerOnce = true,
   respectReducedMotion = true,
   triggerOnHover = true,
+  triggerOnTap = false,
   preserveWords = true,
   clipDuringShuffle = true,
 }) => {
@@ -167,6 +168,21 @@ const ShuffleText = ({
     el.addEventListener('mouseenter', handleHover);
     return () => el.removeEventListener('mouseenter', handleHover);
   }, [animate, triggerOnHover]);
+
+  useEffect(() => {
+    if (!triggerOnTap || !ref.current) return;
+
+    const el = ref.current;
+    const handlePointerUp = () => {
+      if (animatingRef.current) return;
+
+      hasPlayedRef.current = false;
+      animate();
+    };
+
+    el.addEventListener('pointerup', handlePointerUp);
+    return () => el.removeEventListener('pointerup', handlePointerUp);
+  }, [animate, triggerOnTap]);
 
   const commonStyle = useMemo(() => {
     const shuffleStyle = isShuffling && clipDuringShuffle && shuffleWidth

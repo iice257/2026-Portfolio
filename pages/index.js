@@ -61,7 +61,13 @@ export default function Home() {
 
   useEffect(() => {
     let frameId = null;
+    let settleTimer = null;
+    const requestedSection = getRequestedSection();
+    let pendingSection = requestedSection;
+
     const updateUrlFromViewport = () => {
+      if (pendingSection) return;
+
       if (frameId !== null) {
         window.cancelAnimationFrame(frameId);
       }
@@ -103,15 +109,23 @@ export default function Home() {
     window.addEventListener("scroll", updateUrlFromViewport, { passive: true });
     window.addEventListener("resize", updateUrlFromViewport);
 
-    const requestedSection = getRequestedSection();
     if (requestedSection) {
       let attempts = 0;
       const scrollWhenReady = () => {
         attempts += 1;
-        if (document.getElementById(requestedSection)) {
+        const target = document.getElementById(requestedSection);
+        const allSectionsReady = SECTION_IDS.every((id) => document.getElementById(id));
+
+        if (target && allSectionsReady) {
+          ScrollTrigger.refresh(true);
           window.requestAnimationFrame(() => {
-            scrollToSection(requestedSection, { behavior: "auto", updateUrl: true });
-            updateUrlFromViewport();
+            window.requestAnimationFrame(() => {
+              scrollToSection(requestedSection, { behavior: "auto", updateUrl: true });
+              settleTimer = window.setTimeout(() => {
+                pendingSection = null;
+                updateUrlFromViewport();
+              }, 180);
+            });
           });
           return;
         }
@@ -129,6 +143,9 @@ export default function Home() {
     return () => {
       if (frameId !== null) {
         window.cancelAnimationFrame(frameId);
+      }
+      if (settleTimer !== null) {
+        window.clearTimeout(settleTimer);
       }
       resizeObserver?.disconnect();
       window.removeEventListener("scroll", updateUrlFromViewport);

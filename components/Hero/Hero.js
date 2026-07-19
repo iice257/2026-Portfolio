@@ -13,27 +13,24 @@ const Galaxy = dynamic(() => import("../ReactBits/Galaxy"), { ssr: false });
 const Waves = dynamic(() => import("../ReactBits/Waves"), { ssr: false });
 
 const HERO_CAPABILITY_PHRASES = [
-  "digital experiences",
-  "mobile apps",
-  "infrastructure",
-  "human-centred interfaces",
-  "landing pages",
-  "machine learning algorithms",
-  "intelligence and research systems",
-  "cross-platform experiences",
+  "AI-powered tools",
+  "polished interfaces",
+  "full-stack products",
   "agentic workflows",
+  "mobile apps",
   "design systems",
   "automation systems",
   "data dashboards",
-  "vertical software architecture",
   "API integrations",
-  "AI-powered tools",
+  "research systems",
+  "product infrastructure",
 ];
 
 const HERO_CAPABILITY_TRANSITION_MS = 640;
 const LOCK_VIEWPORT_QUERY = "(max-width: 1023px)";
 const TOOLTIP_DELAY_MS = 2400;
 const TOOLTIP_VISIBLE_MS = 3200;
+const HERO_SCROLL_TRIAL_ENABLED = process.env.NEXT_PUBLIC_HERO_SCROLL_TRIAL === "true";
 
 const LockIcon = ({ unlocked = false }) => (
   <svg
@@ -83,6 +80,7 @@ const Hero = () => {
   const [previousCapabilityIndex, setPreviousCapabilityIndex] = useState(null);
   const [capabilityWidth, setCapabilityWidth] = useState(null);
   const sectionRef = useRef(null);
+  const backdropRef = useRef(null);
   const nameContainerRef = useRef(null);
   const subtitleRef = useRef(null);
   const scrollIndicatorRef = useRef(null);
@@ -416,13 +414,47 @@ const Hero = () => {
       ScrollTrigger.create({
         trigger: sectionRef.current,
         start: "top top",
-        end: "bottom top",
+        end: HERO_SCROLL_TRIAL_ENABLED && !reduceMotion && !window.matchMedia(LOCK_VIEWPORT_QUERY).matches
+          ? "+=58%"
+          : "bottom top",
         scrub: 1,
+        pin: HERO_SCROLL_TRIAL_ENABLED && !reduceMotion && !window.matchMedia(LOCK_VIEWPORT_QUERY).matches,
+        pinSpacing: true,
+        anticipatePin: 1,
         onUpdate: (self) => {
           if (isLockedRef.current) return;
 
           const progress = self.progress;
           const isCompact = isLockViewportRef.current;
+          const isScrollTrial = HERO_SCROLL_TRIAL_ENABLED && !reduceMotion && !isCompact;
+
+          if (isScrollTrial) {
+            const zoomProgress = Math.min(progress / 0.62, 1);
+            const exitProgress = Math.max((progress - 0.62) / 0.38, 0);
+
+            gsap.set(nameContainerRef.current, {
+              y: 0,
+              scale: 1 + zoomProgress * 0.04 - exitProgress * 0.04,
+              filter: "blur(0px)",
+              opacity: 1,
+            });
+
+            gsap.set(subtitleRef.current, {
+              y: zoomProgress * 16 - exitProgress * 16,
+              scale: 1 + zoomProgress * 0.012 - exitProgress * 0.012,
+              opacity: 1,
+            });
+
+            gsap.set(backdropRef.current, {
+              scale: 1 + zoomProgress * 0.04 - exitProgress * 0.04,
+              opacity: 1,
+            });
+
+            gsap.set(scrollIndicatorRef.current, {
+              opacity: 1 - progress * 4,
+            });
+            return;
+          }
 
           gsap.set(nameContainerRef.current, {
             y: isCompact ? progress * 56 : progress * 150,
@@ -438,6 +470,10 @@ const Hero = () => {
 
           gsap.set(scrollIndicatorRef.current, {
             opacity: 1 - progress * 3,
+          });
+
+          gsap.set(backdropRef.current, {
+            clearProps: "transform,opacity",
           });
         },
       });
@@ -455,9 +491,10 @@ const Hero = () => {
       className={`${styles.heroSection} ${isLocked ? styles.heroSectionLocked : ""} ${hasUnlocked ? styles.heroSectionUnlocked : ""} relative min-h-[100dvh] lg:min-h-screen flex items-center justify-center overflow-hidden`}
       style={{ backgroundColor: "var(--bg-primary)" }}
       data-hero-locked={isLocked ? "true" : "false"}
+      data-hero-scroll-trial={HERO_SCROLL_TRIAL_ENABLED ? "true" : "false"}
     >
       {canRenderHeroBackdrop && theme === "dark" && (
-        <div className={styles.galaxyBackdrop} aria-hidden="true">
+        <div ref={backdropRef} className={styles.galaxyBackdrop} aria-hidden="true">
           <Galaxy
             {...PORTFOLIO_GALAXY_CONFIG}
             paused={isHeroBackdropPaused}
@@ -466,7 +503,7 @@ const Hero = () => {
       )}
 
       {canRenderHeroBackdrop && theme === "light" && (
-        <div className={styles.wavesBackdrop} aria-hidden="true">
+        <div ref={backdropRef} className={styles.wavesBackdrop} aria-hidden="true">
           <Waves
             {...PORTFOLIO_WAVES_CONFIG}
             pixelRatio={0.8}
@@ -544,7 +581,7 @@ const Hero = () => {
                 scale={false}
                 textColor="var(--fg-primary)"
                 minFontSize={42}
-                baseWeight={isLockViewport ? 165 : 100}
+                baseWeight={isLockViewport ? 550 : 100}
                 targetFps={60}
               />
             </div>

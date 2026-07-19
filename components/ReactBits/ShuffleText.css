@@ -41,8 +41,9 @@
 }
 
 .shuffle-space {
-  display: inline;
-  white-space: normal;
+  display: inline-block;
+  width: 0.28em;
+  white-space: nowrap;
 }
 
 .shuffle-line {

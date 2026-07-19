@@ -413,6 +413,19 @@ html[data-hero-locked="true"] [data-hide-when-hero-locked="true"] {
 }
 
 @media (max-width: 767px) {
+  .landing-section-title {
+    width: 100%;
+    font-size: clamp(4rem, 17.75vw, 7rem) !important;
+    line-height: 0.94 !important;
+    letter-spacing: 0 !important;
+    text-wrap: balance;
+
+    .shuffle-parent {
+      display: block;
+      width: 100%;
+    }
+  }
+
   .text-massive {
     font-size: clamp(3rem, 14.5vw, 5.4rem);
     line-height: 1.04;

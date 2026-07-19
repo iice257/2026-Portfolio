@@ -108,7 +108,7 @@ const Contact = () => {
             className="contact-title text-display-lg md:text-display-xl font-light mb-8 contact-reveal"
             style={{ color: "var(--fg-primary)" }}
           >
-            <span className="block">We&apos;re gonna build amazing things,</span>
+            <span className="block">Let&apos;s build something useful,</span>
             <span className="block">together.</span>
           </h2>
 

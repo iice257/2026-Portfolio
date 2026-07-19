@@ -53,7 +53,7 @@ const Philosophy = () => {
     >
       <div className="section-container text-center sticky top-[30vh]">
         <h2
-          className="text-[clamp(4.15rem,18vw,7.4rem)] md:text-giant font-extralight max-w-[calc(100vw-2rem)] md:max-w-5xl mx-auto leading-[1.02] md:leading-[1.2]"
+          className="text-[clamp(3rem,12.5vw,5rem)] md:text-giant font-extralight max-w-[calc(100vw-2rem)] md:max-w-5xl mx-auto leading-[1.02] md:leading-[1.2]"
           style={{ color: 'var(--fg-primary)' }}
         >
           {words.map((word, i) => (

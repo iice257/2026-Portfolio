@@ -62,27 +62,27 @@ const Skills = () => {
     {
       name: "Frontend",
       skills: ["React", "React Native", "TypeScript", "Next.js", "Tailwind CSS"],
-      description: "Building responsive, performant user interfaces with modern frameworks and best practices."
+      description: "Building responsive, high-fidelity interfaces where performance and interaction quality are product features."
     },
     {
       name: "Backend",
       skills: ["Node.js", "PHP / Laravel", "FastAPI", "Python", "Docker"],
-      description: "Designing scalable APIs and server-side architecture for robust applications."
+      description: "Building the APIs, services, and deployment paths that make products work end to end."
     },
     {
       name: "Data",
       skills: ["MySQL", "MongoDB"],
-      description: "Managing databases and data structures for efficient storage and retrieval."
+      description: "Structuring application data for reliable retrieval, product state, and operational workflows."
     },
     {
       name: "AI and Agents",
       skills: ["AI Agents", "Prompt Workflows", "Automation", "Tool Calling", "Research Systems"],
-      description: "Designing practical AI workflows, agent tools, and automation systems that support real users."
+      description: "Using Codex and agent workflows daily to research, build, debug, automate, and review software."
     },
     {
       name: "Practices",
       skills: ["Performance Optimization", "Responsive Design", "UI/UX Awareness", "System Maintenance", "Problem Solving"],
-      description: "Applying industry best practices for maintainable, high-quality code."
+      description: "Keeping products maintainable through performance work, responsive systems, careful review, and operational discipline."
     }
   ];
 
@@ -124,10 +124,10 @@ const Skills = () => {
           </p>
           <h2
             ref={titleRef}
-            className="text-massive font-extralight"
+            className="landing-section-title text-massive font-extralight"
             style={{ color: 'var(--fg-primary)' }}
           >
-            <ShuffleText text="What I do" duration={0.4} shuffleTimes={4} />
+            <ShuffleText text="What I do" duration={0.4} shuffleTimes={4} triggerOnTap clipDuringShuffle={false} textAlign="left" />
           </h2>
         </div>
 

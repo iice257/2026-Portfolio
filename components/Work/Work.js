@@ -119,13 +119,11 @@ const Work = () => {
       stack: ["HTML", "CSS", "JavaScript", "Responsive Design", "Website Maintenance"],
     },
     {
-      company: "REDACTED",
+      company: "Nestlé",
       role: "IT Attendant",
-      period: "REDACTED - REDACTED",
-      location: "REDACTED",
-      redacted: true,
+      period: "CURRENT",
       summary:
-        "Provided IT support in a disciplined operational environment, assisting with endpoint support, system access, troubleshooting, and day-to-day technical issue resolution.",
+        "Keep day-to-day workplace technology dependable across endpoint support, system access, troubleshooting, onboarding, and operational follow-through.",
       details: [
         "Supported users with technical issues across devices, access, and workplace systems.",
         "Assisted with hardware, software, and basic network-related troubleshooting.",
@@ -160,10 +158,10 @@ const Work = () => {
           </p>
           <h2
             ref={titleRef}
-            className="text-[clamp(3.5rem,7.75vw,7.65rem)] leading-[1.08] font-extralight pb-[0.16em]"
+            className="landing-section-title text-[clamp(3.5rem,7.75vw,7.65rem)] leading-[1.08] font-extralight pb-[0.16em]"
             style={{ color: "var(--fg-primary)" }}
           >
-            <ShuffleText text="Where I've worked" duration={0.6} shuffleTimes={4} />
+            <ShuffleText text="Where I've worked" duration={0.6} shuffleTimes={4} triggerOnTap clipDuringShuffle={false} textAlign="left" />
           </h2>
         </div>
 
@@ -193,7 +191,7 @@ const Work = () => {
                         {exp.role}
                       </h3>
                       <span className="text-body-md" style={{ color: "var(--fg-secondary)" }}>
-                        {exp.redacted ? <span className="redacted-text">REDACTED</span> : exp.company}
+                        {exp.company}
                       </span>
                       <span className="mt-2 block text-[0.7rem] font-medium uppercase tracking-[0.14em] md:hidden" style={{ color: "var(--fg-muted)" }}>
                         {exp.period}
@@ -236,7 +234,7 @@ const Work = () => {
                         </p>
                         {exp.location && (
                           <p className="text-micro mt-5" style={{ color: "var(--fg-muted)" }}>
-                            Location: <span className="redacted-text">REDACTED</span>
+                            Location: {exp.location}
                           </p>
                         )}
                         <p className="text-micro mt-5 md:hidden" style={{ color: "var(--fg-muted)" }}>
@@ -273,42 +271,42 @@ const Work = () => {
             <span>5+ years building for the web</span>
             <span>Multiple client websites shipped</span>
             <span>Frontend, UI, and IT systems experience</span>
-            <span>Applied AI/ML learning in progress</span>
+            <span>Daily AI-assisted engineering practice</span>
           </div>
 
           <div className="work-practice-grid">
             <div className="work-practice-heading">
               <p className="text-micro mb-5" style={{ color: "var(--fg-muted)" }}>
-                AI & Machine Learning Practice
+                Applied AI & Machine Learning
               </p>
               <h3 className="text-display-md md:text-display-lg font-extralight leading-tight" style={{ color: "var(--fg-primary)" }}>
-                Building AI fluency into product engineering.
+                Daily AI engineering, backed by deeper study.
               </h3>
             </div>
 
             <div className="work-practice-copy">
               <p className="text-body-lg font-light leading-relaxed" style={{ color: "var(--fg-secondary)" }}>
-                Currently strengthening machine learning foundations through Deep Learning with Python, neural network fundamentals, and applied exploration of modern AI systems.
+                Codex has been part of my daily engineering workflow from its earliest releases: planning, implementation, debugging, research, automation, and review. In parallel, I am going deeper into Python, model behavior, neural networks, and the mathematics behind modern machine learning.
               </p>
               <ul className="work-practice-list">
                 <li>
                   <span className="text-micro">01</span>
-                  <p>Understand how models learn, fail, and get evaluated.</p>
+                  <p>Build practical agent tools, automations, and review-first workflows for real engineering work.</p>
                 </li>
                 <li>
                   <span className="text-micro">02</span>
-                  <p>Translate AI concepts into real product UX and reliable systems.</p>
+                  <p>Use model capabilities critically: evaluate outputs, expose uncertainty, and keep humans in control.</p>
                 </li>
                 <li>
                   <span className="text-micro">03</span>
-                  <p>Keep the practice grounded in useful tools, not novelty for its own sake.</p>
+                  <p>Study the Python, model, neural-network, and mathematical foundations beneath the tools.</p>
                 </li>
               </ul>
             </div>
           </div>
 
           <div className="work-practice-tags text-micro" style={{ color: "var(--fg-muted)" }}>
-            {["Deep Learning", "Neural Networks", "LLMs", "AI Agents", "Model Evaluation", "Product UX"].map((item) => (
+            {["Codex", "Agent Workflows", "Python", "Deep Learning", "Neural Networks", "Model Evaluation"].map((item) => (
               <span key={item}>{item}</span>
             ))}
           </div>

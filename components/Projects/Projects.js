@@ -89,10 +89,10 @@ const Projects = ({ isDesktop }) => {
         </p>
         <h2
           ref={titleRef}
-          className="text-massive font-extralight"
-          style={{ color: 'var(--fg-primary)', whiteSpace: isDesktop ? 'nowrap' : 'normal' }}
+          className="landing-section-title text-massive font-extralight md:whitespace-nowrap"
+          style={{ color: 'var(--fg-primary)' }}
         >
-          <ShuffleText text="What I've done" duration={0.6} shuffleTimes={4} />
+          <ShuffleText text="What I've done" duration={0.6} shuffleTimes={4} triggerOnTap clipDuringShuffle={false} textAlign="left" />
         </h2>
       </div>
 
