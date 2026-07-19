@@ -10,17 +10,21 @@ const projectDataSource = fs
 
 const projectData = vm.runInNewContext(
   `${projectDataSource}
-  ({ allProjects, featuredProjects, githubProjectCount, majorProjectCount, majorProjects });`,
+  ({ allProjects, archiveProjectRecords, expandableArchiveProjects, featuredProjects, githubProjectCount, majorProjectCount, majorProjects, quietArchiveProjects, remainingProjects });`,
   {},
   { filename: "data/projects.js" }
 );
 
 const {
   allProjects,
+  archiveProjectRecords,
+  expandableArchiveProjects,
   featuredProjects,
   githubProjectCount,
   majorProjectCount,
   majorProjects,
+  quietArchiveProjects,
+  remainingProjects,
 } = projectData;
 const errors = [];
 const warnings = [];
@@ -108,8 +112,31 @@ if (majorProjectCount !== featuredProjects.length + 6) {
   errors.push("majorProjectCount should equal featured projects plus six major projects.");
 }
 
-if (githubProjectCount < allProjects.filter((project) => project.url !== "#").length) {
-  errors.push("githubProjectCount is lower than the number of projects with repository URLs.");
+if (githubProjectCount !== allProjects.filter((project) => project.url !== "#").length) {
+  errors.push("githubProjectCount must match the visible projects with repository URLs.");
+}
+
+const visibleArchiveSlugs = new Set(remainingProjects.map((project) => project.slug));
+const hiddenArchiveProjects = archiveProjectRecords.filter((project) => project.archiveTier === "hidden");
+
+if (archiveProjectRecords.some((project) => !["expandable", "quiet", "hidden"].includes(project.archiveTier))) {
+  errors.push("Every archive record must resolve to a supported archive tier.");
+}
+
+if (new Set(archiveProjectRecords.map((project) => project.archiveNumber)).size !== archiveProjectRecords.length) {
+  errors.push("Archive record numbers must be unique.");
+}
+
+if (quietArchiveProjects.some((project) => !project.liveUrl && (!project.url || project.url === "#"))) {
+  errors.push("Quiet archive rows must have a valid repository or live link.");
+}
+
+if (hiddenArchiveProjects.some((project) => visibleArchiveSlugs.has(project.slug))) {
+  errors.push("Hidden archive records cannot appear in the visible archive.");
+}
+
+if (expandableArchiveProjects.some((project) => !visibleArchiveSlugs.has(project.slug))) {
+  errors.push("Expandable archive records must appear in the visible archive.");
 }
 
 for (const warning of warnings) {

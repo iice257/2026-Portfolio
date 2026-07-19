@@ -29,7 +29,7 @@ export const featuredProjects = [
     concept: "A review-first form copilot for moving through long applications without surrendering the final decision.",
     problem: "Re-entering the same context across lengthy forms is slow and error-prone; one missed field can undo an otherwise strong application.",
     solution: "Collect context once, generate editable field-level drafts, and keep submission outside the automation boundary.",
-    currentStatus: "Prototype direction with the core product model defined in the repo.",
+    currentStatus: "Review-first product workflow defined in the repository.",
     developerNotes: "This is a place where AI can remove tedious work without pretending it should take responsibility. The core product question is how far automation can go before trust, accuracy, and user intent are compromised.",
     notes: "This is a place where AI can remove tedious work without pretending it should take responsibility. The core product question is how far automation can go before trust, accuracy, and user intent are compromised.",
     desktopVideo: "/projects/videos/formmate-ai.webm",
@@ -108,13 +108,13 @@ export const featuredProjects = [
     slug: "restore-ai",
     category: "AI image tools",
     subtitle: "Mobile image restoration app",
-    description: "A mobile app concept for restoring, upscaling, resizing, and recoloring damaged or low-quality images.",
+    description: "A mobile app for restoring, upscaling, resizing, and recoloring damaged or low-quality images.",
     longDescription: "Restore AI is a mobile image-repair workflow for restoration, upscaling, resizing, and recoloring. It frames technical image processing as a simple before-and-after decision for personal and professional photos.",
     url: repo("RestoreAI"),
     tech: ["mobile", "ai image", "restoration", "ux"],
     toolsUsed: [
       "Mobile app patterns",
-      "AI image restoration concepts",
+      "AI image restoration workflows",
       "Upscaling workflows",
       "Recoloring UX",
       "Before/after review",
@@ -127,7 +127,7 @@ export const featuredProjects = [
     concept: "A focused mobile studio for improving old, damaged, or low-resolution images without exposing users to a technical editing stack.",
     problem: "Basic image repair often requires several specialist tools, making a straightforward restoration job feel slower and more technical than it needs to be.",
     solution: "Bring the most common repair actions into one guided mobile flow, with clear before-and-after review before export.",
-    currentStatus: "Concept/prototype repo.",
+    currentStatus: "Product foundation for a focused mobile image restoration workflow.",
     developerNotes: "The product has immediate emotional value because old images are personal. The hard product work is not visual polish alone; it is delivering reliable quality, respectful privacy, and a cost model that makes the tool viable.",
     notes: "The product has immediate emotional value because old images are personal. The hard product work is not visual polish alone; it is delivering reliable quality, respectful privacy, and a cost model that makes the tool viable.",
     visual: { label: "Restore", kicker: "Image repair", accent: "#FCA5A5", secondary: "#38BDF8" },
@@ -137,9 +137,9 @@ export const featuredProjects = [
 export const majorProjects = [
   { name: "Bountic", repoName: "bountic", slug: "bountic", subtitle: "Autonomous USDC bounties", description: "A bounty board for funding agent-assisted open-source tasks with USDC.", url: repo("bountic"), liveUrl: "https://bountic.vercel.app", tech: ["crypto", "agents", "open source"], status: "Exploratory product build", notes: "The useful part is the incentive model: small tasks, clear payouts, and agent work that still needs human judgment.", visual: { label: "Bountic", kicker: "Bounty economy", accent: "#8EF6E4", secondary: "#F6C177" } },
   { name: "Loop Monitor", repoName: "loop-monitor", slug: "loop-monitor", subtitle: "Agent pipeline dashboard", description: "A local dashboard for tracking agent runs, bounty queues, and judge results.", url: repo("loop-monitor"), tech: ["dashboard", "agents", "ops"], status: "Local dashboard", notes: "A practical monitoring surface for agent work: what ran, what changed, and what still needs review.", visual: { label: "Loop", kicker: "Agent telemetry", accent: "#93C5FD", secondary: "#22C55E" } },
-  { name: "Rustchain", repoName: "Rustchain", slug: "rustchain", subtitle: "Proof-of-Antiquity chain", description: "A DePIN concept where vintage hardware participates in a Proof-of-Antiquity network.", url: repo("Rustchain"), liveUrl: "https://rustchain.org", tech: ["blockchain", "depin", "hardware"], status: "Technical concept", notes: "Mostly a systems idea, but the hardware constraint gives it a sharper story than a generic chain demo.", visual: { label: "Rustchain", kicker: "Vintage DePIN", accent: "#F97316", secondary: "#94A3B8" } },
+  { name: "Rustchain", repoName: "Rustchain", slug: "rustchain", subtitle: "Proof-of-Antiquity chain", description: "A DePIN network where vintage hardware participates in a Proof-of-Antiquity protocol.", url: repo("Rustchain"), liveUrl: "https://rustchain.org", tech: ["blockchain", "depin", "hardware"], status: "Technical exploration", notes: "The hardware constraint gives the network a distinct systems story beyond a generic chain project.", visual: { label: "Rustchain", kicker: "Vintage DePIN", accent: "#F97316", secondary: "#94A3B8" } },
   { name: "Pages Forward", repoName: "Pages-forward-rebuild", slug: "pages-forward", subtitle: "Modern bookstore rebuild", description: "A rebuilt bookstore surface with clearer browsing, product framing, and commerce intent.", url: repo("Pages-forward-rebuild"), tech: ["javascript", "commerce", "frontend", "content"], status: "Second iteration", notes: "Useful because it shows iteration: same idea, stronger structure, cleaner product surface.", visual: { label: "Pages", kicker: "Book commerce", accent: "#F3DFA2", secondary: "#C084FC" } },
-  { name: "SignalOps", repoName: "signalops", slug: "signalops", subtitle: "Security triage cockpit", description: "A security and operations cockpit for triage, status, and action queues.", url: repo("signalops"), liveUrl: "https://signalops-orpin.vercel.app", tech: ["typescript", "security", "ops"], status: "Product cockpit concept", notes: "The dashboard direction is the point here: compact status, quick scanning, and action-heavy workflows.", visual: { label: "SignalOps", kicker: "Security ops", accent: "#F87171", secondary: "#60A5FA" } },
+  { name: "SignalOps", repoName: "signalops", slug: "signalops", subtitle: "Security triage cockpit", description: "A security and operations cockpit for triage, status, and action queues.", url: repo("signalops"), liveUrl: "https://signalops-orpin.vercel.app", tech: ["typescript", "security", "ops"], status: "Security operations product", notes: "Built for compact status, quick scanning, and action-heavy workflows.", visual: { label: "SignalOps", kicker: "Security ops", accent: "#F87171", secondary: "#60A5FA" } },
   { name: "Unfollowr", repoName: "Unfollowr", slug: "unfollowr", image: "/projects/unfollowr.png", subtitle: "Social account hygiene dashboard", description: "A dashboard for reviewing follow status, engagement, and cleanup actions.", url: repo("Unfollowr"), tech: ["typescript", "dashboard", "social"], status: "Dashboard build", notes: "A simple product surface around account cleanup: score what matters, queue the action, keep the user in control.", visual: { contain: false, accent: "#FFA62E", secondary: "#EA4D2C" } },
 ];
 
@@ -163,9 +163,18 @@ export const highlightedProject = {
   visual: { label: "KA", kicker: "Portfolio system", accent: "#F5F5F5", secondary: "#7CFFCB" },
 };
 
-export const remainingProjects = [
-  { name: "Codexoors", repoName: "Codexoors", slug: "codexoors", description: "Early-access/waitlist experience with original Codexoors branding, identity connection, community tasks, and invite unlocks.", tech: ["css", "waitlist", "community"], status: "Brand/product page", notes: "Strong identity concept; kept near the top for polish potential.", url: repo("Codexoors") },
-  { name: "PowergridApp", repoName: "PowergridApp", slug: "powergridapp", image: "/projects/powergrid.png", description: "Mobile app concept for navigating unreliable power supply in Nigeria with availability, usage, and management guidance.", tech: ["mobile", "energy", "utility"], status: "Product concept", notes: "Preserves the existing PowerGrid idea in the complete archive.", url: repo("PowergridApp") },
+const EXPANDABLE_ARCHIVE_NUMBERS = new Set([
+  11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+  24, 26, 27, 28, 32, 33, 52, 53, 54,
+]);
+
+const HIDDEN_ARCHIVE_NUMBERS = new Set([
+  34, 37, 38, 41, 42, 43, 44, 45, 46, 48, 49, 51,
+]);
+
+const archiveProjectSource = [
+  { name: "Codexoors", repoName: "Codexoors", slug: "codexoors", description: "Early-access/waitlist experience with original Codexoors branding, identity connection, community tasks, and invite unlocks.", tech: ["css", "waitlist", "community"], status: "Brand product page", notes: "A strong identity system with room for further polish.", url: repo("Codexoors") },
+  { name: "PowergridApp", repoName: "PowergridApp", slug: "powergridapp", image: "/projects/powergrid.png", description: "Mobile app for navigating unreliable power supply in Nigeria with availability, usage, and management guidance.", tech: ["mobile", "energy", "utility"], status: "Product build", notes: "Preserves the PowerGrid product direction in the complete archive.", url: repo("PowergridApp") },
   { name: "DSTRKT", repoName: "DSTRKT", slug: "dstrkt", description: "An eCommerce webstore for the DSTRKT fashion brand.", tech: ["html", "commerce", "brand"], status: "Webstore build", notes: "Clear client-style commerce surface.", url: repo("DSTRKT"), liveUrl: "https://dstrkt-site.vercel.app" },
   { name: "Samabi Clinic", repoName: "samabiclinic", slug: "samabiclinic", description: "A modern, accessible React-based website for Samabi Functional Medicine Clinic in Port Harcourt.", tech: ["typescript", "react", "healthcare"], status: "Clinic website", notes: "Professional service-site work with real-world positioning.", url: repo("samabiclinic") },
   { name: "TikTok Lyric Video Pipeline", repoName: "TikTok-Lyric-Video-Pipeline", slug: "tiktok-lyric-video-pipeline", description: "A modular Python pipeline for producing TikTok-ready lyric videos from licensed audio, timed lyrics, and trend metadata.", tech: ["python", "automation", "video"], status: "Automation pipeline", notes: "Good systems thinking across intake, scoring, rendering, scheduling, and upload.", url: repo("TikTok-Lyric-Video-Pipeline") },
@@ -176,12 +185,12 @@ export const remainingProjects = [
   { name: "Minimum Viable Parser", repoName: "Minimum-Viable-Parser", slug: "minimum-viable-parser", description: "A routing skill that chooses the lightest acquisition/parsing method that can still meet accuracy needs.", tech: ["parser", "skill", "routing"], status: "Reusable skill", notes: "Useful reliability layer for data extraction work.", url: repo("Minimum-Viable-Parser") },
   { name: "Skills Update", repoName: "Skills-update", slug: "skills-update", description: "A Python utility for updating installed skills.", tech: ["python", "skills", "maintenance"], status: "Utility skill", notes: "Small but relevant to the agent tooling cluster.", url: repo("Skills-update") },
   { name: "Codex iMessage Handoff", repoName: "codex-imessage-handoff", slug: "codex-imessage-handoff", description: "Work-from-iMessage handoff experiment for Codex workflows.", tech: ["typescript", "imessage", "codex"], status: "Experiment", notes: "Earlier version of the handoff tooling idea.", url: repo("codex-imessage-handoff") },
-  { name: "Bounty Hunters", repoName: "Bounty-Hunters", slug: "bounty-hunters", description: "Bounty-related project repository with limited public metadata.", tech: ["bounties", "prototype"], status: "Repository", notes: "Grouped near Bountic because of the related bounty theme.", url: repo("Bounty-Hunters") },
+  { name: "Bounty Hunters", repoName: "Bounty-Hunters", slug: "bounty-hunters", description: "Bounty-related project repository with limited public metadata.", tech: ["bounties", "open source"], status: "Repository", notes: "Grouped near Bountic because of the related bounty theme.", url: repo("Bounty-Hunters") },
   { name: "ILBE Event Page Redesign", repoName: "ILBE-event-page-redesign", slug: "ilbe-event-page-redesign", description: "Page redesign for the ILBE event in Ibadan.", tech: ["css", "event page", "frontend"], status: "Redesign", notes: "A focused visual redesign exercise.", url: repo("ILBE-event-page-redesign"), liveUrl: "https://ilbe-event-page-redesign.vercel.app" },
   { name: "Pages Forward Original", repoName: "Pages-Forward", slug: "pages-forward-original", description: "The original lighter Pages Forward bookstore website for buying physical books or ebooks and reading in-browser.", tech: ["html", "bookstore", "commerce"], status: "Earlier version", notes: "Kept as lineage for the featured rebuild.", url: repo("Pages-Forward"), liveUrl: "https://pages-forward.vercel.app" },
   { name: "Tickets", repoName: "Tickets", slug: "tickets", description: "Frontend clone of the Ticketmaster mobile experience built in a single HTML file.", tech: ["html", "clone", "mobile ui"], status: "Frontend exercise", notes: "Useful interaction/UI replication practice.", url: repo("Tickets"), liveUrl: "https://the-mayhem-tour.netlify.app" },
-  { name: "Solana dApp", repoName: "Solana-dApp", slug: "solana-dapp", description: "A light experiment building a Reddit-style dApp on Solana using Amazon Kiro IDE.", tech: ["typescript", "solana", "web3"], status: "Experiment", notes: "Functional scaffold, not production-ready.", url: repo("Solana-dApp"), liveUrl: "https://solana-d-app-ten.vercel.app" },
-  { name: "Nothing To Watch", repoName: "nothing-to-watch", slug: "nothing-to-watch", description: "Experimental WebGL gallery that visualizes tens of thousands of film posters as a Voronoi diagram.", tech: ["typescript", "webgl", "visualization"], status: "Visualization experiment", notes: "Technically interesting visual exploration.", url: repo("nothing-to-watch") },
+  { name: "Solana dApp", repoName: "Solana-dApp", slug: "solana-dapp", description: "A focused Reddit-style dApp build on Solana using Amazon Kiro IDE.", tech: ["typescript", "solana", "web3"], status: "Web3 implementation", notes: "A functional scaffold that demonstrates the core product flow.", url: repo("Solana-dApp") },
+  { name: "What to Watch", repoName: "What-to-watch", slug: "what-to-watch", description: "An exploratory movie-discovery product that turns a large film catalog into a tactile WebGL field for browsing, previewing, and saving titles.", tech: ["typescript", "webgl", "visualization", "product ux"], status: "Active visualization product", notes: "Planned for featured treatment later; retained here as an expandable technical product record for now.", url: repo("What-to-watch"), liveUrl: "https://what-to-watch-brown.vercel.app" },
   { name: "Qwen Chat iOS", repoName: "qwen-chat-ios", slug: "qwen-chat-ios", description: "iOS chat experiment repository with limited public metadata.", tech: ["ios", "chat", "ai"], status: "Experiment", notes: "Kept in the archive because the repo is public but sparse.", url: repo("qwen-chat-ios") },
   { name: "StickerSmash", repoName: "StickerSmash", slug: "stickersmash", description: "Expo tutorial project completed as a quick hands-on mobile learning exercise.", tech: ["typescript", "expo", "mobile"], status: "Learning project", notes: "Useful as documented learning progression.", url: repo("StickerSmash") },
   { name: "Hyperball Airdrop", repoName: "Hyperballairdrop", slug: "hyperballairdrop", description: "Small airdrop page built for the Hyperball project.", tech: ["html", "airdrop", "landing page"], status: "Landing page", notes: "Compact campaign-style build.", url: repo("Hyperballairdrop"), liveUrl: "https://hyperballairdrop.netlify.app" },
@@ -190,8 +199,8 @@ export const remainingProjects = [
   { name: "King's Portfolio", repoName: "king-s-portfolio", slug: "king-s-portfolio", description: "Previous portfolio website for Kingsley Aremu, showcasing projects and professional experience.", tech: ["typescript", "portfolio", "react"], status: "Previous portfolio", notes: "Useful as portfolio lineage.", url: repo("king-s-portfolio"), liveUrl: "https://kingsleyaremu.vercel.app" },
   { name: "Val Day Site", repoName: "val-day-site", slug: "val-day-site", description: "A simple single-file Valentine's Day website with no framework or build tooling.", tech: ["html", "single page", "creative"], status: "Small experiment", notes: "Lightweight creative build.", url: repo("val-day-site"), liveUrl: "https://val-day-site.vercel.app" },
   { name: "Heads Tails Game", repoName: "Heads-Tails-Game", slug: "heads-tails-game", description: "Heads-or-tails game section built as a mini landing-page interaction for BeraKols.", tech: ["game", "landing page"], status: "Mini game", notes: "Small interactive UI piece.", url: repo("Heads-Tails-Game") },
-  { name: "StreakMate", repoName: "Local portfolio data", slug: "streakmate", image: "/projects/streakmate.png", description: "Cross-platform habit tracking app for daily streaks, smart reminders, and motivational insights.", tech: ["react", "nodejs"], status: "Archived concept", notes: "Preserved from the previous project data so existing portfolio details are not lost.", url: "#" },
-  { name: "ScoreLog", repoName: "Local portfolio data", slug: "scorelog", image: "/projects/scorelog.png", description: "Versatile score tracking application for board games, card games, and competitive activities.", tech: ["react", "nodejs"], status: "Archived concept", notes: "Preserved from the previous project data so existing portfolio details are not lost.", url: "#" },
+  { name: "StreakMate", repoName: "Local portfolio data", slug: "streakmate", image: "/projects/streakmate.png", description: "Cross-platform habit tracking app for daily streaks, smart reminders, and motivational insights.", tech: ["react", "nodejs"], status: "Archived product", notes: "Preserved from earlier portfolio data as part of the complete project record.", url: "#" },
+  { name: "ScoreLog", repoName: "Local portfolio data", slug: "scorelog", image: "/projects/scorelog.png", description: "Versatile score tracking application for board games, card games, and competitive activities.", tech: ["react", "nodejs"], status: "Archived product", notes: "Preserved from earlier portfolio data as part of the complete project record.", url: "#" },
   { name: "Sphinx Nav Fiber", repoName: "sphinx-nav-fiber", slug: "sphinx-nav-fiber", description: "Repository with limited public metadata.", tech: ["experiment"], status: "Repository", notes: "Kept for completeness.", url: repo("sphinx-nav-fiber") },
   { name: "Universe", repoName: "universe", slug: "universe", description: "Repository with limited public metadata.", tech: ["experiment"], status: "Repository", notes: "Kept for completeness.", url: repo("universe") },
   { name: "iice257 Profile", repoName: "iice257", slug: "iice257-profile", description: "Profile repository for the iice257 GitHub account.", tech: ["github profile"], status: "Profile repo", notes: "Included as a public repo, but intentionally low in hierarchy.", url: repo("iice257") },
@@ -205,8 +214,25 @@ export const remainingProjects = [
   { name: "Build Your Own X", repoName: "build-your-own-x", slug: "build-your-own-x", description: "Reference repository for mastering programming by recreating technologies from scratch.", tech: ["learning", "reference"], status: "Reference", notes: "Included for completeness; not original portfolio work.", url: repo("build-your-own-x") },
   { name: "Medusa Setup", repoName: "yt-medusajs-setup", slug: "yt-medusajs-setup", description: "Setup of a Medusa app.", tech: ["medusa", "commerce", "setup"], status: "Setup exercise", notes: "Small setup repository.", url: repo("yt-medusajs-setup") },
   { name: "Pix Plot", repoName: "pix-plot", slug: "pix-plot", description: "A WebGL viewer for UMAP or TSNE-clustered images.", tech: ["webgl", "visualization", "reference"], status: "Reference", notes: "Reference/visualization repo kept in the archive.", url: repo("pix-plot") },
+  { name: "VISUALICER", repoName: "VISUALICER", slug: "visualicer", description: "A local-first lyric and audio visualizer with configurable radial geometry, responsive seeking, curated themes, typography controls, and browser-only media handling.", tech: ["next.js", "audio", "visualization", "interaction design"], status: "Active creative product", notes: "Planned for the major-project tier later; retained here as an expandable product record for now.", url: repo("VISUALICER"), liveUrl: "https://lyric-audio-visualizer.vercel.app" },
+  { name: "Tuteria Task", repoName: "tuteria-task", slug: "tuteria-task", description: "A full-stack referral follow-up workflow with send, preview, and audit-log states, server-side email delivery, privacy-safe Supabase logging, and CI deployment.", tech: ["next.js", "supabase", "email", "workflow"], status: "Full-stack case study", notes: "A compact but complete implementation that demonstrates product UI, backend safeguards, persistence, and delivery automation.", url: repo("tuteria-task") },
+  { name: "AeroDesk 11", repoName: "windows-11-os-fork", slug: "aerodesk-11", description: "A Windows-inspired browser operating-system prototype with boot and login flows, window management, taskbar utilities, system applications, and local desktop workflows.", tech: ["typescript", "react", "window management", "systems ui"], status: "Browser OS prototype", notes: "A broad interface-systems experiment relevant to desktop interaction, state management, and application-shell design.", url: repo("windows-11-os-fork") },
 ];
 
+export const archiveProjectRecords = archiveProjectSource.map((project, index) => {
+  const archiveNumber = index + 11;
+  const archiveTier = HIDDEN_ARCHIVE_NUMBERS.has(archiveNumber)
+    ? "hidden"
+    : EXPANDABLE_ARCHIVE_NUMBERS.has(archiveNumber)
+      ? "expandable"
+      : "quiet";
+
+  return { ...project, archiveNumber, archiveTier };
+});
+
+export const expandableArchiveProjects = archiveProjectRecords.filter((project) => project.archiveTier === "expandable");
+export const quietArchiveProjects = archiveProjectRecords.filter((project) => project.archiveTier === "quiet");
+export const remainingProjects = archiveProjectRecords.filter((project) => project.archiveTier !== "hidden");
 export const allProjects = [...featuredProjects, highlightedProject, ...majorProjects, ...remainingProjects];
-export const githubProjectCount = 50;
+export const githubProjectCount = allProjects.filter((project) => project.url && project.url !== "#").length;
 export const majorProjectCount = featuredProjects.length + majorProjects.length;

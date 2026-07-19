@@ -221,7 +221,7 @@ const Meta = () => (
     <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png" />
     <link rel="shortcut icon" href="/favicons/favicon.ico" />
     <meta name="msapplication-TileColor" content="#0a0a0a" />
-    <link rel="manifest" href="/manifest.json" />
+    <link rel="manifest" href="/manifest.json" type="application/manifest+json" />
   </Head>
 );
 

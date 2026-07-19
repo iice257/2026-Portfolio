@@ -85,9 +85,9 @@ const Contact = () => {
         <div className="contact-effect contact-effect-waves" aria-hidden="true">
           <Waves
             {...(PORTFOLIO_WAVES_THEME_CONFIG[theme] || PORTFOLIO_WAVES_THEME_CONFIG.light)}
-            pixelRatio={1}
-            targetFps={30}
-            maxPixelCount={1600000}
+            pixelRatio={0.72}
+            targetFps={24}
+            maxPixelCount={850000}
             paused={isContactBackdropPaused}
           />
         </div>
@@ -108,7 +108,7 @@ const Contact = () => {
             className="contact-title text-display-lg md:text-display-xl font-light mb-8 contact-reveal"
             style={{ color: "var(--fg-primary)" }}
           >
-            <span className="block">We&apos;re gonna build amazing things,</span>
+            <span className="block">Let&apos;s build something useful,</span>
             <span className="block">together.</span>
           </h2>
 
