@@ -70,10 +70,10 @@
     "Nigeria frontend engineer portfolio"
   ],
   "projectCounts": {
-    "all": 52,
+    "all": 43,
     "featured": 4,
     "major": 6,
-    "archive": 41
+    "archive": 32
   },
   "featuredProjects": [
     {
@@ -422,7 +422,9 @@
       ],
       "status": "Brand product page",
       "notes": "A strong identity system with room for further polish.",
-      "url": "https://github.com/iice257/Codexoors"
+      "url": "https://github.com/iice257/Codexoors",
+      "archiveNumber": 11,
+      "archiveTier": "expandable"
     },
     {
       "name": "PowergridApp",
@@ -437,7 +439,9 @@
       ],
       "status": "Product build",
       "notes": "Preserves the PowerGrid product direction in the complete archive.",
-      "url": "https://github.com/iice257/PowergridApp"
+      "url": "https://github.com/iice257/PowergridApp",
+      "archiveNumber": 12,
+      "archiveTier": "expandable"
     },
     {
       "name": "DSTRKT",
@@ -452,7 +456,9 @@
       "status": "Webstore build",
       "notes": "Clear client-style commerce surface.",
       "url": "https://github.com/iice257/DSTRKT",
-      "liveUrl": "https://dstrkt-site.vercel.app"
+      "liveUrl": "https://dstrkt-site.vercel.app",
+      "archiveNumber": 13,
+      "archiveTier": "expandable"
     },
     {
       "name": "Samabi Clinic",
@@ -466,7 +472,9 @@
       ],
       "status": "Clinic website",
       "notes": "Professional service-site work with real-world positioning.",
-      "url": "https://github.com/iice257/samabiclinic"
+      "url": "https://github.com/iice257/samabiclinic",
+      "archiveNumber": 14,
+      "archiveTier": "expandable"
     },
     {
       "name": "TikTok Lyric Video Pipeline",
@@ -480,7 +488,9 @@
       ],
       "status": "Automation pipeline",
       "notes": "Good systems thinking across intake, scoring, rendering, scheduling, and upload.",
-      "url": "https://github.com/iice257/TikTok-Lyric-Video-Pipeline"
+      "url": "https://github.com/iice257/TikTok-Lyric-Video-Pipeline",
+      "archiveNumber": 15,
+      "archiveTier": "expandable"
     },
     {
       "name": "Codex Handoff Plus",
@@ -494,7 +504,9 @@
       ],
       "status": "Personal tooling",
       "notes": "Part of the agent workflow ecosystem.",
-      "url": "https://github.com/iice257/codex-handoff-plus"
+      "url": "https://github.com/iice257/codex-handoff-plus",
+      "archiveNumber": 16,
+      "archiveTier": "expandable"
     },
     {
       "name": "X Publisher",
@@ -508,7 +520,9 @@
       ],
       "status": "Reusable skill",
       "notes": "Focused automation for social publishing workflows.",
-      "url": "https://github.com/iice257/x-publisher"
+      "url": "https://github.com/iice257/x-publisher",
+      "archiveNumber": 17,
+      "archiveTier": "expandable"
     },
     {
       "name": "Idea Launcher",
@@ -522,7 +536,9 @@
       ],
       "status": "Reusable skill",
       "notes": "A useful ideation-to-build bridge.",
-      "url": "https://github.com/iice257/idea-launcher"
+      "url": "https://github.com/iice257/idea-launcher",
+      "archiveNumber": 18,
+      "archiveTier": "expandable"
     },
     {
       "name": "Autoresearch",
@@ -536,7 +552,9 @@
       ],
       "status": "Reusable skill",
       "notes": "Supports repeatable research workflows.",
-      "url": "https://github.com/iice257/Autoresearch"
+      "url": "https://github.com/iice257/Autoresearch",
+      "archiveNumber": 19,
+      "archiveTier": "expandable"
     },
     {
       "name": "Minimum Viable Parser",
@@ -550,7 +568,9 @@
       ],
       "status": "Reusable skill",
       "notes": "Useful reliability layer for data extraction work.",
-      "url": "https://github.com/iice257/Minimum-Viable-Parser"
+      "url": "https://github.com/iice257/Minimum-Viable-Parser",
+      "archiveNumber": 20,
+      "archiveTier": "expandable"
     },
     {
       "name": "Skills Update",
@@ -564,7 +584,9 @@
       ],
       "status": "Utility skill",
       "notes": "Small but relevant to the agent tooling cluster.",
-      "url": "https://github.com/iice257/Skills-update"
+      "url": "https://github.com/iice257/Skills-update",
+      "archiveNumber": 21,
+      "archiveTier": "quiet"
     },
     {
       "name": "Codex iMessage Handoff",
@@ -578,7 +600,9 @@
       ],
       "status": "Experiment",
       "notes": "Earlier version of the handoff tooling idea.",
-      "url": "https://github.com/iice257/codex-imessage-handoff"
+      "url": "https://github.com/iice257/codex-imessage-handoff",
+      "archiveNumber": 22,
+      "archiveTier": "quiet"
     },
     {
       "name": "Bounty Hunters",
@@ -591,7 +615,9 @@
       ],
       "status": "Repository",
       "notes": "Grouped near Bountic because of the related bounty theme.",
-      "url": "https://github.com/iice257/Bounty-Hunters"
+      "url": "https://github.com/iice257/Bounty-Hunters",
+      "archiveNumber": 23,
+      "archiveTier": "quiet"
     },
     {
       "name": "ILBE Event Page Redesign",
@@ -606,7 +632,9 @@
       "status": "Redesign",
       "notes": "A focused visual redesign exercise.",
       "url": "https://github.com/iice257/ILBE-event-page-redesign",
-      "liveUrl": "https://ilbe-event-page-redesign.vercel.app"
+      "liveUrl": "https://ilbe-event-page-redesign.vercel.app",
+      "archiveNumber": 24,
+      "archiveTier": "expandable"
     },
     {
       "name": "Pages Forward Original",
@@ -621,7 +649,9 @@
       "status": "Earlier version",
       "notes": "Kept as lineage for the featured rebuild.",
       "url": "https://github.com/iice257/Pages-Forward",
-      "liveUrl": "https://pages-forward.vercel.app"
+      "liveUrl": "https://pages-forward.vercel.app",
+      "archiveNumber": 25,
+      "archiveTier": "quiet"
     },
     {
       "name": "Tickets",
@@ -636,7 +666,9 @@
       "status": "Frontend exercise",
       "notes": "Useful interaction/UI replication practice.",
       "url": "https://github.com/iice257/Tickets",
-      "liveUrl": "https://the-mayhem-tour.netlify.app"
+      "liveUrl": "https://the-mayhem-tour.netlify.app",
+      "archiveNumber": 26,
+      "archiveTier": "expandable"
     },
     {
       "name": "Solana dApp",
@@ -651,21 +683,26 @@
       "status": "Web3 implementation",
       "notes": "A functional scaffold that demonstrates the core product flow.",
       "url": "https://github.com/iice257/Solana-dApp",
-      "liveUrl": "https://solana-d-app-ten.vercel.app"
+      "archiveNumber": 27,
+      "archiveTier": "expandable"
     },
     {
-      "name": "Nothing To Watch",
-      "repoName": "nothing-to-watch",
-      "slug": "nothing-to-watch",
-      "description": "WebGL gallery that visualizes tens of thousands of film posters as a Voronoi diagram.",
+      "name": "What to Watch",
+      "repoName": "What-to-watch",
+      "slug": "what-to-watch",
+      "description": "An exploratory movie-discovery product that turns a large film catalog into a tactile WebGL field for browsing, previewing, and saving titles.",
       "tech": [
         "typescript",
         "webgl",
-        "visualization"
+        "visualization",
+        "product ux"
       ],
-      "status": "Visualization build",
-      "notes": "A technically ambitious visual exploration.",
-      "url": "https://github.com/iice257/nothing-to-watch"
+      "status": "Active visualization product",
+      "notes": "Planned for featured treatment later; retained here as an expandable technical product record for now.",
+      "url": "https://github.com/iice257/What-to-watch",
+      "liveUrl": "https://what-to-watch-brown.vercel.app",
+      "archiveNumber": 28,
+      "archiveTier": "expandable"
     },
     {
       "name": "Qwen Chat iOS",
@@ -679,7 +716,9 @@
       ],
       "status": "Experiment",
       "notes": "Kept in the archive because the repo is public but sparse.",
-      "url": "https://github.com/iice257/qwen-chat-ios"
+      "url": "https://github.com/iice257/qwen-chat-ios",
+      "archiveNumber": 29,
+      "archiveTier": "quiet"
     },
     {
       "name": "StickerSmash",
@@ -693,7 +732,9 @@
       ],
       "status": "Learning project",
       "notes": "Useful as documented learning progression.",
-      "url": "https://github.com/iice257/StickerSmash"
+      "url": "https://github.com/iice257/StickerSmash",
+      "archiveNumber": 30,
+      "archiveTier": "quiet"
     },
     {
       "name": "Hyperball Airdrop",
@@ -708,7 +749,9 @@
       "status": "Landing page",
       "notes": "Compact campaign-style build.",
       "url": "https://github.com/iice257/Hyperballairdrop",
-      "liveUrl": "https://hyperballairdrop.netlify.app"
+      "liveUrl": "https://hyperballairdrop.netlify.app",
+      "archiveNumber": 31,
+      "archiveTier": "quiet"
     },
     {
       "name": "Ambition Collection",
@@ -723,7 +766,9 @@
       "status": "Creative web page",
       "notes": "Editorial/visual exploration.",
       "url": "https://github.com/iice257/Ambition-Collection",
-      "liveUrl": "https://ambition-collection.vercel.app"
+      "liveUrl": "https://ambition-collection.vercel.app",
+      "archiveNumber": 32,
+      "archiveTier": "expandable"
     },
     {
       "name": "MHC Architecture Analysis",
@@ -738,22 +783,9 @@
       "status": "Research page",
       "notes": "Technical writing and presentation artifact.",
       "url": "https://github.com/iice257/Research---MHC-Architecture-Analysis",
-      "liveUrl": "https://mhc-interactive-article-by-ice-on-x.netlify.app"
-    },
-    {
-      "name": "King's Portfolio",
-      "repoName": "king-s-portfolio",
-      "slug": "king-s-portfolio",
-      "description": "Previous portfolio website for Kingsley Aremu, showcasing projects and professional experience.",
-      "tech": [
-        "typescript",
-        "portfolio",
-        "react"
-      ],
-      "status": "Previous portfolio",
-      "notes": "Useful as portfolio lineage.",
-      "url": "https://github.com/iice257/king-s-portfolio",
-      "liveUrl": "https://kingsleyaremu.vercel.app"
+      "liveUrl": "https://mhc-interactive-article-by-ice-on-x.netlify.app",
+      "archiveNumber": 33,
+      "archiveTier": "expandable"
     },
     {
       "name": "Val Day Site",
@@ -768,7 +800,9 @@
       "status": "Small experiment",
       "notes": "Lightweight creative build.",
       "url": "https://github.com/iice257/val-day-site",
-      "liveUrl": "https://val-day-site.vercel.app"
+      "liveUrl": "https://val-day-site.vercel.app",
+      "archiveNumber": 35,
+      "archiveTier": "quiet"
     },
     {
       "name": "Heads Tails Game",
@@ -781,35 +815,9 @@
       ],
       "status": "Mini game",
       "notes": "Small interactive UI piece.",
-      "url": "https://github.com/iice257/Heads-Tails-Game"
-    },
-    {
-      "name": "StreakMate",
-      "repoName": "Local portfolio data",
-      "slug": "streakmate",
-      "image": "/projects/streakmate.png",
-      "description": "Cross-platform habit tracking app for daily streaks, smart reminders, and motivational insights.",
-      "tech": [
-        "react",
-        "nodejs"
-      ],
-      "status": "Archived product",
-      "notes": "Preserved from earlier portfolio data as part of the complete project record.",
-      "url": "#"
-    },
-    {
-      "name": "ScoreLog",
-      "repoName": "Local portfolio data",
-      "slug": "scorelog",
-      "image": "/projects/scorelog.png",
-      "description": "Versatile score tracking application for board games, card games, and competitive activities.",
-      "tech": [
-        "react",
-        "nodejs"
-      ],
-      "status": "Archived product",
-      "notes": "Preserved from earlier portfolio data as part of the complete project record.",
-      "url": "#"
+      "url": "https://github.com/iice257/Heads-Tails-Game",
+      "archiveNumber": 36,
+      "archiveTier": "quiet"
     },
     {
       "name": "Sphinx Nav Fiber",
@@ -821,7 +829,9 @@
       ],
       "status": "Repository",
       "notes": "Kept for completeness.",
-      "url": "https://github.com/iice257/sphinx-nav-fiber"
+      "url": "https://github.com/iice257/sphinx-nav-fiber",
+      "archiveNumber": 39,
+      "archiveTier": "quiet"
     },
     {
       "name": "Universe",
@@ -833,86 +843,9 @@
       ],
       "status": "Repository",
       "notes": "Kept for completeness.",
-      "url": "https://github.com/iice257/universe"
-    },
-    {
-      "name": "iice257 Profile",
-      "repoName": "iice257",
-      "slug": "iice257-profile",
-      "description": "Profile repository for the iice257 GitHub account.",
-      "tech": [
-        "github profile"
-      ],
-      "status": "Profile repo",
-      "notes": "Included as a public repo, but intentionally low in hierarchy.",
-      "url": "https://github.com/iice257/iice257"
-    },
-    {
-      "name": "t3chn",
-      "repoName": "t3chn",
-      "slug": "t3chn",
-      "description": "Config files for a GitHub profile.",
-      "tech": [
-        "profile",
-        "config"
-      ],
-      "status": "Profile/config repo",
-      "notes": "Low-priority repository kept for completeness.",
-      "url": "https://github.com/iice257/t3chn"
-    },
-    {
-      "name": "ComfyUI Frontend",
-      "repoName": "ComfyUI_frontend",
-      "slug": "comfyui-frontend",
-      "description": "Official front-end implementation of ComfyUI.",
-      "tech": [
-        "frontend",
-        "comfyui"
-      ],
-      "status": "Fork/reference",
-      "notes": "Appears to be third-party or reference code, so it stays in the compact archive.",
-      "url": "https://github.com/iice257/ComfyUI_frontend"
-    },
-    {
-      "name": "BlockNote",
-      "repoName": "BlockNote",
-      "slug": "blocknote",
-      "description": "A block-based React rich text editor built on ProseMirror and Tiptap.",
-      "tech": [
-        "react",
-        "editor",
-        "reference"
-      ],
-      "status": "Fork/reference",
-      "notes": "Reference repository rather than a primary portfolio project.",
-      "url": "https://github.com/iice257/BlockNote"
-    },
-    {
-      "name": "Microsoft Activation Scripts",
-      "repoName": "Microsoft-Activation-Scripts",
-      "slug": "microsoft-activation-scripts",
-      "description": "Open-source Windows and Office activation scripts with troubleshooting.",
-      "tech": [
-        "scripts",
-        "reference"
-      ],
-      "status": "Fork/reference",
-      "notes": "Listed for completeness only; not promoted as portfolio work.",
-      "url": "https://github.com/iice257/Microsoft-Activation-Scripts"
-    },
-    {
-      "name": "Deep Learning With Python Notebooks",
-      "repoName": "deep-learning-with-python-notebooks",
-      "slug": "deep-learning-with-python-notebooks",
-      "description": "Jupyter notebooks for code samples from Deep Learning with Python.",
-      "tech": [
-        "jupyter",
-        "learning",
-        "reference"
-      ],
-      "status": "Learning/reference",
-      "notes": "Kept as a learning resource.",
-      "url": "https://github.com/iice257/deep-learning-with-python-notebooks"
+      "url": "https://github.com/iice257/universe",
+      "archiveNumber": 40,
+      "archiveTier": "quiet"
     },
     {
       "name": "Advent of Code",
@@ -926,33 +859,9 @@
       ],
       "status": "Practice",
       "notes": "Learning/practice archive.",
-      "url": "https://github.com/iice257/Advent-of-Code"
-    },
-    {
-      "name": "apps.apple.com",
-      "repoName": "apps.apple.com",
-      "slug": "apps-apple-com",
-      "description": "App Store web version repository.",
-      "tech": [
-        "web clone",
-        "reference"
-      ],
-      "status": "Reference",
-      "notes": "Low-priority archive item.",
-      "url": "https://github.com/iice257/apps.apple.com"
-    },
-    {
-      "name": "Build Your Own X",
-      "repoName": "build-your-own-x",
-      "slug": "build-your-own-x",
-      "description": "Reference repository for mastering programming by recreating technologies from scratch.",
-      "tech": [
-        "learning",
-        "reference"
-      ],
-      "status": "Reference",
-      "notes": "Included for completeness; not original portfolio work.",
-      "url": "https://github.com/iice257/build-your-own-x"
+      "url": "https://github.com/iice257/Advent-of-Code",
+      "archiveNumber": 47,
+      "archiveTier": "quiet"
     },
     {
       "name": "Medusa Setup",
@@ -966,22 +875,62 @@
       ],
       "status": "Setup exercise",
       "notes": "Small setup repository.",
-      "url": "https://github.com/iice257/yt-medusajs-setup"
+      "url": "https://github.com/iice257/yt-medusajs-setup",
+      "archiveNumber": 50,
+      "archiveTier": "quiet"
     },
     {
-      "name": "Pix Plot",
-      "repoName": "pix-plot",
-      "slug": "pix-plot",
-      "description": "A WebGL viewer for UMAP or TSNE-clustered images.",
+      "name": "VISUALICER",
+      "repoName": "VISUALICER",
+      "slug": "visualicer",
+      "description": "A local-first lyric and audio visualizer with configurable radial geometry, responsive seeking, curated themes, typography controls, and browser-only media handling.",
       "tech": [
-        "webgl",
+        "next.js",
+        "audio",
         "visualization",
-        "reference"
+        "interaction design"
       ],
-      "status": "Reference",
-      "notes": "Reference/visualization repo kept in the archive.",
-      "url": "https://github.com/iice257/pix-plot"
+      "status": "Active creative product",
+      "notes": "Planned for the major-project tier later; retained here as an expandable product record for now.",
+      "url": "https://github.com/iice257/VISUALICER",
+      "liveUrl": "https://lyric-audio-visualizer.vercel.app",
+      "archiveNumber": 52,
+      "archiveTier": "expandable"
+    },
+    {
+      "name": "Tuteria Task",
+      "repoName": "tuteria-task",
+      "slug": "tuteria-task",
+      "description": "A full-stack referral follow-up workflow with send, preview, and audit-log states, server-side email delivery, privacy-safe Supabase logging, and CI deployment.",
+      "tech": [
+        "next.js",
+        "supabase",
+        "email",
+        "workflow"
+      ],
+      "status": "Full-stack case study",
+      "notes": "A compact but complete implementation that demonstrates product UI, backend safeguards, persistence, and delivery automation.",
+      "url": "https://github.com/iice257/tuteria-task",
+      "archiveNumber": 53,
+      "archiveTier": "expandable"
+    },
+    {
+      "name": "AeroDesk 11",
+      "repoName": "windows-11-os-fork",
+      "slug": "aerodesk-11",
+      "description": "A Windows-inspired browser operating-system prototype with boot and login flows, window management, taskbar utilities, system applications, and local desktop workflows.",
+      "tech": [
+        "typescript",
+        "react",
+        "window management",
+        "systems ui"
+      ],
+      "status": "Browser OS prototype",
+      "notes": "A broad interface-systems experiment relevant to desktop interaction, state management, and application-shell design.",
+      "url": "https://github.com/iice257/windows-11-os-fork",
+      "archiveNumber": 54,
+      "archiveTier": "expandable"
     }
   ],
-  "generatedAt": "2026-07-15"
+  "generatedAt": "2026-07-19"
 }
