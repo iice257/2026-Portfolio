@@ -375,7 +375,7 @@ const ProjectMediaLightbox = ({ active, activeIndex, items, direction = 0, onClo
       aria-label={`${active.project.name} ${isMobile ? "mobile" : "desktop"} preview`}
       tabIndex={-1}
     >
-      <button type="button" className="mockup-lightbox-nav is-prev" onClick={(event) => { event.stopPropagation(); onNavigate(-1); }} aria-label="Previous mockup">
+      <button type="button" className="mockup-lightbox-nav is-prev" onClick={(event) => { event.stopPropagation(); onNavigate(-1); }} aria-label="Previous preview">
         <span aria-hidden="true">&lsaquo;</span>
       </button>
       <motion.div
@@ -394,10 +394,10 @@ const ProjectMediaLightbox = ({ active, activeIndex, items, direction = 0, onClo
             <h3 className="text-body-xl font-light" style={{ color: "var(--fg-primary)" }}>{active.project.name}</h3>
           </div>
           <div className="mockup-lightbox-header-actions" data-cursor-group="buttons">
-            <button type="button" className="mockup-lightbox-fullscreen" data-clickable="true" onClick={openFullscreen} aria-label="Open mockup fullscreen">
+            <button type="button" className="mockup-lightbox-fullscreen" data-clickable="true" onClick={openFullscreen} aria-label="Open preview fullscreen">
               <IconFullscreen />
             </button>
-            <button type="button" className="mockup-lightbox-close" data-clickable="true" onClick={onClose} aria-label="Close mockup preview">
+            <button type="button" className="mockup-lightbox-close" data-clickable="true" onClick={onClose} aria-label="Close project preview">
               &times;
             </button>
           </div>
@@ -407,7 +407,7 @@ const ProjectMediaLightbox = ({ active, activeIndex, items, direction = 0, onClo
           data-cursor-label="Click to close"
           data-cursor-variant="project"
           onClick={onClose}
-          aria-label="Mockup preview"
+          aria-label="Project preview"
           {...swipeHandlers}
         >
           <motion.div
@@ -419,8 +419,8 @@ const ProjectMediaLightbox = ({ active, activeIndex, items, direction = 0, onClo
             {items.map((item, itemIndex) => {
               const itemVideoSrc = item.variant === "desktop" ? item.project.desktopVideo : item.project.mobileVideo;
               const itemIsMobile = item.variant === "mobile";
-              const shouldRenderPreview = isPreviewWithinRenderWindow(itemIndex, safeActiveIndex, items.length);
               const itemKey = `${item.project.slug}-${item.variant}`;
+              const shouldRenderPreview = isPreviewWithinRenderWindow(itemIndex, safeActiveIndex, items.length);
 
               return (
                 <div
@@ -449,7 +449,7 @@ const ProjectMediaLightbox = ({ active, activeIndex, items, direction = 0, onClo
           </motion.div>
         </div>
       </motion.div>
-      <button type="button" className="mockup-lightbox-nav is-next" onClick={(event) => { event.stopPropagation(); onNavigate(1); }} aria-label="Next mockup">
+      <button type="button" className="mockup-lightbox-nav is-next" onClick={(event) => { event.stopPropagation(); onNavigate(1); }} aria-label="Next preview">
         <span aria-hidden="true">&rsaquo;</span>
       </button>
     </motion.div>
@@ -664,7 +664,7 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
             </aside>
 
             <div className="lg:col-span-8">
-              <DetailBlock label="Concept" title="Product idea">
+              <DetailBlock label="Product focus" title="What it does">
                 {project.concept}
               </DetailBlock>
               <DetailBlock label="Problem" title="What it solves">

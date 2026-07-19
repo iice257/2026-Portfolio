@@ -1,13 +1,16 @@
 {
-  "name": "Portfolio | Kingsley Afolabi Aremu",
+  "id": "/",
+  "name": "Kingsley Aremu | Product Engineer",
   "short_name": "Kingsley Aremu",
-  "description": "Kingsley Afolabi Aremu's portfolio website.",
+  "description": "Portfolio of Kingsley Afolabi Aremu, a Lagos-based full-stack and creative engineer.",
+  "lang": "en",
+  "dir": "ltr",
   "icons": [
     {
       "src": "/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icon-256x256.png",
@@ -27,7 +30,9 @@
   ],
   "theme_color": "#0a0a0a",
   "background_color": "#0a0a0a",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
-  "orientation": "portrait"
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "any"
 }

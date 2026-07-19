@@ -127,7 +127,7 @@ const PreviewSurface = ({ project, variant = "desktop", onOpen, onHover, onLeave
     }}
     onMouseEnter={() => onHover("Click to open")}
     onMouseLeave={onLeave}
-    aria-label={`Open ${previewLabel(variant).toLowerCase()} mockup for ${project.name}`}
+    aria-label={`Open ${previewLabel(variant).toLowerCase()} preview for ${project.name}`}
   >
     {children}
     <span className="mockup-expand-icon" aria-hidden="true">
@@ -311,10 +311,10 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompa
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label={`${isMobile ? "Mobile" : "Desktop"} mockup previews`}
+      aria-label={`${isMobile ? "Mobile" : "Desktop"} project previews`}
       tabIndex={-1}
     >
-      <button type="button" className="mockup-lightbox-nav is-prev" onClick={(event) => { event.stopPropagation(); onNavigate(-1); }} aria-label="Previous mockup">
+      <button type="button" className="mockup-lightbox-nav is-prev" onClick={(event) => { event.stopPropagation(); onNavigate(-1); }} aria-label="Previous preview">
         <span aria-hidden="true">&lsaquo;</span>
       </button>
       <motion.div
@@ -333,10 +333,10 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompa
             <h3 className="text-body-xl font-light" style={{ color: "var(--fg-primary)" }}>{active.project.name}</h3>
           </div>
           <div className="mockup-lightbox-header-actions" data-cursor-group="buttons">
-            <button type="button" className="mockup-lightbox-fullscreen" data-clickable="true" onClick={openFullscreen} aria-label="Open mockup fullscreen">
+            <button type="button" className="mockup-lightbox-fullscreen" data-clickable="true" onClick={openFullscreen} aria-label="Open preview fullscreen">
               <IconFullscreen />
             </button>
-            <button type="button" className="mockup-lightbox-close" data-clickable="true" onClick={onClose} aria-label="Close mockup preview">
+            <button type="button" className="mockup-lightbox-close" data-clickable="true" onClick={onClose} aria-label="Close project preview">
               &times;
             </button>
           </div>
@@ -347,7 +347,7 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompa
           data-cursor-label="Click to close"
           data-cursor-variant="project"
           onClick={handleStageClick}
-          aria-label="Mockup preview"
+          aria-label="Project preview"
           {...swipeHandlers}
         >
           <motion.div
@@ -359,8 +359,8 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompa
             {items.map((item, itemIndex) => {
               const itemPreview = getProjectPreview(item.project, item.variant);
               const itemIsMobile = item.variant === "mobile";
-              const shouldRenderPreview = isPreviewWithinRenderWindow(itemIndex, safeActiveIndex, items.length);
               const itemKey = `${item.project.slug}-${item.variant}`;
+              const shouldRenderPreview = isPreviewWithinRenderWindow(itemIndex, safeActiveIndex, items.length);
 
               return (
                 <div
@@ -383,7 +383,7 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompa
                     />
                   )}
                   {shouldRenderPreview && itemPreview.type === "image" && (
-                    <Image src={itemPreview.src} alt={`${item.project.name} ${previewLabel(item.variant)} mockup`} fill sizes="90vw" className="object-contain" />
+                    <Image src={itemPreview.src} alt={`${item.project.name} ${previewLabel(item.variant)} preview`} fill sizes="90vw" className="object-contain" />
                   )}
                   {shouldRenderPreview && itemPreview.type === "mockup" && (
                     <ProjectMockupFrame project={item.project} variant={item.variant} className={itemIsMobile ? "h-full w-full p-5" : "h-full w-full p-6"} />
@@ -407,7 +407,7 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompa
           </button>
         )}
       </motion.div>
-      <button type="button" className="mockup-lightbox-nav is-next" onClick={(event) => { event.stopPropagation(); onNavigate(1); }} aria-label="Next mockup">
+      <button type="button" className="mockup-lightbox-nav is-next" onClick={(event) => { event.stopPropagation(); onNavigate(1); }} aria-label="Next preview">
         <span aria-hidden="true">&rsaquo;</span>
       </button>
     </motion.div>
@@ -456,7 +456,7 @@ const MockupChoiceButton = ({ project, onOpenPreview, onHover, onLeave }) => {
         aria-expanded={isChoosing}
       >
         <IconExpand />
-        <span>View mockup</span>
+        <span>View preview</span>
       </button>
       <div className="mockup-choice-options" aria-hidden={!isChoosing}>
         {["desktop", "mobile"].map((variant) => (
@@ -961,7 +961,7 @@ export default function ProjectsIndex() {
                 Featured
               </p>
               <h2 className="text-display-lg font-light" style={{ color: "var(--fg-primary)" }}>
-                Premium project pages
+                Selected project details
               </h2>
             </div>
             <p className="text-body-md max-w-md" style={{ color: "var(--fg-secondary)" }}>

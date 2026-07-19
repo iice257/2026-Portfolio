@@ -95,7 +95,7 @@ const Work = () => {
       role: "Freelance Web Designer",
       period: "FEB 2019 - PRESENT",
       summary:
-        "Designed and built custom websites for clients, from concept to delivery, with focus on modern interfaces, responsive layouts, and practical business websites.",
+        "Designed and built custom websites for clients, from requirements to delivery, with focus on modern interfaces, responsive layouts, and practical business websites.",
       details: [
         "Built client websites across portfolio, business, landing page, and service-based use cases.",
         "Managed multiple concurrent projects, including design direction, revisions, and delivery.",
