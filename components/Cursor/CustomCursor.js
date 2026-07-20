@@ -15,6 +15,18 @@ const PREVIEW_LABEL_PATTERN = /^click to (open|close)$/i;
 const INTERACTIVE_BRIDGE_RADIUS = 38;
 const WELCOME_VISIT_KEY = "portfolio.cursor.welcomed";
 const WELCOME_TOOLTIP_MS = 5000;
+const DEFAULT_LAB_CONFIG = { morph: 0.16, roundness: 1, fill: 0.16, spin: 0.7 };
+
+const interpolateCursorPath = (fromPath, toPath, amount) => {
+  const fromNumbers = fromPath.match(/-?\d*\.?\d+/g)?.map(Number) || [];
+  let index = 0;
+  return toPath.replace(/-?\d*\.?\d+/g, (match) => {
+    const from = fromNumbers[index] ?? Number(match);
+    const to = Number(match);
+    index += 1;
+    return String(from + (to - from) * Math.max(0, Math.min(1, amount)));
+  });
+};
 
 const getCursorLabelKind = (text) => (
   PREVIEW_LABEL_PATTERN.test((text || "").trim()) ? "preview" : "standard"
@@ -30,6 +42,7 @@ const CustomCursor = () => {
   const [isVisible, setIsVisible] = useState(false); // Default hidden until mouse moves
   const [isClickable, setIsClickable] = useState(false);
   const [welcomeText, setWelcomeText] = useState("");
+  const [labConfig, setLabConfig] = useState(DEFAULT_LAB_CONFIG);
   const isVisibleRef = useRef(false);
   const isClickableRef = useRef(false);
   const { cursorText, setCursorText, cursorVariant, setCursorVariant, isRouteLoading } = useCursor();
@@ -53,6 +66,20 @@ const CustomCursor = () => {
   useEffect(() => {
     cursorVariantRef.current = cursorVariant;
   }, [cursorVariant]);
+
+  useEffect(() => {
+    const handleLabConfig = (event) => {
+      const detail = event.detail || {};
+      setLabConfig({
+        morph: Number.isFinite(detail.morph) ? detail.morph : DEFAULT_LAB_CONFIG.morph,
+        roundness: Number.isFinite(detail.roundness) ? detail.roundness : DEFAULT_LAB_CONFIG.roundness,
+        fill: Number.isFinite(detail.fill) ? detail.fill : DEFAULT_LAB_CONFIG.fill,
+        spin: Number.isFinite(detail.spin) ? detail.spin : DEFAULT_LAB_CONFIG.spin,
+      });
+    };
+    window.addEventListener("playground:cursor-config", handleLabConfig);
+    return () => window.removeEventListener("playground:cursor-config", handleLabConfig);
+  }, []);
 
   useEffect(() => {
     // Setup quickSetters
@@ -313,11 +340,13 @@ const CustomCursor = () => {
     if (isRouteLoading) return;
 
     const shouldUseClickableShape = isClickable || Boolean(cursorText);
-    const targetPath = shouldUseClickableShape ? CLICKABLE_CURSOR_PATH : DEFAULT_CURSOR_PATH;
+    const targetPath = shouldUseClickableShape
+      ? interpolateCursorPath(DEFAULT_CURSOR_PATH, CLICKABLE_CURSOR_PATH, labConfig.roundness)
+      : DEFAULT_CURSOR_PATH;
 
     gsap.to([outlinePathRef.current, fillPathRef.current], {
       attr: { d: targetPath },
-      duration: 0.08,
+      duration: labConfig.morph,
       ease: "power1.out",
       overwrite: "auto",
     });
@@ -334,11 +363,11 @@ const CustomCursor = () => {
 
     gsap.to(fillPathRef.current, {
       opacity: shouldUseClickableShape ? 1 : 0,
-      duration: 0.12,
+      duration: labConfig.fill,
       ease: "power2.out",
       overwrite: "auto",
     });
-  }, [cursorText, isClickable, isRouteLoading]);
+  }, [cursorText, isClickable, isRouteLoading, labConfig]);
 
   useEffect(() => {
     if (!outlinePathRef.current || !fillPathRef.current || !fillRectRef.current) return undefined;
@@ -352,17 +381,19 @@ const CustomCursor = () => {
 
     if (!isRouteLoading) {
       const shouldUseClickableShape = isClickableRef.current || Boolean(cursorTextRef.current);
-      const targetPath = shouldUseClickableShape ? CLICKABLE_CURSOR_PATH : DEFAULT_CURSOR_PATH;
+      const targetPath = shouldUseClickableShape
+        ? interpolateCursorPath(DEFAULT_CURSOR_PATH, CLICKABLE_CURSOR_PATH, labConfig.roundness)
+        : DEFAULT_CURSOR_PATH;
 
       gsap.to(fillPath, {
         opacity: shouldUseClickableShape ? 1 : 0,
-        duration: 0.16,
+        duration: labConfig.fill,
         ease: "power2.out",
       });
 
       gsap.to([outlinePath, fillPath], {
         attr: { d: targetPath },
-        duration: 0.08,
+        duration: labConfig.morph,
         ease: "power1.out",
         overwrite: "auto",
       });
@@ -381,7 +412,7 @@ const CustomCursor = () => {
         scale: 1,
         rotate: 0,
         opacity: 1,
-        duration: 0.18,
+        duration: labConfig.morph,
         ease: "power2.out",
         overwrite: "auto",
       });
@@ -390,7 +421,7 @@ const CustomCursor = () => {
     }
 
     gsap.set([outlinePath, fillPath], {
-      attr: { d: CLICKABLE_CURSOR_PATH },
+      attr: { d: interpolateCursorPath(DEFAULT_CURSOR_PATH, CLICKABLE_CURSOR_PATH, labConfig.roundness) },
     });
 
     gsap.set(fillRect, {
@@ -399,31 +430,32 @@ const CustomCursor = () => {
 
     loadingTimelineRef.current = gsap.timeline({
       repeat: -1,
-      yoyo: true,
       defaults: { overwrite: "auto" },
     });
 
     loadingTimelineRef.current
       .set(fillPath, { opacity: 1 })
       .to(shape, {
-        scale: 1.16,
-        opacity: 0.72,
-        duration: 0.34,
-        ease: "power2.inOut",
+        rotationY: 360,
+        transformPerspective: 320,
+        duration: labConfig.spin,
+        ease: "none",
       }, 0)
       .to(fillPath, {
-        opacity: 0.34,
-        duration: 0.34,
+        opacity: 0.5,
+        duration: labConfig.spin * 0.5,
+        yoyo: true,
+        repeat: 1,
         ease: "power2.inOut",
       }, 0);
 
     return () => {
       loadingTimelineRef.current?.kill();
       loadingTimelineRef.current = null;
-      gsap.set(shape, { scale: 1, rotate: 0, opacity: 1 });
+      gsap.set(shape, { scale: 1, rotate: 0, rotationY: 0, opacity: 1 });
       gsap.set(fillPath, { opacity: isClickableRef.current || Boolean(cursorTextRef.current) ? 1 : 0 });
     };
-  }, [isRouteLoading]);
+  }, [isRouteLoading, labConfig]);
 
   useEffect(() => {
     if ((!cursorText && !welcomeText) || !textRef.current) return;

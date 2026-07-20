@@ -37,6 +37,8 @@ const TextPressure = ({
 
   minFontSize = 24,
   baseWeight = 100,
+  maxWeight = 900,
+  maxStrokeWidth = 0,
   targetFps = 60
 }) => {
   const containerRef = useRef(null);
@@ -143,6 +145,9 @@ const TextPressure = ({
         if (alpha && span.style.opacity !== '1') {
           span.style.opacity = '1';
         }
+        if (span.style.webkitTextStrokeWidth !== '0px') {
+          span.style.webkitTextStrokeWidth = '0px';
+        }
       });
     };
 
@@ -196,14 +201,21 @@ const TextPressure = ({
               item.elem.style.fontVariationSettings = defaultSettings;
               if (alpha) item.elem.style.opacity = '1';
             }
+            if (item.elem.style.webkitTextStrokeWidth !== '0px') {
+              item.elem.style.webkitTextStrokeWidth = '0px';
+            }
             return;
           }
 
           const d = Math.sqrt(dSq);
+          const pressure = Math.max(0, Math.min(1, 1 - d / maxDist));
           const wdth = width ? Math.floor(getAttr(d, maxDist, 5, 200)) : 100;
-          const wght = weight ? Math.max(baseWeight, Math.floor(getAttr(d, maxDist, 100, 900))) : 400;
+          const wght = weight
+            ? Math.max(baseWeight, Math.min(maxWeight, Math.floor(getAttr(d, maxDist, 100, maxWeight))))
+            : 400;
           const italVal = italic ? getAttr(d, maxDist, 0, 1).toFixed(2) : 0;
           const alphaVal = alpha ? getAttr(d, maxDist, 0, 1).toFixed(2) : 1;
+          const strokeWidth = `${(maxStrokeWidth * pressure).toFixed(3)}px`;
 
           const newFontVariationSettings = `'wght' ${wght}, 'wdth' ${wdth}, 'ital' ${italVal}`;
 
@@ -212,6 +224,10 @@ const TextPressure = ({
           }
           if (alpha && item.elem.style.opacity !== alphaVal) {
             item.elem.style.opacity = alphaVal;
+          }
+          if (item.elem.style.webkitTextStrokeWidth !== strokeWidth) {
+            item.elem.style.webkitTextStrokeColor = 'currentColor';
+            item.elem.style.webkitTextStrokeWidth = strokeWidth;
           }
         });
       }
@@ -341,7 +357,7 @@ const TextPressure = ({
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       motionQuery.removeEventListener('change', handleMotionPreferenceChange);
     };
-  }, [width, weight, italic, alpha, baseWeight, targetFps, calculateSpans]);
+  }, [width, weight, italic, alpha, baseWeight, maxWeight, maxStrokeWidth, targetFps, calculateSpans]);
 
   const styleElement = useMemo(() => {
     const css = `

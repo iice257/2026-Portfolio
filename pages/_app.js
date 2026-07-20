@@ -52,6 +52,7 @@ const AppContent = ({ Component, pageProps }) => {
   const { isHeroLocked, setIsHeroLocked } = useHeroLock();
   const { setIsRouteLoading } = useCursor();
   const router = useRouter();
+  const isPlayground = router.pathname === "/playground";
   const [isLoaded, setIsLoaded] = useState(false);
   const [isFinePointer, setIsFinePointer] = useState(true);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
@@ -140,7 +141,7 @@ const AppContent = ({ Component, pageProps }) => {
       </button>
       <div id="site-portal-root" />
       {isFinePointer && <CustomCursor />}
-      <Header />
+      {!isPlayground && <Header />}
 
       {/* Page wrapper with blur-in animation */}
       <motion.div
@@ -162,7 +163,7 @@ const AppContent = ({ Component, pageProps }) => {
         </AnimatePresence>
       </motion.div>
 
-      {isSnowing && allowMotion && isPageVisible && !isHeroLocked && (
+      {isSnowing && allowMotion && isPageVisible && !isHeroLocked && !isPlayground && (
         <Snowfall
           key={`${theme}-${isMobileViewport ? "mobile" : "desktop"}`}
           color={snowColor}

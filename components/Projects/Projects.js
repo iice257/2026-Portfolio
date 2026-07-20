@@ -8,6 +8,13 @@ import Image from "next/image";
 import { useCursor } from "../../context/CursorContext";
 import ShuffleText from "../ReactBits/ShuffleText";
 
+const LANDING_PROJECT_DESCRIPTIONS = {
+  "formmate-ai": "An AI-assisted form companion for completing tedious web forms with reviewable voice or text guidance.",
+  pastevault: "A private, installable online clipboard for saving, searching, and sharing text, code, links, and JSON across devices.",
+  "ai-agent-skills": "A collection of reusable AI-agent skills that speed up research, planning, parsing, publishing, and build workflows.",
+  "restore-ai": "A mobile app for restoring, upscaling, resizing, and recoloring damaged or low-quality images.",
+};
+
 const Projects = ({ isDesktop }) => {
   const sectionRef = useRef(null);
   const titleRef = useRef(null);
@@ -92,7 +99,7 @@ const Projects = ({ isDesktop }) => {
           className="landing-section-title text-massive font-extralight md:whitespace-nowrap"
           style={{ color: 'var(--fg-primary)' }}
         >
-          <ShuffleText text="What I've done" duration={0.6} shuffleTimes={4} triggerOnTap clipDuringShuffle={false} textAlign="left" />
+          <ShuffleText text="What I've done" duration={0.6} shuffleTimes={4} triggerOnTap textAlign="left" />
         </h2>
       </div>
 
@@ -163,7 +170,7 @@ const Projects = ({ isDesktop }) => {
                     className="text-editorial font-light mb-8 max-w-md mx-auto"
                     style={{ color: 'var(--fg-secondary)' }}
                   >
-                    {project.description}
+                    {LANDING_PROJECT_DESCRIPTIONS[project.slug] || project.description}
                   </p>
 
                   {/* Tech Stack */}

@@ -4,4 +4,5 @@ export { default as IconLinkedin} from "./linkedin";
 export { default as IconInstagram} from "./instagram";
 export { default as IconTwitter} from "./twitter";
 export { default as IconExternal} from "./external";
+export { default as IconArrowUpRight } from "./arrow-up-right";
 export { default as Icon } from './icon';

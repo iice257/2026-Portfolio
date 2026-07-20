@@ -78,7 +78,7 @@ const Contact = () => {
     <section
       ref={sectionRef}
       id={MENULINKS[4].ref}
-      className="relative overflow-hidden section-spacing-lg"
+      className="relative overflow-visible section-spacing-lg"
       style={{ backgroundColor: "var(--bg-primary)" }}
     >
       {canRenderContactBackdrop && (

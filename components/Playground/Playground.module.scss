@@ -1,0 +1,599 @@
+.root {
+  --lab-bg: #050505;
+  --lab-panel: rgba(5, 5, 5, 0.94);
+  --lab-fg: #f1f1ee;
+  --lab-dim: #858585;
+  --lab-faint: #555;
+  --lab-border: rgba(255, 255, 255, 0.13);
+  --lab-soft: rgba(255, 255, 255, 0.045);
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: grid;
+  grid-template-columns: clamp(17.5rem, 18vw, 20rem) minmax(0, 1fr);
+  min-height: 100dvh;
+  overflow: hidden;
+  background: var(--lab-bg);
+  color: var(--lab-fg);
+  font-family: var(--font-inter), sans-serif;
+  isolation: isolate;
+}
+
+.root[data-playground-theme="light"] {
+  --lab-bg: #f2f2ee;
+  --lab-panel: rgba(242, 242, 238, 0.94);
+  --lab-fg: #111;
+  --lab-dim: #65655f;
+  --lab-faint: #8b8b85;
+  --lab-border: rgba(0, 0, 0, 0.16);
+  --lab-soft: rgba(0, 0, 0, 0.045);
+}
+
+.root::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.88' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.45'/%3E%3C/svg%3E");
+  mix-blend-mode: soft-light;
+}
+
+.indexPanel {
+  position: relative;
+  z-index: 5;
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  background: var(--lab-panel);
+  border-right: 1px solid var(--lab-border);
+}
+
+.brandRow {
+  height: 4.75rem;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 0 1.55rem;
+  border-bottom: 1px solid var(--lab-border);
+  white-space: nowrap;
+}
+
+.brandRow a {
+  color: var(--lab-fg);
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.brandRow span {
+  color: var(--lab-dim);
+  font: 500 0.72rem/1 var(--font-ibm-plex-mono), monospace;
+}
+
+.indexLabel {
+  display: flex;
+  justify-content: space-between;
+  padding: 2.15rem 1.55rem 1.1rem;
+  color: var(--lab-dim);
+  font: 500 0.61rem/1 var(--font-ibm-plex-mono), monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.indexLabel span { color: var(--lab-faint); }
+
+.indexPanel nav {
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.indexPanel nav::-webkit-scrollbar { display: none; }
+.indexPanel ol { margin: 0; padding: 0 0 1.25rem; list-style: none; }
+.indexPanel li { position: relative; }
+
+.indexPanel li button {
+  position: relative;
+  width: 100%;
+  min-height: 3.65rem;
+  display: grid;
+  grid-template-columns: 1.65rem minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-content: center;
+  column-gap: 0.55rem;
+  padding: 0.62rem 1.55rem;
+  border: 0;
+  background: transparent;
+  color: var(--lab-dim);
+  text-align: left;
+  transition: color 180ms ease, background 180ms ease;
+}
+
+.indexPanel li button::before {
+  content: "";
+  position: absolute;
+  left: 0.45rem;
+  top: 50%;
+  width: 2px;
+  height: 0;
+  background: var(--lab-fg);
+  transform: translateY(-50%);
+  transition: height 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.indexPanel li button:hover,
+.indexPanel li button:focus-visible,
+.indexPanel li button.activeExperiment {
+  color: var(--lab-fg);
+  background: linear-gradient(90deg, var(--lab-soft), transparent 74%);
+}
+
+.indexPanel li button.activeExperiment::before { height: 2.5rem; }
+.indexPanel li button span {
+  grid-row: 1 / 3;
+  align-self: center;
+  color: var(--lab-faint);
+  font: 500 0.66rem/1 var(--font-ibm-plex-mono), monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.indexPanel li button b {
+  overflow: hidden;
+  color: currentColor;
+  font-size: 0.77rem;
+  font-weight: 480;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.indexPanel li button small {
+  margin-top: 0.23rem;
+  color: var(--lab-faint);
+  font: 500 0.5rem/1 var(--font-ibm-plex-mono), monospace;
+  letter-spacing: 0.08em;
+}
+
+.indexFooter {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--lab-border);
+}
+
+.indexFooter button,
+.indexFooter a {
+  min-height: 3.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.15rem;
+  border: 0;
+  background: transparent;
+  color: var(--lab-dim);
+  font: 500 0.6rem/1 var(--font-ibm-plex-mono), monospace;
+  text-transform: uppercase;
+  transition: color 180ms ease, background 180ms ease;
+}
+
+.indexFooter button { border-right: 1px solid var(--lab-border); }
+.indexFooter button:hover, .indexFooter a:hover { color: var(--lab-fg); background: var(--lab-soft); }
+.indexFooter span { color: var(--lab-fg); }
+
+.workspace {
+  position: relative;
+  min-width: 0;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: var(--lab-bg);
+}
+
+.surface,
+.loadingSurface {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--lab-bg);
+}
+
+.loadingSurface::after {
+  content: "";
+  position: absolute;
+  inset: 45% 48%;
+  border: 1px solid var(--lab-border);
+  animation: labPulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes labPulse { to { transform: scale(2.5); opacity: 0; } }
+
+.surface :global(.playground-three-surface),
+.surface :global(.signal-experiment),
+.surface :global(.playground-canvas),
+.surface :global(.playground-reactbits-surface),
+.surface :global(.playground-dot-field),
+.surface :global(.ascii-experiment),
+.surface :global(.metallic-experiment),
+.surface :global(.cursor-trail-placeholder),
+.surface :global(.text-pressure-experiment),
+.surface :global(.cursor-morph-experiment) {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.surface :global(.playground-canvas) { display: block; touch-action: none; }
+.surface :global(.playground-three-surface canvas) { width: 100%; height: 100%; display: block; }
+.surface :global(.playground-reactbits-surface),
+.surface :global(.playground-dot-field),
+.surface :global(.ascii-experiment),
+.surface :global(.metallic-experiment) { overflow: hidden; background: var(--lab-bg); }
+.surface :global(.playground-reactbits-surface .galaxy-container),
+.surface :global(.playground-reactbits-surface .waves),
+.surface :global(.playground-reactbits-surface canvas),
+.surface :global(.playground-dot-field canvas),
+.surface :global(.ascii-experiment .ascii-text-container),
+.surface :global(.metallic-experiment .paint-container) {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.surface :global(.cursor-trail-fluid) { opacity: 0.86; filter: contrast(1.2) grayscale(1); }
+.surface :global(.playground-dot-field) { opacity: 0.9; }
+.surface :global(.ascii-experiment) { filter: grayscale(1) contrast(1.14); }
+.surface :global(.metallic-experiment) { display: grid; place-items: center; padding: clamp(5rem, 11vh, 8rem) clamp(2rem, 7vw, 7rem); }
+.surface :global(.metallic-experiment .paint-container) {
+  position: relative;
+  width: min(72vw, 62rem);
+  height: min(48vh, 30rem);
+  filter: grayscale(1) contrast(1.08);
+}
+.surface :global(.cursor-trail-placeholder) {
+  background:
+    linear-gradient(90deg, transparent 49.95%, color-mix(in srgb, var(--lab-fg) 14%, transparent) 50%, transparent 50.05%),
+    linear-gradient(0deg, transparent 49.95%, color-mix(in srgb, var(--lab-fg) 14%, transparent) 50%, transparent 50.05%);
+  background-size: 4rem 4rem;
+}
+
+.experimentMeta {
+  position: absolute;
+  z-index: 4;
+  left: clamp(1.35rem, 3.2vw, 3.8rem);
+  bottom: clamp(5.3rem, 9vh, 7.2rem);
+  width: min(23rem, 42vw);
+  pointer-events: none;
+  text-shadow: 0 1px 20px var(--lab-bg);
+}
+
+.experimentMeta > span {
+  color: var(--lab-dim);
+  font: 500 0.57rem/1 var(--font-ibm-plex-mono), monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.experimentMeta h1 {
+  margin: 0.48rem 0 0;
+  color: var(--lab-fg);
+  font-size: clamp(1.25rem, 1.8vw, 1.8rem);
+  font-weight: 420;
+  line-height: 0.96;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+
+.experimentMeta p {
+  max-width: 23rem;
+  margin: 0.55rem 0 0;
+  color: var(--lab-dim);
+  font-size: clamp(0.68rem, 0.85vw, 0.8rem);
+  line-height: 1.5;
+}
+
+.experimentMeta div { display: flex; gap: 1rem; margin-top: 0.55rem; }
+.experimentMeta div span,
+.experimentMeta div a {
+  pointer-events: auto;
+  color: var(--lab-dim);
+  font: 500 0.52rem/1.3 var(--font-ibm-plex-mono), monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.experimentMeta div a:hover { color: var(--lab-fg); }
+
+.systemPanel {
+  position: absolute;
+  z-index: 7;
+  top: 1.35rem;
+  right: 1.35rem;
+  width: clamp(14.5rem, 16vw, 17.5rem);
+  border: 1px solid var(--lab-border);
+  background: color-mix(in srgb, var(--lab-panel) 90%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.systemHeading {
+  width: 100%;
+  min-height: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 0.72rem;
+  border: 0;
+  border-bottom: 1px solid var(--lab-border);
+  background: transparent;
+  color: var(--lab-dim);
+  font: 500 0.55rem/1 var(--font-ibm-plex-mono), monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.systemPanel dl { margin: 0; }
+.systemPanel dl div {
+  min-height: 2rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 0.72rem;
+  border-bottom: 1px solid var(--lab-border);
+}
+.systemPanel dl div:last-child { border-bottom: 0; }
+.systemPanel dt, .systemPanel dd {
+  overflow: hidden;
+  margin: 0;
+  font: 500 0.54rem/1.2 var(--font-ibm-plex-mono), monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.systemPanel dt { color: var(--lab-dim); text-transform: uppercase; }
+.systemPanel dd { max-width: 9rem; color: var(--lab-fg); font-variant-numeric: tabular-nums; text-align: right; }
+
+.qualitySelector { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--lab-border); }
+.qualitySelector button {
+  min-height: 2.3rem;
+  padding: 0.3rem;
+  border: 0;
+  border-right: 1px solid var(--lab-border);
+  background: transparent;
+  color: var(--lab-dim);
+  font: 500 0.48rem/1.2 var(--font-ibm-plex-mono), monospace;
+}
+.qualitySelector button:last-child { border-right: 0; }
+.qualitySelector button[aria-pressed="true"] { background: var(--lab-fg); color: var(--lab-bg); }
+
+.transport {
+  position: absolute;
+  z-index: 8;
+  right: 1.35rem;
+  bottom: 1.35rem;
+  display: flex;
+  border: 1px solid var(--lab-border);
+  background: var(--lab-panel);
+}
+.transport button {
+  min-height: 2.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.48rem;
+  padding: 0 0.85rem;
+  border: 0;
+  border-right: 1px solid var(--lab-border);
+  background: transparent;
+  color: var(--lab-dim);
+  font: 500 0.55rem/1 var(--font-ibm-plex-mono), monospace;
+  text-transform: uppercase;
+  transition: color 160ms ease, background 160ms ease;
+}
+.transport button:last-child { border-right: 0; }
+.transport button:hover, .transport button:focus-visible { color: var(--lab-fg); background: var(--lab-soft); }
+.transport button span { color: var(--lab-fg); font-size: 0.78rem; }
+
+.inspectorWrap {
+  position: absolute;
+  z-index: 10;
+  top: 1.35rem;
+  right: 1.35rem;
+  bottom: 4.6rem;
+  width: min(20rem, calc(100vw - 3rem));
+}
+
+.inspector {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--lab-border);
+  background: var(--lab-panel);
+  backdrop-filter: blur(18px);
+}
+
+.inspector header {
+  min-height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  border-bottom: 1px solid var(--lab-border);
+}
+.inspector header div { display: flex; gap: 0.8rem; align-items: baseline; }
+.inspector header span { color: var(--lab-fg); font-size: 0.78rem; font-weight: 520; }
+.inspector header strong { color: var(--lab-faint); font: 500 0.55rem/1 var(--font-ibm-plex-mono), monospace; }
+.inspector header button { width: 2rem; height: 2rem; border: 0; background: transparent; color: var(--lab-dim); font-size: 1.15rem; }
+.inspectorControls { padding: 0.3rem 1rem; }
+.inspectorControls label { display: block; padding: 1rem 0; border-bottom: 1px solid var(--lab-border); }
+.inspectorControls label > span { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.8rem; }
+.inspectorControls b { color: var(--lab-dim); font-size: 0.67rem; font-weight: 460; }
+.inspectorControls output { color: var(--lab-fg); font: 500 0.58rem/1 var(--font-ibm-plex-mono), monospace; font-variant-numeric: tabular-nums; }
+.inspectorControls input { width: 100%; height: 1px; appearance: none; background: var(--lab-border); }
+.inspectorControls input::-webkit-slider-thumb { width: 0.55rem; height: 0.55rem; appearance: none; border-radius: 50%; background: var(--lab-fg); }
+.inspectorControls select {
+  width: 100%;
+  min-height: 2.4rem;
+  padding: 0 0.65rem;
+  border: 1px solid var(--lab-border);
+  border-radius: 0;
+  background: var(--lab-bg);
+  color: var(--lab-fg);
+  font: 500 0.6rem/1 var(--font-ibm-plex-mono), monospace;
+}
+.inspector > p { margin: auto 1rem 1rem; color: var(--lab-faint); font: 500 0.53rem/1.5 var(--font-ibm-plex-mono), monospace; }
+
+.pausedFlag {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  top: 50%;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--lab-border);
+  background: var(--lab-panel);
+  color: var(--lab-fg);
+  font: 500 0.58rem/1 var(--font-ibm-plex-mono), monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transform: translate(-50%, -50%);
+}
+
+.mobileBar { display: none; }
+
+// Experiment-specific surfaces intentionally remain global: they are shared by dynamically loaded children.
+.surface :global(.text-pressure-experiment) { display: grid; place-items: center; padding: 8%; }
+.surface :global(.text-pressure-experiment > div) { height: min(70vh, 36rem) !important; }
+.surface :global(.pressure-orbit) {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: clamp(4.2rem, 7vw, 7.5rem);
+  aspect-ratio: 1;
+  border: 1px solid color-mix(in srgb, var(--lab-fg) 72%, transparent);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.surface :global(.pressure-orbit i) { position: absolute; inset: 50%; width: 0.45rem; height: 0.45rem; border-radius: 50%; background: var(--lab-fg); transform: translate(-50%, -50%); }
+
+.surface :global(.signal-activation) {
+  position: absolute;
+  left: clamp(1.35rem, 3.2vw, 3.8rem);
+  bottom: 1.35rem;
+  z-index: 5;
+  min-height: 2.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 0.85rem;
+  border: 1px solid var(--lab-border);
+  background: var(--lab-panel);
+  color: var(--lab-fg);
+  font: 500 0.55rem/1 var(--font-ibm-plex-mono), monospace;
+  text-transform: uppercase;
+}
+.surface :global(.signal-status) {
+  position: absolute;
+  left: clamp(1.35rem, 3.2vw, 3.8rem);
+  bottom: 4.6rem;
+  z-index: 5;
+  max-width: 23rem;
+  margin: 0;
+  color: var(--lab-dim);
+  font: 500 0.52rem/1.5 var(--font-ibm-plex-mono), monospace;
+}
+
+.surface :global(.cursor-morph-experiment) { padding: clamp(4.5rem, 10vh, 7rem) clamp(2rem, 5vw, 5.5rem) 8rem; overflow: auto; }
+.surface :global(.cursor-lab-heading) { display: flex; justify-content: space-between; align-items: flex-end; gap: 2rem; margin-bottom: clamp(2rem, 6vh, 4.5rem); }
+.surface :global(.cursor-lab-heading p) { margin: 0; color: var(--lab-fg); font-size: clamp(1.3rem, 2.4vw, 2.7rem); letter-spacing: -0.045em; }
+.surface :global(.cursor-lab-heading span) { max-width: 19rem; color: var(--lab-dim); font-size: 0.72rem; line-height: 1.5; }
+.surface :global(.cursor-state-grid) { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--lab-border); border-left: 1px solid var(--lab-border); }
+.surface :global(.cursor-state-cell) {
+  position: relative;
+  min-height: clamp(9.5rem, 21vh, 13.5rem);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto 1fr auto;
+  align-items: start;
+  padding: 0.85rem;
+  border: 0;
+  border-right: 1px solid var(--lab-border);
+  border-bottom: 1px solid var(--lab-border);
+  background: transparent;
+  color: var(--lab-fg);
+  text-align: left;
+  transition: background 180ms ease;
+}
+.surface :global(.cursor-state-cell:hover) { background: var(--lab-soft); }
+.surface :global(.cursor-state-number) { color: var(--lab-faint); font: 500 0.52rem/1 var(--font-ibm-plex-mono), monospace; }
+.surface :global(.cursor-state-label) { color: var(--lab-dim); font: 500 0.55rem/1 var(--font-ibm-plex-mono), monospace; text-transform: uppercase; }
+.surface :global(.cursor-state-glyph) { grid-column: 1 / 3; align-self: center; justify-self: center; font-size: clamp(2rem, 3.5vw, 3.8rem); font-weight: 250; }
+.surface :global(.cursor-state-helper) { color: var(--lab-faint); font: 500 0.5rem/1 var(--font-ibm-plex-mono), monospace; text-transform: uppercase; }
+.surface :global(.cursor-state-detail) { grid-column: 1 / 3; margin-top: 0.45rem; color: var(--lab-dim); font-size: 0.58rem; }
+.surface :global(.cursor-state-cell input) { grid-column: 1 / 3; width: 100%; margin-top: 0.5rem; padding: 0.35rem 0; border: 0; border-bottom: 1px solid var(--lab-border); background: transparent; color: var(--lab-fg); font-size: 0.68rem; outline: 0; }
+.surface :global(.cursor-state-cell.is-disabled) { opacity: 0.42; }
+.surface :global(.cursor-state-cell:nth-child(6) .cursor-state-glyph) { animation: cursorLoad 0.72s ease-in-out infinite alternate; }
+@keyframes cursorLoad { to { opacity: 0.36; transform: scale(0.92); } }
+
+@media (max-width: 1080px) {
+  .root { grid-template-columns: 15.5rem minmax(0, 1fr); }
+  .indexPanel li button { padding-inline: 1.2rem; }
+  .experimentMeta { width: min(23rem, 50vw); }
+  .surface :global(.cursor-state-grid) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 767px) {
+  .root { display: block; }
+  .indexPanel { display: none; }
+  .workspace { min-height: 100dvh; }
+  .mobileBar {
+    position: absolute;
+    z-index: 12;
+    inset: 0 0 auto;
+    min-height: 3.75rem;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.55rem 0.8rem;
+    border-bottom: 1px solid var(--lab-border);
+    background: var(--lab-panel);
+  }
+  .mobileBar a { color: var(--lab-fg); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; }
+  .mobileBar label { min-width: 0; }
+  .mobileBar select { width: 100%; min-height: 2.55rem; padding: 0 1.9rem 0 0.65rem; border: 1px solid var(--lab-border); border-radius: 0; background: var(--lab-bg); color: var(--lab-fg); font: 500 0.62rem/1 var(--font-ibm-plex-mono), monospace; }
+  .mobileBar button { min-height: 2.55rem; padding: 0 0.7rem; border: 1px solid var(--lab-border); background: transparent; color: var(--lab-fg); font: 500 0.56rem/1 var(--font-ibm-plex-mono), monospace; text-transform: uppercase; }
+  .surface { top: 3.75rem; bottom: 0; }
+  .systemPanel {
+    top: 4.45rem;
+    left: 0.7rem;
+    right: 0.7rem;
+    width: auto;
+    display: flex;
+    background: color-mix(in srgb, var(--lab-panel) 86%, transparent);
+  }
+  .systemHeading { width: 4.8rem; border: 0; border-right: 1px solid var(--lab-border); }
+  .systemPanel dl { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); }
+  .systemPanel dl div { min-height: 2.5rem; display: flex; flex-direction: column; justify-content: center; gap: 0.25rem; border-right: 1px solid var(--lab-border); border-bottom: 0; }
+  .systemPanel dl div:nth-child(n + 4) { display: none; }
+  .systemPanel dt, .systemPanel dd { font-size: 0.45rem; }
+  .qualitySelector { position: absolute; top: 100%; left: 0; right: 0; background: var(--lab-panel); }
+  .experimentMeta { left: 1rem; right: 1rem; bottom: 5rem; width: auto; }
+  .experimentMeta h1 { font-size: clamp(1.6rem, 8vw, 2.35rem); }
+  .experimentMeta p { max-width: 19rem; }
+  .transport { left: 0.7rem; right: 0.7rem; bottom: 0.7rem; justify-content: stretch; }
+  .transport button { flex: 1; justify-content: center; min-height: 3rem; padding-inline: 0.4rem; }
+  .inspectorWrap { inset: auto 0 0; width: 100%; height: min(67dvh, 36rem); }
+  .inspector { border-inline: 0; border-bottom: 0; }
+  .surface :global(.text-pressure-experiment) { padding: 8%; }
+  .surface :global(.text-pressure-experiment > div) { height: 60dvh !important; }
+  .surface :global(.cursor-morph-experiment) { padding: 7.5rem 1rem 9rem; }
+  .surface :global(.cursor-lab-heading) { display: block; margin-bottom: 1.5rem; }
+  .surface :global(.cursor-lab-heading span) { display: block; margin-top: 0.75rem; }
+  .surface :global(.cursor-state-grid) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .surface :global(.cursor-state-cell) { min-height: 8.5rem; }
+  .surface :global(.signal-activation) { left: 0.7rem; bottom: 4.35rem; }
+  .surface :global(.signal-status) { left: 0.7rem; right: 0.7rem; bottom: 7.4rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root *, .root *::before, .root *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+}

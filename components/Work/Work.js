@@ -158,10 +158,10 @@ const Work = () => {
           </p>
           <h2
             ref={titleRef}
-            className="landing-section-title text-[clamp(3.5rem,7.75vw,7.65rem)] leading-[1.08] font-extralight pb-[0.16em]"
+            className="landing-section-title work-section-title text-massive font-extralight"
             style={{ color: "var(--fg-primary)" }}
           >
-            <ShuffleText text="Where I've worked" duration={0.6} shuffleTimes={4} triggerOnTap clipDuringShuffle={false} textAlign="left" />
+            <ShuffleText text="Where I've worked" duration={0.6} shuffleTimes={4} triggerOnTap textAlign="left" />
           </h2>
         </div>
 

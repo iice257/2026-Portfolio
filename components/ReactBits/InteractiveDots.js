@@ -21,6 +21,10 @@ const InteractiveDots = ({
   trailOnMove = false,
   trailInterval = 44,
   trailMinDistance = 12,
+  mouseInteraction = true,
+  pointerRadius = 150,
+  rippleRadius = 300,
+  interactionStrength = 1,
   className = "",
 }) => {
   const canvasRef = useRef(null);
@@ -137,16 +141,16 @@ const InteractiveDots = ({
     ripplesRef.current = ripplesRef.current.slice(-6);
   }, [updatePointer]);
 
-  const getPointerInfluence = (x, y) => {
+  const getPointerInfluence = useCallback((x, y) => {
     if (!pointerRef.current.active) return 0;
 
     const dx = x - pointerRef.current.x;
     const dy = y - pointerRef.current.y;
     const distance = Math.hypot(dx, dy);
-    return Math.max(0, 1 - distance / 150);
-  };
+    return Math.max(0, 1 - distance / pointerRadius);
+  }, [pointerRadius]);
 
-  const getRippleInfluence = (x, y, now) => {
+  const getRippleInfluence = useCallback((x, y, now) => {
     let influence = 0;
 
     ripplesRef.current.forEach((ripple) => {
@@ -155,8 +159,8 @@ const InteractiveDots = ({
       if (age >= maxAge) return;
 
       const distance = Math.hypot(x - ripple.x, y - ripple.y);
-      const radius = (age / maxAge) * 300;
-      const width = 60;
+      const radius = (age / maxAge) * rippleRadius;
+      const width = Math.max(32, rippleRadius * 0.2);
 
       if (Math.abs(distance - radius) < width) {
         influence += (1 - age / maxAge) * ripple.intensity * (1 - Math.abs(distance - radius) / width);
@@ -164,7 +168,7 @@ const InteractiveDots = ({
     });
 
     return Math.min(influence, 2);
-  };
+  }, [rippleRadius]);
 
   const getTrailInfluence = (x, y, now) => {
     let influence = 0;
@@ -252,9 +256,9 @@ const InteractiveDots = ({
     }
 
     dotsRef.current.forEach((dot) => {
-      const influence = getPointerInfluence(dot.originalX, dot.originalY)
+      const influence = (getPointerInfluence(dot.originalX, dot.originalY)
         + getRippleInfluence(dot.originalX, dot.originalY, now)
-        + getTrailInfluence(dot.originalX, dot.originalY, now);
+        + getTrailInfluence(dot.originalX, dot.originalY, now)) * interactionStrength;
       const size = 1.7 + influence * 5.2 + Math.sin(timeRef.current + dot.phase) * 0.35;
       const opacity = Math.max(
         0.18,
@@ -276,7 +280,7 @@ const InteractiveDots = ({
         ctx.beginPath();
         ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
         ctx.lineWidth = 1.4;
-        ctx.arc(ripple.x, ripple.y, progress * 300, 0, Math.PI * 2);
+        ctx.arc(ripple.x, ripple.y, progress * rippleRadius, 0, Math.PI * 2);
         ctx.stroke();
       });
     }
@@ -296,7 +300,7 @@ const InteractiveDots = ({
     }
 
     animationFrameRef.current = window.requestAnimationFrame(animate);
-  }, [animationSpeed, backgroundColor, removeWaveLine, trailOnMove]);
+  }, [animationSpeed, backgroundColor, getPointerInfluence, getRippleInfluence, interactionStrength, removeWaveLine, rippleRadius, trailOnMove]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -312,9 +316,11 @@ const InteractiveDots = ({
       pointerRef.current.active = false;
     };
 
-    window.addEventListener("pointermove", addTrailRipple, { passive: true });
-    window.addEventListener("pointerdown", addRipple, { passive: true });
-    window.addEventListener("pointerleave", handlePointerLeave);
+    if (mouseInteraction) {
+      window.addEventListener("pointermove", addTrailRipple, { passive: true });
+      window.addEventListener("pointerdown", addRipple, { passive: true });
+      window.addEventListener("pointerleave", handlePointerLeave);
+    }
 
     if (!shouldReduce) {
       animationFrameRef.current = window.requestAnimationFrame(animate);
@@ -329,9 +335,11 @@ const InteractiveDots = ({
 
     return () => {
       observer.disconnect();
-      window.removeEventListener("pointermove", addTrailRipple);
-      window.removeEventListener("pointerdown", addRipple);
-      window.removeEventListener("pointerleave", handlePointerLeave);
+      if (mouseInteraction) {
+        window.removeEventListener("pointermove", addTrailRipple);
+        window.removeEventListener("pointerdown", addRipple);
+        window.removeEventListener("pointerleave", handlePointerLeave);
+      }
       if (animationFrameRef.current) {
         window.cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
@@ -344,7 +352,7 @@ const InteractiveDots = ({
       pointerRef.current.active = false;
       lastTrailRef.current = { x: 0, y: 0, time: 0, set: false };
     };
-  }, [active, addRipple, addTrailRipple, animate, backgroundColor, resizeCanvas]);
+  }, [active, addRipple, addTrailRipple, animate, backgroundColor, mouseInteraction, resizeCanvas]);
 
   return (
     <div ref={containerRef} className={`interactive-dots ${className}`} aria-hidden="true">

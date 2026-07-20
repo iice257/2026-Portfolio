@@ -30,6 +30,8 @@ function SplashCursor({
     if (!canvas) return undefined;
 
     let isActive = true;
+    canvas.dataset.playgroundWebgl = "true";
+    canvas.dataset.playgroundLoop = "active";
 
     function pointerPrototype() {
       this.id = -1;
@@ -674,6 +676,10 @@ function SplashCursor({
 
     function updateFrame() {
       if (!isActive) return;
+      if (document.visibilityState === 'hidden') {
+        animationFrameId.current = requestAnimationFrame(updateFrame);
+        return;
+      }
       const dt = calcDeltaTime();
       if (resizeCanvas()) initFramebuffers();
       updateColors(dt);
@@ -1030,6 +1036,7 @@ function SplashCursor({
 
     return () => {
       isActive = false;
+      delete canvas.dataset.playgroundLoop;
 
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);

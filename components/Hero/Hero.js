@@ -411,50 +411,71 @@ const Hero = () => {
           "-=0.08"
         );
 
+      const isScrollTrial = HERO_SCROLL_TRIAL_ENABLED
+        && !reduceMotion
+        && !window.matchMedia(LOCK_VIEWPORT_QUERY).matches;
+
+      if (isScrollTrial) {
+        const trialTimeline = gsap.timeline({
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top top",
+            end: "+=100%",
+            scrub: 0.45,
+            pin: true,
+            pinSpacing: false,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+          },
+        });
+
+        trialTimeline
+          .to(scrollIndicatorRef.current, {
+            opacity: 0,
+            duration: 0.12,
+            ease: "none",
+          }, 0)
+          .to(subtitleRef.current, {
+            y: -54,
+            scale: 1.08,
+            opacity: 0,
+            duration: 0.38,
+            ease: "power1.in",
+          }, 0.04)
+          .to(nameContainerRef.current, {
+            yPercent: -3,
+            scale: 6.8,
+            transformOrigin: "50% 47%",
+            force3D: true,
+            duration: 1,
+            ease: "power2.in",
+          }, 0)
+          .to(backdropRef.current, {
+            scale: 1.55,
+            transformOrigin: "50% 50%",
+            force3D: true,
+            duration: 1,
+            ease: "power1.in",
+          }, 0)
+          .to(sectionRef.current, {
+            opacity: 0,
+            duration: 0.32,
+            ease: "power1.in",
+          }, 0.68);
+
+        return;
+      }
+
       ScrollTrigger.create({
         trigger: sectionRef.current,
         start: "top top",
-        end: HERO_SCROLL_TRIAL_ENABLED && !reduceMotion && !window.matchMedia(LOCK_VIEWPORT_QUERY).matches
-          ? "+=58%"
-          : "bottom top",
+        end: "bottom top",
         scrub: 1,
-        pin: HERO_SCROLL_TRIAL_ENABLED && !reduceMotion && !window.matchMedia(LOCK_VIEWPORT_QUERY).matches,
-        pinSpacing: true,
-        anticipatePin: 1,
         onUpdate: (self) => {
           if (isLockedRef.current) return;
 
           const progress = self.progress;
           const isCompact = isLockViewportRef.current;
-          const isScrollTrial = HERO_SCROLL_TRIAL_ENABLED && !reduceMotion && !isCompact;
-
-          if (isScrollTrial) {
-            const zoomProgress = Math.min(progress / 0.62, 1);
-            const exitProgress = Math.max((progress - 0.62) / 0.38, 0);
-
-            gsap.set(nameContainerRef.current, {
-              y: 0,
-              scale: 1 + zoomProgress * 0.04 - exitProgress * 0.04,
-              filter: "blur(0px)",
-              opacity: 1,
-            });
-
-            gsap.set(subtitleRef.current, {
-              y: zoomProgress * 16 - exitProgress * 16,
-              scale: 1 + zoomProgress * 0.012 - exitProgress * 0.012,
-              opacity: 1,
-            });
-
-            gsap.set(backdropRef.current, {
-              scale: 1 + zoomProgress * 0.04 - exitProgress * 0.04,
-              opacity: 1,
-            });
-
-            gsap.set(scrollIndicatorRef.current, {
-              opacity: 1 - progress * 4,
-            });
-            return;
-          }
 
           gsap.set(nameContainerRef.current, {
             y: isCompact ? progress * 56 : progress * 150,
@@ -563,6 +584,7 @@ const Hero = () => {
                 scale={false}
                 textColor="var(--fg-primary)"
                 minFontSize={42}
+                maxWeight={790}
                 targetFps={60}
               />
             </div>
@@ -582,6 +604,8 @@ const Hero = () => {
                 textColor="var(--fg-primary)"
                 minFontSize={42}
                 baseWeight={isLockViewport ? 550 : 100}
+                maxWeight={900}
+                maxStrokeWidth={isLockViewport ? 0.55 : 0.25}
                 targetFps={60}
               />
             </div>

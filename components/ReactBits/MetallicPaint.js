@@ -327,6 +327,7 @@ export default function MetallicPaint({
 
     const gl = canvas.getContext('webgl2', { antialias: true, alpha: true, powerPreference: 'high-performance' });
     if (!gl) return false;
+    canvas.dataset.playgroundWebgl = "true";
 
     const compile = (src, type) => {
       const shader = gl.createShader(type);
@@ -535,6 +536,7 @@ export default function MetallicPaint({
 
       gl.uniform1f(u.u_time, animTimeRef.current);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      canvas.dataset.playgroundLoop = "active";
       rafRef.current = requestAnimationFrame(render);
     };
 
@@ -543,6 +545,7 @@ export default function MetallicPaint({
 
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      delete canvas.dataset.playgroundLoop;
       if (mouseAnimation) {
         canvas.removeEventListener('mousemove', handleMouseMove);
       }

@@ -16,19 +16,12 @@
   display: inline-block;
   overflow: hidden;
   text-overflow: clip;
-  white-space: nowrap;
   contain: paint;
-}
-
-.shuffle-parent.clip-during-shuffle.is-shuffling .shuffle-word,
-.shuffle-parent.clip-during-shuffle.is-shuffling .shuffle-char,
-.shuffle-parent.clip-during-shuffle.is-shuffling .shuffle-space {
-  white-space: nowrap;
 }
 
 .shuffle-parent.clip-during-shuffle.is-shuffling .shuffle-space {
   display: inline-block;
-  width: 0.32em;
+  width: 0.28em;
 }
 
 .shuffle-char {
@@ -48,4 +41,10 @@
 
 .shuffle-line {
   display: block;
+}
+
+@media (max-width: 767px) {
+  .landing-section-title .shuffle-parent.shuffle-align-left {
+    transform: none;
+  }
 }

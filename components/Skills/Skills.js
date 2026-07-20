@@ -127,7 +127,7 @@ const Skills = () => {
             className="landing-section-title text-massive font-extralight"
             style={{ color: 'var(--fg-primary)' }}
           >
-            <ShuffleText text="What I do" duration={0.4} shuffleTimes={4} triggerOnTap clipDuringShuffle={false} textAlign="left" />
+            <ShuffleText text="What I do" duration={0.4} shuffleTimes={4} triggerOnTap textAlign="left" />
           </h2>
         </div>
 

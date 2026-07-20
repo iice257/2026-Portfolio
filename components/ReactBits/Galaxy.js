@@ -295,10 +295,12 @@ export default function Galaxy({
         cancelAnimationFrame(animateId);
         animateId = null;
       }
+      delete gl.canvas.dataset.playgroundLoop;
     }
 
     function startLoop() {
       if (animateId === null && !pausedRef.current && document.visibilityState !== 'hidden') {
+        gl.canvas.dataset.playgroundLoop = "active";
         animateId = requestAnimationFrame(update);
       }
     }
@@ -337,6 +339,7 @@ export default function Galaxy({
     }
     resumeRef.current = startLoop;
     stopRef.current = stopLoop;
+    gl.canvas.dataset.playgroundWebgl = "true";
     ctn.appendChild(gl.canvas);
     startLoop();
 

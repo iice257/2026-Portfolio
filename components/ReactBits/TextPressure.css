@@ -9,7 +9,7 @@
 
 .text-pressure-char {
   display: inline-block;
-  transition: font-weight 0.1s ease-out, font-variation-settings 0.1s ease-out;
+  transition: font-weight 0.1s ease-out, font-variation-settings 0.1s ease-out, -webkit-text-stroke-width 0.1s ease-out;
   transform-origin: bottom center;
-  will-change: font-weight, font-variation-settings;
+  will-change: font-weight, font-variation-settings, -webkit-text-stroke-width;
 }

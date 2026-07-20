@@ -2,13 +2,13 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { CONTACT_LINKS, MENULINKS } from "../../constants";
-import { PORTFOLIO_GALAXY_CONFIG, PORTFOLIO_WAVES_CONFIG } from "../ReactBits/galaxyConfig";
+import { PORTFOLIO_GALAXY_CONFIG } from "../ReactBits/galaxyConfig";
+import InteractiveDots from "../ReactBits/InteractiveDots";
 import ShuffleText from "../ReactBits/ShuffleText";
 import { useTheme } from "../../context/ThemeContext";
 import { getSectionHref, scrollToSection, SECTION_IDS } from "../../utils/sectionNavigation";
 
 const Galaxy = dynamic(() => import("../ReactBits/Galaxy"), { ssr: false });
-const Waves = dynamic(() => import("../ReactBits/Waves"), { ssr: false });
 
 const Footer = () => {
   const footerRef = useRef(null);
@@ -91,13 +91,20 @@ const Footer = () => {
       )}
 
       {canRenderFooterBackdrop && theme === "light" && !isFooterBackdropPaused && (
-        <div className="footer-effect footer-effect-waves" aria-hidden="true">
-          <Waves
-            {...PORTFOLIO_WAVES_CONFIG}
-            mouseInteraction={false}
-            pixelRatio={0.55}
-            targetFps={16}
-            maxPixelCount={360000}
+        <div className="footer-effect footer-effect-dots" aria-hidden="true">
+          <InteractiveDots
+            active={!isFooterBackdropPaused}
+            backgroundColor="#f7f7f4"
+            dotColor="#151515"
+            gridSpacing={28}
+            animationSpeed={0.004}
+            removeWaveLine
+            trailOnMove={false}
+            mouseInteraction
+            pointerRadius={92}
+            rippleRadius={165}
+            interactionStrength={0.62}
+            className="footer-menu-dots"
           />
         </div>
       )}
@@ -132,6 +139,17 @@ const Footer = () => {
                 Index
               </p>
               <ul className="space-y-3">
+                <li>
+                  <Link
+                    href="/playground"
+                    className="text-body-lg link-underline inline-flex items-center gap-2"
+                    style={{ color: "var(--fg-primary)" }}
+                    data-cursor-label="Open Playground"
+                  >
+                    <span>Open Playground</span>
+                    <span aria-hidden="true">↗</span>
+                  </Link>
+                </li>
                 {navLinks.map((link) => (
                   <li key={link.ref}>
                     <Link

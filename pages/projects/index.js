@@ -19,6 +19,7 @@ import Footer from "@/components/Footer/Footer";
 import ProjectVisual from "@/components/Projects/ProjectVisual";
 import LightboxVideo from "@/components/Projects/LightboxVideo";
 import ShuffleText from "@/components/ReactBits/ShuffleText";
+import { IconArrowUpRight, IconGithub } from "@/components/Icons";
 import { useCursor } from "../../context/CursorContext";
 import { useBodyScrollLock } from "../../utils/useBodyScrollLock";
 import { useDialogFocus } from "../../utils/useDialogFocus";
@@ -826,7 +827,7 @@ export default function ProjectsIndex() {
                 <ShuffleText text="Projects" duration={0.48} shuffleTimes={3} textAlign="left" />
               </h1>
               <p className="text-editorial font-light max-w-3xl" style={{ color: "var(--fg-secondary)" }}>
-                A structured view of product work, agent tooling, implementation studies, and public repositories. Selected work is followed by additional builds and a curated archive.
+                Ten projects I&apos;d walk you through unprompted, and forty-some more that show the actual shape of getting here: product ideas, agent tooling, and the experiments and forks that come with building things regularly.
               </p>
             </div>
             <div className="lg:col-span-4 grid grid-cols-2 gap-6">
@@ -947,7 +948,7 @@ export default function ProjectsIndex() {
                 </div>
               ) : (
                 <p className="project-search-empty" style={{ color: "var(--fg-secondary)" }}>
-                  No matching projects yet. Try a broader product area or technology.
+                  Nothing matching that yet. Try a broader area or technology.
                 </p>
               )}
             </div>
@@ -961,11 +962,11 @@ export default function ProjectsIndex() {
                 Featured
               </p>
               <h2 className="text-display-lg font-light" style={{ color: "var(--fg-primary)" }}>
-                Selected project details
+                The ones I&apos;d talk about first
               </h2>
             </div>
             <p className="text-body-md max-w-md" style={{ color: "var(--fg-secondary)" }}>
-              These four receive the richest treatment and have full writeups.
+              Full writeups, because these are the four I still think about.
             </p>
           </div>
 
@@ -1037,7 +1038,7 @@ export default function ProjectsIndex() {
               </h2>
             </div>
             <p className="text-body-md max-w-md" style={{ color: "var(--fg-secondary)" }}>
-              Moved out of the archive because the portfolio itself carries the strongest technical story.
+              You&apos;re already looking at it. That&apos;s easier to point at than to describe from inside the archive.
             </p>
           </div>
 
@@ -1079,10 +1080,10 @@ export default function ProjectsIndex() {
               Major
             </p>
             <h2 className="text-display-lg font-light mb-4" style={{ color: "var(--fg-primary)" }}>
-              Six more substantial builds
+              Six more, still standing
             </h2>
             <p className="text-body-lg max-w-2xl" style={{ color: "var(--fg-secondary)" }}>
-              These complete the top ten. Tap or click a card to flip it for tools, status, and notes.
+              Flip a card for the stack, the status, and what I actually think of it now.
             </p>
           </div>
 
@@ -1145,10 +1146,10 @@ export default function ProjectsIndex() {
               Archive
             </p>
             <h2 className="text-display-lg font-light mb-4" style={{ color: "var(--fg-primary)" }}>
-              Additional work
+              Everything else
             </h2>
             <p className="text-body-lg max-w-2xl" style={{ color: "var(--fg-secondary)" }}>
-              Expandable records lead with authored product and technical work. Smaller public builds follow as direct, compact links.
+              Real products I built to answer a question, and the smaller public repos that came along the way.
             </p>
           </div>
 
@@ -1245,7 +1246,7 @@ export default function ProjectsIndex() {
             })}
 
             {quietArchiveProjects.map((project) => {
-              const href = project.liveUrl || project.url;
+              const href = project.url;
 
               return (
                 <article key={project.slug} className="archive-project-quiet border-b" style={{ borderColor: "var(--border)" }}>
@@ -1254,18 +1255,23 @@ export default function ProjectsIndex() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="archive-project-quiet-link grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 py-5 text-left cursor-none"
-                    aria-label={`Open ${project.name}`}
+                    aria-label={`View ${project.name} GitHub repository`}
+                    data-cursor-label="View GitHub repo"
+                    data-cursor-variant="project"
                   >
                     <span className="text-micro md:col-span-2" style={{ color: "var(--fg-muted)" }}>
                       {String(project.archiveNumber).padStart(2, "0")}
                     </span>
                     <span className="archive-project-quiet-title md:col-span-5 min-w-0 text-body-lg font-light" style={{ color: "var(--fg-primary)" }}>
-                      {project.name}
+                      <span className="archive-project-quiet-title-text">{project.name}</span>
                     </span>
                     <span className="md:col-span-4 text-body-sm" style={{ color: "var(--fg-muted)" }}>
                       {project.status}
                     </span>
-                    <span className="archive-project-quiet-arrow" aria-hidden="true">&nearr;</span>
+                    <span className="archive-project-quiet-destination" aria-hidden="true">
+                      <span className="archive-project-quiet-github"><IconGithub /></span>
+                      <span className="archive-project-quiet-arrow"><IconArrowUpRight /></span>
+                    </span>
                   </a>
                 </article>
               );

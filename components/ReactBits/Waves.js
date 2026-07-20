@@ -312,10 +312,12 @@ export default function Waves({
         cancelAnimationFrame(frameIdRef.current);
         frameIdRef.current = null;
       }
+      delete canvas.dataset.playgroundLoop;
     }
 
     function startLoop() {
       if (!frameIdRef.current && !pausedRef.current && document.visibilityState !== "hidden") {
+        canvas.dataset.playgroundLoop = "active";
         frameIdRef.current = requestAnimationFrame(animate);
       }
     }

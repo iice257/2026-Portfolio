@@ -34,7 +34,8 @@ const ShuffleText = ({
   const [ready, setReady] = useState(false);
   const [isShuffling, setIsShuffling] = useState(false);
   const [displayChars, setDisplayChars] = useState([]);
-  const [shuffleWidth, setShuffleWidth] = useState(null);
+  const [shuffleBounds, setShuffleBounds] = useState(null);
+  const [shuffleCharWidths, setShuffleCharWidths] = useState([]);
   const animatingRef = useRef(false);
   const hasPlayedRef = useRef(false);
   const timersRef = useRef([]);
@@ -44,16 +45,20 @@ const ShuffleText = ({
     timersRef.current = [];
   }, []);
 
-  const measureShuffleWidth = useCallback(() => {
+  const measureShuffleBounds = useCallback(() => {
     const el = ref.current;
     if (!el) return null;
 
     const parentWidth = el.parentElement?.getBoundingClientRect().width || 0;
-    const rectWidth = el.getBoundingClientRect().width;
+    const rect = el.getBoundingClientRect();
+    const rectWidth = rect.width;
     const scrollWidth = el.scrollWidth || rectWidth;
     const availableWidth = parentWidth > 0 ? parentWidth : scrollWidth;
 
-    return Math.max(1, Math.ceil(Math.min(scrollWidth, availableWidth)));
+    return {
+      width: Math.max(1, Math.ceil(Math.min(scrollWidth, availableWidth))),
+      height: Math.max(1, Math.ceil(rect.height)),
+    };
   }, []);
 
   // Split text into chars on mount
@@ -79,7 +84,11 @@ const ShuffleText = ({
     }
 
     clearTimers();
-    setShuffleWidth(measureShuffleWidth());
+    const el = ref.current;
+    setShuffleBounds(measureShuffleBounds());
+    setShuffleCharWidths(
+      el ? Array.from(el.querySelectorAll('.shuffle-char')).map((char) => char.getBoundingClientRect().width) : []
+    );
     animatingRef.current = true;
     hasPlayedRef.current = true;
     setReady(false);
@@ -103,7 +112,8 @@ const ShuffleText = ({
         })));
         setReady(true);
         setIsShuffling(false);
-        setShuffleWidth(null);
+        setShuffleBounds(null);
+        setShuffleCharWidths([]);
         animatingRef.current = false;
         onShuffleComplete?.();
         return;
@@ -134,7 +144,7 @@ const ShuffleText = ({
     };
 
     step();
-  }, [clearTimers, measureShuffleWidth, text, duration, shuffleTimes, scrambleCharset, triggerOnce, respectReducedMotion, onShuffleComplete]);
+  }, [clearTimers, measureShuffleBounds, text, duration, shuffleTimes, scrambleCharset, triggerOnce, respectReducedMotion, onShuffleComplete]);
 
   useEffect(() => () => clearTimers(), [clearTimers]);
 
@@ -180,17 +190,17 @@ const ShuffleText = ({
       animate();
     };
 
-    el.addEventListener('pointerup', handlePointerUp);
-    return () => el.removeEventListener('pointerup', handlePointerUp);
+    el.addEventListener('click', handlePointerUp);
+    return () => el.removeEventListener('click', handlePointerUp);
   }, [animate, triggerOnTap]);
 
   const commonStyle = useMemo(() => {
-    const shuffleStyle = isShuffling && clipDuringShuffle && shuffleWidth
-      ? { width: `${shuffleWidth}px` }
+    const shuffleStyle = isShuffling && clipDuringShuffle && shuffleBounds
+      ? { width: `${shuffleBounds.width}px`, height: `${shuffleBounds.height}px` }
       : {};
 
     return { textAlign, ...style, ...shuffleStyle };
-  }, [clipDuringShuffle, isShuffling, shuffleWidth, textAlign, style]);
+  }, [clipDuringShuffle, isShuffling, shuffleBounds, textAlign, style]);
   const classes = useMemo(() => {
     const states = [
       'shuffle-parent',
@@ -246,6 +256,9 @@ const ShuffleText = ({
                   style={{
                     display: 'inline-block',
                     willChange: ready ? 'auto' : 'transform',
+                    width: isShuffling && clipDuringShuffle && shuffleCharWidths[char.id]
+                      ? `${shuffleCharWidths[char.id]}px`
+                      : undefined,
                   }}
                 >
                   {char.current}

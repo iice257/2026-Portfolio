@@ -4,6 +4,7 @@ import { safeStorage } from "../utils/storage";
 const ThemeContext = createContext({
   theme: "dark",
   toggleTheme: () => { },
+  setThemeMode: () => { },
 });
 
 export const ThemeProvider = ({ children }) => {
@@ -38,7 +39,16 @@ export const ThemeProvider = ({ children }) => {
     });
   }, []);
 
-  const value = useMemo(() => ({ theme, toggleTheme }), [theme, toggleTheme]);
+  const setThemeMode = useCallback((nextTheme) => {
+    if (nextTheme !== "dark" && nextTheme !== "light") return;
+    setTheme(nextTheme);
+    safeStorage.set(window.localStorage, "theme", nextTheme);
+  }, []);
+
+  const value = useMemo(
+    () => ({ theme, toggleTheme, setThemeMode }),
+    [theme, toggleTheme, setThemeMode]
+  );
 
   return (
     <ThemeContext.Provider value={value}>
