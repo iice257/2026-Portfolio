@@ -12,11 +12,10 @@ const createMetallicMask = () => {
   const svg = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720">
   <rect width="1200" height="720" fill="#fff"/>
-  <path d="M144 148h912v424H144z" rx="22" fill="#000"/>
-  <path d="M206 216h788v78H206z" fill="#fff"/>
-  <path d="M206 392h788v84H206z" fill="#fff"/>
-  <text x="600" y="371" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="148" font-weight="900" letter-spacing="-8" fill="#fff">PLAYGROUND</text>
-  <circle cx="1012" cy="182" r="18" fill="#fff"/>
+  <rect x="146" y="146" width="908" height="428" rx="20" fill="none" stroke="#000" stroke-width="12"/>
+  <path d="M206 218h158M836 218h158M206 500h216M778 500h216" fill="none" stroke="#000" stroke-width="12"/>
+  <text x="600" y="404" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="142" font-weight="900" letter-spacing="-8" fill="#000">PLAYGROUND</text>
+  <circle cx="1014" cy="184" r="18" fill="#000"/>
 </svg>`;
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 };
@@ -25,7 +24,7 @@ const metallicMask = createMetallicMask();
 
 export function GalaxyExperiment({ paused, params, qualityConfig }) {
   return (
-    <div className="playground-reactbits-surface" data-playground-loop={paused ? undefined : "active"}>
+    <div className="playground-reactbits-surface">
       <Galaxy
         density={params.density * qualityConfig.density}
         twinkleIntensity={params.twinkle}
@@ -51,7 +50,7 @@ export function WavesExperiment({ paused, params, qualityConfig, theme }) {
   const ink = theme === "dark" ? "rgba(245,245,242,.78)" : "rgba(18,18,18,.76)";
 
   return (
-    <div className="playground-reactbits-surface" data-playground-loop={paused ? undefined : "active"}>
+    <div className="playground-reactbits-surface">
       <Waves
         lineColor={ink}
         backgroundColor="transparent"
@@ -84,7 +83,7 @@ export function CursorTrailExperiment({ paused, params, qualityConfig, theme }) 
 
   if (isFluid) {
     return (
-      <div className="playground-reactbits-surface cursor-trail-fluid" data-playground-loop="active">
+      <div className="playground-reactbits-surface cursor-trail-fluid">
         <SplashCursor
           RAINBOW_MODE={false}
           COLOR={ink}
@@ -140,6 +139,12 @@ export function ASCIITextExperiment({ params, theme }) {
 export function MetallicPaintExperiment({ params }) {
   return (
     <div className="metallic-experiment" data-playground-loop="active">
+      <svg className="metallic-fallback-mark" viewBox="0 0 1200 720" aria-hidden="true">
+        <rect x="146" y="146" width="908" height="428" rx="20" fill="none" stroke="currentColor" strokeWidth="12" />
+        <path d="M206 218h158M836 218h158M206 500h216M778 500h216" fill="none" stroke="currentColor" strokeWidth="12" />
+        <text x="600" y="404" textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize="142" fontWeight="900" letterSpacing="-8">PLAYGROUND</text>
+        <circle cx="1014" cy="184" r="18" fill="currentColor" />
+      </svg>
       <MetallicPaint
         imageSrc={metallicMask}
         seed={194}

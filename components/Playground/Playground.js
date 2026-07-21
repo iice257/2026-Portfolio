@@ -338,9 +338,9 @@ export default function Playground() {
         <SystemPanel metrics={metrics} experiment={experiment} quality={quality} setQuality={setQuality} />
 
         <div className={styles.transport} role="group" aria-label="Experiment controls">
-          <button type="button" onClick={() => setPaused((value) => !value)} aria-pressed={paused}><span>{paused ? "Play" : "II"}</span>{paused ? "Resume" : "Pause"}</button>
-          <button type="button" onClick={resetExperiment}><span>Reset</span>Reset</button>
-          <button type="button" onClick={() => setInspectorOpen((value) => !value)} aria-expanded={inspectorOpen}><span>Tune</span>Parameters</button>
+          <button type="button" onClick={() => setPaused((value) => !value)} aria-pressed={paused}><span>{paused ? "Play" : "II"}</span><em>{paused ? "Resume" : "Pause"}</em></button>
+          <button type="button" onClick={resetExperiment}><span>Reset</span><em>Reset</em></button>
+          <button type="button" onClick={() => setInspectorOpen((value) => !value)} aria-expanded={inspectorOpen}><span>Tune</span><em>Parameters</em></button>
         </div>
 
         <AnimatePresence>

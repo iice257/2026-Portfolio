@@ -436,13 +436,14 @@ const CustomCursor = () => {
     loadingTimelineRef.current
       .set(fillPath, { opacity: 1 })
       .to(shape, {
-        rotationY: 360,
-        transformPerspective: 320,
-        duration: labConfig.spin,
-        ease: "none",
+        scale: 1.18,
+        duration: labConfig.spin * 0.5,
+        yoyo: true,
+        repeat: 1,
+        ease: "power2.inOut",
       }, 0)
       .to(fillPath, {
-        opacity: 0.5,
+        opacity: 0.4,
         duration: labConfig.spin * 0.5,
         yoyo: true,
         repeat: 1,

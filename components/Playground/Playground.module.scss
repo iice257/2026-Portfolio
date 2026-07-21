@@ -245,7 +245,16 @@
 .surface :global(.playground-dot-field) { opacity: 0.9; }
 .surface :global(.ascii-experiment) { filter: grayscale(1) contrast(1.14); }
 .surface :global(.metallic-experiment) { display: grid; place-items: center; padding: clamp(5rem, 11vh, 8rem) clamp(2rem, 7vw, 7rem); }
+.surface :global(.metallic-fallback-mark) {
+  grid-area: 1 / 1;
+  width: min(82vw, 920px);
+  height: auto;
+  color: rgba(245, 245, 242, .72);
+  filter: drop-shadow(0 0 28px rgba(255, 255, 255, .14));
+}
 .surface :global(.metallic-experiment .paint-container) {
+  grid-area: 1 / 1;
+  position: relative;
   position: relative;
   width: min(72vw, 62rem);
   height: min(48vh, 30rem);
@@ -391,6 +400,7 @@
 .transport button:last-child { border-right: 0; }
 .transport button:hover, .transport button:focus-visible { color: var(--lab-fg); background: var(--lab-soft); }
 .transport button span { color: var(--lab-fg); font-size: 0.78rem; }
+.transport button em { font-style: normal; }
 
 .inspectorWrap {
   position: absolute;
@@ -580,7 +590,8 @@
   .experimentMeta h1 { font-size: clamp(1.6rem, 8vw, 2.35rem); }
   .experimentMeta p { max-width: 19rem; }
   .transport { left: 0.7rem; right: 0.7rem; bottom: 0.7rem; justify-content: stretch; }
-  .transport button { flex: 1; justify-content: center; min-height: 3rem; padding-inline: 0.4rem; }
+  .transport button { flex: 1; min-width: 0; justify-content: center; min-height: 3rem; padding-inline: 0.4rem; }
+  .transport button em { display: none; }
   .inspectorWrap { inset: auto 0 0; width: 100%; height: min(67dvh, 36rem); }
   .inspector { border-inline: 0; border-bottom: 0; }
   .surface :global(.text-pressure-experiment) { padding: 8%; }
