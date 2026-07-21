@@ -813,7 +813,7 @@ export default function ProjectsIndex() {
         />
       </Head>
 
-      <main id="main-content" className="min-h-screen" style={{ backgroundColor: "var(--bg-primary)" }}>
+      <main id="main-content" className="projects-index-page min-h-screen" style={{ backgroundColor: "var(--bg-primary)" }}>
         <section className="section-container pt-40 pb-24">
           <Link
             href="/"
@@ -826,7 +826,7 @@ export default function ProjectsIndex() {
               <h1 className="text-massive font-extralight mb-8 leading-[1.14] pb-[0.18em]" style={{ color: "var(--fg-primary)" }}>
                 <ShuffleText text="Projects" duration={0.48} shuffleTimes={3} textAlign="left" />
               </h1>
-              <p className="text-editorial font-light max-w-3xl" style={{ color: "var(--fg-secondary)" }}>
+              <p className="projects-index-intro text-editorial font-light max-w-3xl" style={{ color: "var(--fg-secondary)" }}>
                 Ten projects I&apos;d walk you through unprompted, and forty-some more that show the actual shape of getting here: product ideas, agent tooling, and the experiments and forks that come with building things regularly.
               </p>
             </div>
@@ -835,7 +835,7 @@ export default function ProjectsIndex() {
                 <span className="text-display-sm font-light block" style={{ color: "var(--fg-primary)" }}>
                   {majorProjectCount}
                 </span>
-                <span className="text-micro" style={{ color: "var(--fg-muted)" }}>
+                <span className="projects-index-stat-label text-micro" style={{ color: "var(--fg-muted)" }}>
                   Major projects
                 </span>
               </div>
@@ -843,7 +843,7 @@ export default function ProjectsIndex() {
                 <span className="text-display-sm font-light block" style={{ color: "var(--fg-primary)" }}>
                   {githubProjectCount}
                 </span>
-                <span className="text-micro" style={{ color: "var(--fg-muted)" }}>
+                <span className="projects-index-stat-label text-micro" style={{ color: "var(--fg-muted)" }}>
                   Portfolio records
                 </span>
               </div>
@@ -961,11 +961,11 @@ export default function ProjectsIndex() {
               <p className="text-micro mb-4" style={{ color: "var(--fg-muted)" }}>
                 Featured
               </p>
-              <h2 className="text-display-lg font-light" style={{ color: "var(--fg-primary)" }}>
+              <h2 className="projects-index-section-title text-display-lg font-light" style={{ color: "var(--fg-primary)" }}>
                 The ones I&apos;d talk about first
               </h2>
             </div>
-            <p className="text-body-md max-w-md" style={{ color: "var(--fg-secondary)" }}>
+            <p className="projects-index-section-summary text-body-md max-w-md" style={{ color: "var(--fg-secondary)" }}>
               Full writeups, because these are the four I still think about.
             </p>
           </div>
@@ -1033,11 +1033,11 @@ export default function ProjectsIndex() {
               <p className="text-micro mb-4" style={{ color: "var(--fg-muted)" }}>
                 Highlight project
               </p>
-              <h2 className="text-display-lg font-light" style={{ color: "var(--fg-primary)" }}>
+              <h2 className="projects-index-section-title text-display-lg font-light" style={{ color: "var(--fg-primary)" }}>
                 This site, as a system
               </h2>
             </div>
-            <p className="text-body-md max-w-md" style={{ color: "var(--fg-secondary)" }}>
+            <p className="projects-index-section-summary text-body-md max-w-md" style={{ color: "var(--fg-secondary)" }}>
               You&apos;re already looking at it. That&apos;s easier to point at than to describe from inside the archive.
             </p>
           </div>
@@ -1079,7 +1079,7 @@ export default function ProjectsIndex() {
             <p className="text-micro mb-4" style={{ color: "var(--fg-muted)" }}>
               Major
             </p>
-            <h2 className="text-display-lg font-light mb-4" style={{ color: "var(--fg-primary)" }}>
+            <h2 className="projects-index-section-title text-display-lg font-light mb-4" style={{ color: "var(--fg-primary)" }}>
               Six more, still standing
             </h2>
             <p className="text-body-lg max-w-2xl" style={{ color: "var(--fg-secondary)" }}>
@@ -1145,7 +1145,7 @@ export default function ProjectsIndex() {
             <p className="text-micro mb-4" style={{ color: "var(--fg-muted)" }}>
               Archive
             </p>
-            <h2 className="text-display-lg font-light mb-4" style={{ color: "var(--fg-primary)" }}>
+            <h2 className="projects-index-section-title text-display-lg font-light mb-4" style={{ color: "var(--fg-primary)" }}>
               Everything else
             </h2>
             <p className="text-body-lg max-w-2xl" style={{ color: "var(--fg-secondary)" }}>

@@ -268,6 +268,25 @@ body {
   @apply max-w-[90rem] mx-auto px-6 md:px-12 lg:px-16;
 }
 
+.projects-index-page {
+  .projects-index-intro,
+  .projects-index-section-summary,
+  .project-search-result-kicker,
+  .project-search-result-description {
+    text-wrap: pretty;
+  }
+
+  .projects-index-section-title {
+    max-width: 15ch;
+    text-wrap: balance;
+  }
+
+  .projects-index-stat-label {
+    display: block;
+    white-space: nowrap;
+  }
+}
+
 .site-header-shell {
   padding-top: 1rem;
 }
@@ -433,7 +452,7 @@ html[data-hero-locked="true"] [data-hide-when-hero-locked="true"] {
   }
 
   .work-section-title {
-    font-size: clamp(2rem, 10.2vw, 4.6rem) !important;
+    font-size: clamp(1.9rem, 10.2vw, 4.6rem) !important;
     white-space: nowrap;
     text-wrap: nowrap;
 
