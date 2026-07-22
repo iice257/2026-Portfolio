@@ -30,7 +30,9 @@ const HERO_CAPABILITY_TRANSITION_MS = 640;
 const LOCK_VIEWPORT_QUERY = "(max-width: 1023px)";
 const TOOLTIP_DELAY_MS = 2400;
 const TOOLTIP_VISIBLE_MS = 3200;
-const HERO_SCROLL_TRIAL_ENABLED = process.env.NEXT_PUBLIC_HERO_SCROLL_TRIAL === "true";
+const HERO_SCROLL_TRIAL_PAUSED = true;
+const HERO_SCROLL_TRIAL_ENABLED = !HERO_SCROLL_TRIAL_PAUSED
+  && process.env.NEXT_PUBLIC_HERO_SCROLL_TRIAL === "true";
 
 const LockIcon = ({ unlocked = false }) => (
   <svg
@@ -528,7 +530,7 @@ const Hero = () => {
           <Waves
             {...PORTFOLIO_WAVES_CONFIG}
             pixelRatio={0.8}
-            targetFps={24}
+            targetFps={isLockViewport ? 24 : 45}
             maxPixelCount={900000}
             mouseInteraction={!isLockViewport || isLocked}
             paused={isHeroBackdropPaused}
@@ -615,6 +617,7 @@ const Hero = () => {
         <div
           ref={subtitleRef}
           data-hide-when-hero-locked="true"
+          data-hero-layout-reserve="true"
           className={`${styles.heroDetails} ${isLocked ? styles.heroDetailsHidden : ""} mt-8 md:mt-8 lg:mt-[-1.25rem] text-center max-w-4xl mx-auto`}
         >
           <p

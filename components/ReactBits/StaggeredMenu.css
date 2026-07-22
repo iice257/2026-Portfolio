@@ -249,3 +249,8 @@
 [data-theme="light"] .site-menu-dots {
   opacity: 0.38;
 }
+.menu-external-icon svg {
+  display: block;
+  width: 1em;
+  height: 1em;
+}

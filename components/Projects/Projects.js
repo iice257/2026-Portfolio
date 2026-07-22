@@ -174,7 +174,7 @@ const Projects = ({ isDesktop }) => {
                   </p>
 
                   {/* Tech Stack */}
-                  <div className="w-full flex flex-wrap md:flex-nowrap items-center justify-center gap-x-2 gap-y-2">
+                  <div className="landing-featured-tags w-full flex flex-wrap md:flex-nowrap items-center justify-center gap-x-2 gap-y-2">
                     {project.tech.map((tech, i) => (
                       <span key={tech} className="inline-flex items-center whitespace-nowrap">
                         <span

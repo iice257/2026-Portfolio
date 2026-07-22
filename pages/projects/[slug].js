@@ -6,7 +6,7 @@ import { featuredProjects } from "../../data/projects";
 import { METADATA } from "../../constants";
 import Footer from "@/components/Footer/Footer";
 import ProjectVisual from "@/components/Projects/ProjectVisual";
-import LightboxVideo from "@/components/Projects/LightboxVideo";
+import ControlledVideo from "@/components/Projects/ControlledVideo";
 import ShuffleText from "@/components/ReactBits/ShuffleText";
 import { useCursor } from "../../context/CursorContext";
 import { useBodyScrollLock } from "../../utils/useBodyScrollLock";
@@ -94,15 +94,6 @@ const PROJECT_TITLE_SIZES = {
   "restore-ai": "clamp(7.2rem, 20.5cqw, 13.2rem)",
 };
 
-const IconLoop = () => (
-  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17 2.8 21 6.8l-4 4" />
-    <path d="M3 11V9.8a3 3 0 0 1 3-3h15" />
-    <path d="M7 21.2l-4-4 4-4" />
-    <path d="M21 13v1.2a3 3 0 0 1-3 3H3" />
-  </svg>
-);
-
 const IconFullscreen = () => (
   <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5" />
@@ -117,71 +108,8 @@ const IconList = () => (
 );
 
 const ProjectMediaPreview = ({ project, variant = "desktop", priority = false, onOpen, onHover, onLeave }) => {
-  const videoRef = useRef(null);
-  const [isPaused, setIsPaused] = useState(false);
-  const [isMonochrome, setIsMonochrome] = useState(true);
-  const [isLooping, setIsLooping] = useState(true);
-  const [activeControl, setActiveControl] = useState(null);
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const videoSrc = variant === "desktop" ? project.desktopVideo : project.mobileVideo;
   const isMobile = variant === "mobile";
-
-  useEffect(() => {
-    if (typeof window === "undefined") return undefined;
-    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-
-    const syncMotionPreference = () => {
-      setPrefersReducedMotion(motionQuery.matches);
-      if (motionQuery.matches && videoRef.current) {
-        videoRef.current.pause();
-        setIsPaused(true);
-      }
-    };
-
-    syncMotionPreference();
-    motionQuery.addEventListener("change", syncMotionPreference);
-
-    return () => motionQuery.removeEventListener("change", syncMotionPreference);
-  }, []);
-
-  useEffect(() => {
-    if (videoRef.current) videoRef.current.loop = isLooping;
-  }, [isLooping]);
-
-  const togglePlayback = () => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    if (video.paused) {
-      video.play().then(() => setIsPaused(false)).catch(() => setIsPaused(true));
-    } else {
-      video.pause();
-      setIsPaused(true);
-    }
-  };
-
-  const toggleLoop = () => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    setIsLooping((current) => {
-      const next = !current;
-      video.loop = next;
-      video.currentTime = 0;
-      if (!isPaused && !prefersReducedMotion) {
-        video.play().catch(() => setIsPaused(true));
-      }
-      return next;
-    });
-  };
-
-  const openFullscreen = () => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const fullscreenTarget = video.requestFullscreen || video.webkitRequestFullscreen || video.msRequestFullscreen;
-    fullscreenTarget?.call(video)?.catch?.(() => {});
-  };
 
   const openPreview = () => {
     onOpen?.(variant);
@@ -196,7 +124,7 @@ const ProjectMediaPreview = ({ project, variant = "desktop", priority = false, o
       onMouseLeave={onLeave}
     >
       <div
-        className={`project-media-frame ${isMonochrome ? "is-monochrome" : ""}`}
+        className="project-media-frame"
         role="button"
         tabIndex={0}
         data-cursor-label="Click to open"
@@ -211,16 +139,12 @@ const ProjectMediaPreview = ({ project, variant = "desktop", priority = false, o
         aria-label={`Open ${isMobile ? "mobile" : "desktop"} preview for ${project.name}`}
       >
         {videoSrc ? (
-          <video
-            ref={videoRef}
-            className="h-full w-full object-cover"
+          <ControlledVideo
             src={videoSrc}
-            autoPlay={!prefersReducedMotion}
-            muted
-            loop={isLooping}
-            playsInline
-            preload={priority ? "auto" : "metadata"}
-            aria-label={`${project.name} ${isMobile ? "mobile" : "desktop"} preview video`}
+            className="h-full w-full object-cover"
+            priority={priority}
+            showSeek
+            label={`${project.name} ${isMobile ? "mobile" : "desktop"} preview video`}
           />
         ) : (
           <div className="relative h-full w-full overflow-hidden">
@@ -237,67 +161,6 @@ const ProjectMediaPreview = ({ project, variant = "desktop", priority = false, o
             <path d="M3 3l6 6M21 3l-6 6M21 21l-6-6M3 21l6-6" />
           </svg>
         </span>
-
-        {videoSrc && (
-          <div
-            className={`project-media-controls active-${activeControl || "play"}`}
-            data-cursor-group="buttons"
-            onClick={(event) => event.stopPropagation()}
-            onMouseLeave={() => setActiveControl(null)}
-          >
-            <button
-              type="button"
-              className="project-media-controls-label"
-              onClick={(event) => event.stopPropagation()}
-              aria-label={`${project.name} video controls`}
-            >
-              <span>Video controls</span>
-            </button>
-            <button
-              type="button"
-              className={`project-media-control-button is-loop ${isLooping ? "is-active" : ""}`}
-              onClick={toggleLoop}
-              onMouseEnter={() => setActiveControl("loop")}
-              onFocus={() => setActiveControl("loop")}
-              aria-label={`${isLooping ? "Disable" : "Enable"} looping for ${project.name} preview`}
-              aria-pressed={isLooping}
-            >
-              <IconLoop />
-            </button>
-            <button
-              type="button"
-              className={`project-media-control-button is-playback ${isPaused ? "is-paused" : "is-playing"}`}
-              onClick={togglePlayback}
-              onMouseEnter={() => setActiveControl("play")}
-              onFocus={() => setActiveControl("play")}
-              aria-label={`${isPaused ? "Play" : "Pause"} ${project.name} preview`}
-              aria-pressed={!isPaused}
-            >
-              <span className={`project-media-playback-icon ${isPaused ? "is-play" : "is-pause"}`} aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              className="project-media-control-button is-fullscreen"
-              onClick={openFullscreen}
-              onMouseEnter={() => setActiveControl("fullscreen")}
-              onFocus={() => setActiveControl("fullscreen")}
-              aria-label={`Open ${project.name} preview fullscreen`}
-            >
-              <IconFullscreen />
-            </button>
-            <button
-              type="button"
-              className={`project-media-control-button is-bw ${isMonochrome ? "is-monochrome" : "is-color"}`}
-              onClick={() => setIsMonochrome((value) => !value)}
-              onMouseEnter={() => setActiveControl("bw")}
-              onFocus={() => setActiveControl("bw")}
-              aria-pressed={isMonochrome}
-              aria-label={`${isMonochrome ? "Disable" : "Enable"} black and white filter for ${project.name} preview`}
-            >
-              <span className={`project-media-bw-icon ${isMonochrome ? "is-monochrome" : "is-color"}`} aria-hidden="true" />
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -350,6 +213,7 @@ const ProjectMediaLightbox = ({ active, activeIndex, items, direction = 0, onClo
   const isMobile = active.variant === "mobile";
   const activeKey = `${active.project.slug}-${active.variant}`;
   const safeActiveIndex = Math.max(0, activeIndex);
+  const activeVideoSrc = active.variant === "desktop" ? active.project.desktopVideo : active.project.mobileVideo;
 
   const openFullscreen = (event) => {
     event.stopPropagation();
@@ -394,9 +258,11 @@ const ProjectMediaLightbox = ({ active, activeIndex, items, direction = 0, onClo
             <h3 className="text-body-xl font-light" style={{ color: "var(--fg-primary)" }}>{active.project.name}</h3>
           </div>
           <div className="mockup-lightbox-header-actions" data-cursor-group="buttons">
-            <button type="button" className="mockup-lightbox-fullscreen" data-clickable="true" onClick={openFullscreen} aria-label="Open preview fullscreen">
-              <IconFullscreen />
-            </button>
+            {!activeVideoSrc && (
+              <button type="button" className="mockup-lightbox-fullscreen" data-clickable="true" onClick={openFullscreen} aria-label="Open preview fullscreen">
+                <IconFullscreen />
+              </button>
+            )}
             <button type="button" className="mockup-lightbox-close" data-clickable="true" onClick={onClose} aria-label="Close project preview">
               &times;
             </button>
@@ -430,15 +296,13 @@ const ProjectMediaLightbox = ({ active, activeIndex, items, direction = 0, onClo
                   style={{ width: `${100 / items.length}%` }}
                 >
                   {shouldRenderPreview && (itemVideoSrc ? (
-                    <LightboxVideo
+                    <ControlledVideo
                       src={itemVideoSrc}
                       isActive={itemKey === activeKey}
-                      muted
-                      loop
-                      playsInline
-                      controls
+                      detailMode
+                      showSeek
                       className="h-full w-full object-cover"
-                      aria-label={`${item.project.name} ${itemIsMobile ? "Mobile" : "Desktop"} preview video`}
+                      label={`${item.project.name} ${itemIsMobile ? "Mobile" : "Desktop"} preview video`}
                     />
                   ) : (
                     <ProjectVisual project={item.project} priority={itemKey === activeKey} compact={itemIsMobile} />

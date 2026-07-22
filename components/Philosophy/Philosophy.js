@@ -11,7 +11,7 @@ const Philosophy = () => {
     const ctx = gsap.context(() => {
       const words = wordsRef.current;
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const isMobile = window.matchMedia("(max-width: 767px)").matches;
+      const isTouchFlow = window.matchMedia("(hover: none), (pointer: coarse)").matches;
 
       if (reduceMotion) {
         gsap.set(words, { opacity: 1, filter: "blur(0px)" });
@@ -31,9 +31,9 @@ const Philosophy = () => {
         ease: "none",
         force3D: true,
         scrollTrigger: {
-          trigger: isMobile ? headingRef.current : sectionRef.current,
-          start: isMobile ? "top 82%" : "10% center",
-          end: isMobile ? "bottom 24%" : "73% center",
+          trigger: isTouchFlow ? headingRef.current : sectionRef.current,
+          start: isTouchFlow ? "top 84%" : "10% center",
+          end: isTouchFlow ? "bottom 18%" : "73% center",
           scrub: 0.35,
           invalidateOnRefresh: true,
         },
@@ -50,13 +50,13 @@ const Philosophy = () => {
     <section
       ref={sectionRef}
       data-normal-url="true"
-      className="relative z-20 min-h-[120svh] md:min-h-[200vh] flex items-start justify-center pt-[22svh] pb-[28svh] md:pt-[30vh] md:pb-0"
+      className="philosophy-section relative z-20 flex items-start justify-center"
       style={{ backgroundColor: 'var(--bg-primary)' }}
     >
-      <div className="section-container text-center md:sticky md:top-[30vh]">
+      <div className="philosophy-copy section-container text-center">
         <h2
           ref={headingRef}
-          className="text-[clamp(3.6rem,15vw,5.1rem)] md:text-giant font-extralight max-w-[calc(100vw-2rem)] md:max-w-5xl mx-auto leading-[1.01] md:leading-[1.2]"
+          className="philosophy-heading font-extralight mx-auto"
           style={{ color: 'var(--fg-primary)' }}
         >
           {words.map((word, i) => (

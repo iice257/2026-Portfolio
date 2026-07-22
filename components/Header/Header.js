@@ -125,7 +125,7 @@ const Header = () => {
       data-cursor-boundary="navigation"
       aria-hidden={isHeroLocked}
       inert={isHeroLocked ? "" : undefined}
-      className={`site-header-shell fixed top-0 left-0 w-full z-[9999] transition-all duration-200 ease-out ${isHeroLocked ? 'pointer-events-none -translate-y-3 opacity-0' : 'translate-y-0 opacity-100'} ${isScrolled ? 'bg-[var(--bg-primary)]' : 'bg-transparent'} py-4 md:py-6`}
+      className={`site-header-shell fixed top-0 left-0 w-full z-[9999] transition-all duration-500 ease-out ${isHeroLocked ? 'pointer-events-none -translate-y-3 opacity-0' : 'translate-y-0 opacity-100'} ${isScrolled ? 'bg-[var(--bg-primary)]' : 'bg-transparent'} py-4 md:py-6`}
       style={isHeroLocked ? { opacity: 0, transform: "translateY(-0.75rem)", pointerEvents: "none" } : undefined}
     >
       <div className="section-container flex justify-between items-center gap-4">

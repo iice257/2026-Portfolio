@@ -5,6 +5,7 @@ import { CONTACT_LINKS, MENULINKS } from "../../constants";
 import { PORTFOLIO_GALAXY_CONFIG } from "../ReactBits/galaxyConfig";
 import InteractiveDots from "../ReactBits/InteractiveDots";
 import ShuffleText from "../ReactBits/ShuffleText";
+import { IconArrowUpRight } from "../Icons";
 import { useTheme } from "../../context/ThemeContext";
 import { getSectionHref, scrollToSection, SECTION_IDS } from "../../utils/sectionNavigation";
 
@@ -147,7 +148,7 @@ const Footer = () => {
                     data-cursor-label="Open Playground"
                   >
                     <span>Open Playground</span>
-                    <span aria-hidden="true">↗</span>
+                    <IconArrowUpRight aria-hidden="true" />
                   </Link>
                 </li>
                 {navLinks.map((link) => (
@@ -161,7 +162,7 @@ const Footer = () => {
                       }}
                     >
                       <span>{link.name}</span>
-                      {link.ref === "projects" && <span aria-hidden="true">↗</span>}
+                      {link.ref === "projects" && <IconArrowUpRight aria-hidden="true" />}
                     </Link>
                   </li>
                 ))}
@@ -191,7 +192,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-16 md:mt-24 pt-7 border-t flex flex-col md:flex-row md:items-center justify-between gap-4" style={{ borderColor: "var(--border)" }}>
+        <div className="footer-meta-strip mt-16 md:mt-24 pt-7 border-t flex flex-col md:flex-row md:items-center justify-between gap-4" style={{ borderColor: "var(--border)" }}>
           <p className="text-body-sm" style={{ color: "var(--fg-muted)" }}>
             &copy; {currentYear} KA
           </p>

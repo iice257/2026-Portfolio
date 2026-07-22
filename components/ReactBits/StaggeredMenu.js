@@ -6,6 +6,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useBodyScrollLock } from '../../utils/useBodyScrollLock';
 import { useDialogFocus } from '../../utils/useDialogFocus';
 import InteractiveDots from './InteractiveDots';
+import { IconArrowUpRight } from '../Icons';
 
 const MENU_INTERACTIVE_SELECTOR = 'a, button, [role="button"], input, textarea, select, summary, [data-clickable="true"]';
 
@@ -172,9 +173,9 @@ const StaggeredMenu = ({
               {item.opensPage && (
                 <span
                   aria-hidden="true"
-                  className="mt-[0.16em] inline-block text-[0.36em] leading-none opacity-70 transition-transform duration-500 ease-in-out group-hover:translate-x-1 group-hover:-translate-y-1"
+                  className="menu-external-icon mt-[0.16em] inline-block text-[0.36em] leading-none opacity-70 transition-transform duration-500 ease-in-out group-hover:translate-x-1 group-hover:-translate-y-1"
                 >
-                  {"\u2197"}
+                  <IconArrowUpRight />
                 </span>
               )}
             </>

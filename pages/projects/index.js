@@ -17,7 +17,7 @@ import {
 } from "../../data/projects";
 import Footer from "@/components/Footer/Footer";
 import ProjectVisual from "@/components/Projects/ProjectVisual";
-import LightboxVideo from "@/components/Projects/LightboxVideo";
+import ControlledVideo from "@/components/Projects/ControlledVideo";
 import ShuffleText from "@/components/ReactBits/ShuffleText";
 import { IconArrowUpRight, IconGithub } from "@/components/Icons";
 import { useCursor } from "../../context/CursorContext";
@@ -281,6 +281,7 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompa
   const isMobile = active.variant === "mobile";
   const activeKey = `${active.project.slug}-${active.variant}`;
   const safeActiveIndex = Math.max(0, activeIndex);
+  const activePreviewType = getProjectPreview(active.project, active.variant).type;
 
   const openFullscreen = (event) => {
     event.stopPropagation();
@@ -334,9 +335,11 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompa
             <h3 className="text-body-xl font-light" style={{ color: "var(--fg-primary)" }}>{active.project.name}</h3>
           </div>
           <div className="mockup-lightbox-header-actions" data-cursor-group="buttons">
-            <button type="button" className="mockup-lightbox-fullscreen" data-clickable="true" onClick={openFullscreen} aria-label="Open preview fullscreen">
-              <IconFullscreen />
-            </button>
+            {activePreviewType !== "video" && (
+              <button type="button" className="mockup-lightbox-fullscreen" data-clickable="true" onClick={openFullscreen} aria-label="Open preview fullscreen">
+                <IconFullscreen />
+              </button>
+            )}
             <button type="button" className="mockup-lightbox-close" data-clickable="true" onClick={onClose} aria-label="Close project preview">
               &times;
             </button>
@@ -371,16 +374,13 @@ const MockupPreviewModal = ({ active, activeIndex, items, direction = 0, isCompa
                   style={{ width: `${100 / items.length}%` }}
                 >
                   {shouldRenderPreview && itemPreview.type === "video" && (
-                    <LightboxVideo
+                    <ControlledVideo
                       src={itemPreview.src}
                       isActive={itemKey === activeKey}
-                      muted
-                      loop
-                      playsInline
-                      controls
-                      onClick={(event) => event.stopPropagation()}
+                      detailMode
+                      showSeek
                       className="h-full w-full object-cover"
-                      aria-label={`${item.project.name} ${previewLabel(item.variant)} preview video`}
+                      label={`${item.project.name} ${previewLabel(item.variant)} preview video`}
                     />
                   )}
                   {shouldRenderPreview && itemPreview.type === "image" && (
