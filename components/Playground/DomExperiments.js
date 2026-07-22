@@ -212,7 +212,7 @@ export function CursorMorphExperiment({ params }) {
     requestCursorRefresh();
     return () => {
       window.dispatchEvent(new CustomEvent("playground:cursor-config", {
-        detail: { morph: 0.16, roundness: 1, fill: 0.16, spin: 0.7 },
+        detail: { morph: 0.16, roundness: 1, fill: 0.16, pulse: 0.7 },
       }));
     };
   }, [params, requestCursorRefresh]);

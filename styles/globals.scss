@@ -22,6 +22,9 @@
   --safe-area-right: env(safe-area-inset-right, 0px);
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-left: env(safe-area-inset-left, 0px);
+  --system-motion-duration: 700ms;
+  --system-motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --system-fade-blur: 10px;
 }
 
 [data-theme="dark"] {
@@ -82,7 +85,40 @@ body {
   background-color: var(--bg-primary);
   color: var(--fg-primary);
   overflow-x: hidden;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color var(--system-motion-duration) var(--system-motion-ease),
+    color var(--system-motion-duration) var(--system-motion-ease);
+}
+
+@keyframes systemFadeBlurIn {
+  from {
+    opacity: 0;
+    filter: blur(var(--system-fade-blur));
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+.system-fade-blur-text {
+  display: grid;
+  min-height: 1.25em;
+}
+
+.system-fade-blur-text > span {
+  grid-area: 1 / 1;
+  display: block;
+}
+
+html,
+.app-shell,
+main {
+  background-color: var(--bg-primary);
+  transition: background-color var(--system-motion-duration) var(--system-motion-ease);
 }
 
 :focus-visible {
@@ -330,9 +366,11 @@ html[data-hero-locked="true"] [data-hero-layout-reserve="true"] {
   visibility: visible;
   transform: translateY(0);
   transition:
-    opacity 480ms cubic-bezier(0.16, 1, 0.3, 1),
-    transform 480ms cubic-bezier(0.16, 1, 0.3, 1),
-    visibility 480ms ease;
+    opacity var(--system-motion-duration) var(--system-motion-ease),
+    filter var(--system-motion-duration) var(--system-motion-ease),
+    transform var(--system-motion-duration) var(--system-motion-ease),
+    visibility var(--system-motion-duration) ease;
+  filter: blur(0);
 }
 
 .site-unlocked-content--hidden {
@@ -342,6 +380,7 @@ html[data-hero-locked="true"] [data-hero-layout-reserve="true"] {
   visibility: hidden;
   pointer-events: none;
   transform: translateY(8px);
+  filter: blur(var(--system-fade-blur));
 }
 
 .hero-capability-cycle {
@@ -617,7 +656,7 @@ html[data-hero-locked="true"] [data-hero-layout-reserve="true"] {
 .philosophy-heading {
   width: 100%;
   max-width: calc(100vw - 1.5rem);
-  font-size: clamp(4rem, 17vw, 6.1rem);
+  font-size: clamp(4.2rem, 18vw, 6.5rem);
   line-height: 0.98;
   overflow-wrap: normal;
 }
@@ -630,7 +669,7 @@ html[data-hero-locked="true"] [data-hero-layout-reserve="true"] {
 
   .philosophy-heading {
     max-width: calc(100vw - 3rem);
-    font-size: clamp(6rem, 13.5vw, 8.5rem);
+    font-size: clamp(6.3rem, 14vw, 9rem);
     line-height: 0.98;
   }
 }

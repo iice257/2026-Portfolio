@@ -160,6 +160,24 @@
   transform: translate3d(-50%, 0, 0) scale(1);
 }
 
+.mobileInteractionStatus {
+  position: absolute;
+  top: -1.9rem;
+  left: 50%;
+  z-index: 2;
+  width: min(19rem, calc(100vw - 3rem));
+  transform: translateX(-50%);
+  color: var(--fg-muted);
+  font-family: var(--font-ibm-plex-mono);
+  font-size: 0.67rem;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  pointer-events: none;
+}
+
 .nameStack {
   display: flex;
   width: min(100%, 64rem);
@@ -200,9 +218,11 @@
 .heroDetails,
 .scrollCue {
   transition:
-    opacity 480ms cubic-bezier(0.16, 1, 0.3, 1),
-    transform 480ms cubic-bezier(0.16, 1, 0.3, 1),
-    visibility 480ms ease;
+    opacity var(--system-motion-duration) var(--system-motion-ease),
+    filter var(--system-motion-duration) var(--system-motion-ease),
+    transform var(--system-motion-duration) var(--system-motion-ease),
+    visibility var(--system-motion-duration) ease;
+  filter: blur(0);
 }
 
 .heroDetailsHidden,
@@ -211,6 +231,7 @@
   visibility: hidden;
   pointer-events: none;
   transform: translateY(8px);
+  filter: blur(var(--system-fade-blur));
 }
 
 @media (min-width: 768px) {

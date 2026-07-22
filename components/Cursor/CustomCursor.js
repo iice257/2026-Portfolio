@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useCursor } from '../../context/CursorContext';
 import { gsap } from 'gsap';
+import { useInteractionState } from '../../context/InteractionStateContext';
 
 const DEFAULT_CURSOR_PATH = "M5.5 3 C5.5 3 5.5 3 5.5 3 L11.5 26.5 C11.5 26.5 11.5 26.5 11.5 26.5 L16.2 17.8 C16.2 17.8 16.2 17.8 16.2 17.8 L25.5 17.8 C25.5 17.8 25.5 17.8 25.5 17.8 L5.5 3 Z";
 const CLICKABLE_CURSOR_PATH = "M5.5 3 C5.95 3.3 6.2 3.45 6.55 3.72 L24.65 17.05 C25.65 17.8 25.2 18.55 23.95 18.55 L16.75 18.55 C16.2 18.55 15.9 18.8 15.65 19.25 L12.2 25.65 C11.65 26.65 10.95 26.35 10.65 25.15 L5.5 3 Z";
@@ -13,9 +14,7 @@ const BRIDGE_SELECTOR = "[data-cursor-bridge='true']";
 const CURSOR_GROUP_SELECTOR = "[data-cursor-group]";
 const PREVIEW_LABEL_PATTERN = /^click to (open|close)$/i;
 const INTERACTIVE_BRIDGE_RADIUS = 38;
-const WELCOME_VISIT_KEY = "portfolio.cursor.welcomed";
-const WELCOME_TOOLTIP_MS = 5000;
-const DEFAULT_LAB_CONFIG = { morph: 0.16, roundness: 1, fill: 0.16, spin: 0.7 };
+const DEFAULT_LAB_CONFIG = { morph: 0.16, roundness: 1, fill: 0.16, pulse: 0.7 };
 
 const interpolateCursorPath = (fromPath, toPath, amount) => {
   const fromNumbers = fromPath.match(/-?\d*\.?\d+/g)?.map(Number) || [];
@@ -41,7 +40,7 @@ const CustomCursor = () => {
   const fillRectRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false); // Default hidden until mouse moves
   const [isClickable, setIsClickable] = useState(false);
-  const [welcomeText, setWelcomeText] = useState("");
+  const { greetingText: welcomeText } = useInteractionState();
   const [labConfig, setLabConfig] = useState(DEFAULT_LAB_CONFIG);
   const isVisibleRef = useRef(false);
   const isClickableRef = useRef(false);
@@ -55,8 +54,6 @@ const CustomCursor = () => {
   const lastPointerRef = useRef({ x: 0, y: 0, hasPointer: false });
   const loadingTimelineRef = useRef(null);
   const refreshFrameRef = useRef(null);
-  const welcomeTimerRef = useRef(null);
-  const welcomeStartedRef = useRef(false);
   const resolvedStateRef = useRef({ text: "", variant: "default", clickable: false });
 
   useEffect(() => {
@@ -74,7 +71,7 @@ const CustomCursor = () => {
         morph: Number.isFinite(detail.morph) ? detail.morph : DEFAULT_LAB_CONFIG.morph,
         roundness: Number.isFinite(detail.roundness) ? detail.roundness : DEFAULT_LAB_CONFIG.roundness,
         fill: Number.isFinite(detail.fill) ? detail.fill : DEFAULT_LAB_CONFIG.fill,
-        spin: Number.isFinite(detail.spin) ? detail.spin : DEFAULT_LAB_CONFIG.spin,
+        pulse: Number.isFinite(detail.pulse) ? detail.pulse : DEFAULT_LAB_CONFIG.pulse,
       });
     };
     window.addEventListener("playground:cursor-config", handleLabConfig);
@@ -257,32 +254,12 @@ const CustomCursor = () => {
       applyCursorContext("", "default");
     };
 
-    const startWelcomeTooltip = () => {
-      if (welcomeStartedRef.current) return;
-      welcomeStartedRef.current = true;
-
-      let hasVisited = false;
-      try {
-        hasVisited = window.localStorage.getItem(WELCOME_VISIT_KEY) === "true";
-        window.localStorage.setItem(WELCOME_VISIT_KEY, "true");
-      } catch {
-        hasVisited = true;
-      }
-
-      setWelcomeText(hasVisited ? "Welcome back!" : "Welcome! Have a great time");
-      window.clearTimeout(welcomeTimerRef.current);
-      welcomeTimerRef.current = window.setTimeout(() => {
-        setWelcomeText("");
-      }, WELCOME_TOOLTIP_MS);
-    };
-
     const onMouseMove = (e) => {
       // Ensure visible on movement
       if (!isVisibleRef.current) {
         isVisibleRef.current = true;
         setIsVisible(true);
       }
-      startWelcomeTooltip();
       lastPointerRef.current = { x: e.clientX, y: e.clientY, hasPointer: true };
       updateCursorFromPoint(e.target);
     };
@@ -331,7 +308,6 @@ const CustomCursor = () => {
       if (refreshFrameRef.current) {
         window.cancelAnimationFrame(refreshFrameRef.current);
       }
-      window.clearTimeout(welcomeTimerRef.current);
     };
   }, [setCursorText, setCursorVariant]);
 
@@ -437,14 +413,14 @@ const CustomCursor = () => {
       .set(fillPath, { opacity: 1 })
       .to(shape, {
         scale: 1.18,
-        duration: labConfig.spin * 0.5,
+        duration: labConfig.pulse * 0.5,
         yoyo: true,
         repeat: 1,
         ease: "power2.inOut",
       }, 0)
       .to(fillPath, {
         opacity: 0.4,
-        duration: labConfig.spin * 0.5,
+        duration: labConfig.pulse * 0.5,
         yoyo: true,
         repeat: 1,
         ease: "power2.inOut",
@@ -559,7 +535,7 @@ const CustomCursor = () => {
         aria-hidden={!hasCursorLabel}
       >
         <div
-          className={`custom-cursor-label absolute left-0 top-0 backdrop-blur-sm px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-widest whitespace-nowrap is-${cursorLabelKind} ${hasCursorLabel ? 'is-visible' : 'is-hidden'}`}
+          className={`custom-cursor-label absolute left-0 top-0 backdrop-blur-sm px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-widest whitespace-nowrap is-${cursorLabelKind} ${welcomeText && !cursorText ? 'is-greeting' : ''} ${hasCursorLabel ? 'is-visible' : 'is-hidden'}`}
         >
           {effectiveCursorText || " "}
         </div>
@@ -579,16 +555,29 @@ const CustomCursor = () => {
             border-color 0.34s cubic-bezier(0.16, 1, 0.3, 1),
             color 0.34s cubic-bezier(0.16, 1, 0.3, 1),
             opacity 0.14s ease,
+            filter 0.14s ease,
             transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .custom-cursor-label.is-greeting {
+          transition:
+            background-color var(--system-motion-duration) var(--system-motion-ease),
+            border-color var(--system-motion-duration) var(--system-motion-ease),
+            color var(--system-motion-duration) var(--system-motion-ease),
+            opacity var(--system-motion-duration) var(--system-motion-ease),
+            filter var(--system-motion-duration) var(--system-motion-ease),
+            transform var(--system-motion-duration) var(--system-motion-ease);
         }
 
         .custom-cursor-label.is-hidden {
           opacity: 0;
+          filter: blur(var(--system-fade-blur));
           transform: translate(-50%, -50%) scale(0.92);
         }
 
         .custom-cursor-label.is-visible {
           opacity: 1;
+          filter: blur(0);
           transform: translate(-50%, -50%) scale(1);
         }
 

@@ -153,7 +153,7 @@ export const EXPERIMENTS = [
       { key: "morph", label: "Morph speed", min: 0.12, max: 0.8, step: 0.02, value: 0.32 },
       { key: "roundness", label: "Vertex roundness", min: 0, max: 1, step: 0.05, value: 0.75 },
       { key: "fill", label: "Fill speed", min: 0.12, max: 0.7, step: 0.02, value: 0.28 },
-      { key: "spin", label: "Spin duration", min: 0.35, max: 1.4, step: 0.05, value: 0.7 },
+      { key: "pulse", label: "Pulse duration", min: 0.35, max: 1.4, step: 0.05, value: 0.7 },
     ],
   },
   {

@@ -10,6 +10,8 @@ import { SnowProvider, useSnow } from "../context/SnowContext";
 import { TooltipProvider } from "../context/TooltipContext";
 import { CursorProvider, useCursor } from "../context/CursorContext";
 import { HeroLockProvider, useHeroLock } from "../context/HeroLockContext";
+import { InteractionStateProvider } from "../context/InteractionStateContext";
+import { fadeBlurMotion } from "../utils/motion";
 import Header from "../components/Header/Header";
 import "../styles/globals.scss";
 // React Bits component styles
@@ -59,7 +61,7 @@ const AppContent = ({ Component, pageProps }) => {
   const [allowMotion, setAllowMotion] = useState(true);
   const [isPageVisible, setIsPageVisible] = useState(true);
 
-  // Page blur-in effect on load
+  // Shared system-level entrance state.
   useEffect(() => {
     const timer = setTimeout(() => setIsLoaded(true), 50);
     return () => clearTimeout(timer);
@@ -145,18 +147,17 @@ const AppContent = ({ Component, pageProps }) => {
 
       {/* Page wrapper with blur-in animation */}
       <motion.div
-        style={{
-          opacity: isLoaded ? 1 : 0,
-          transition: 'opacity 160ms ease-out',
-        }}
+        initial={false}
+        animate={isLoaded ? fadeBlurMotion.animate : fadeBlurMotion.initial}
+        transition={fadeBlurMotion.transition}
       >
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={router.asPath}
-            initial={allowMotion ? { opacity: 0, y: 8 } : false}
-            animate={{ opacity: 1, y: 0 }}
-            exit={allowMotion ? { opacity: 0, y: -6 } : { opacity: 1, y: 0 }}
-            transition={{ duration: allowMotion ? 0.2 : 0, ease: [0.16, 1, 0.3, 1] }}
+            initial={allowMotion ? fadeBlurMotion.initial : false}
+            animate={fadeBlurMotion.animate}
+            exit={allowMotion ? fadeBlurMotion.exit : { opacity: 1, filter: "blur(0px)", y: 0 }}
+            transition={allowMotion ? fadeBlurMotion.transition : { duration: 0 }}
           >
             <Component {...pageProps} />
           </motion.div>
@@ -193,9 +194,11 @@ const App = ({ Component, pageProps }) => {
         <TooltipProvider>
           <CursorProvider>
             <HeroLockProvider>
-              <Meta />
-              <AppContent Component={Component} pageProps={pageProps} />
-              {GTAG ? <GoogleAnalytics gaId={GTAG} /> : null}
+              <InteractionStateProvider>
+                <Meta />
+                <AppContent Component={Component} pageProps={pageProps} />
+                {GTAG ? <GoogleAnalytics gaId={GTAG} /> : null}
+              </InteractionStateProvider>
             </HeroLockProvider>
           </CursorProvider>
         </TooltipProvider>

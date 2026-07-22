@@ -5,8 +5,10 @@ import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { MENULINKS } from "../../constants";
 import { useHeroLock } from "../../context/HeroLockContext";
 import { useTheme } from "../../context/ThemeContext";
+import { INTERACTION_STATES, useInteractionState } from "../../context/InteractionStateContext";
 import { PORTFOLIO_GALAXY_CONFIG, PORTFOLIO_WAVES_CONFIG } from "../ReactBits/galaxyConfig";
 import TextPressure from "../ReactBits/TextPressure";
+import FadeBlurText from "../Motion/FadeBlurText";
 import styles from "./Hero.module.scss";
 
 const Galaxy = dynamic(() => import("../ReactBits/Galaxy"), { ssr: false });
@@ -68,6 +70,7 @@ const LockIcon = ({ unlocked = false }) => (
 );
 
 const Hero = () => {
+  const { interactionState, greetingText } = useInteractionState();
   const { setIsHeroLocked } = useHeroLock();
   const { theme } = useTheme();
   const [isLockViewport, setIsLockViewport] = useState(false);
@@ -506,6 +509,9 @@ const Hero = () => {
   }, []);
 
   const isLockControlVisible = isLockViewport && (isLocked || isHeroInView);
+  const mobileInteractionText = greetingText || (
+    interactionState === INTERACTION_STATES.LOCKED ? "Locked" : "Interactive"
+  );
 
   return (
     <section
@@ -568,6 +574,12 @@ const Hero = () => {
               >
                 {isLocked ? "Unlock to scroll" : "Relock for hero interaction"}
               </div>
+            </div>
+          )}
+
+          {isLockViewport && (
+            <div className={styles.mobileInteractionStatus} role="status" aria-live="polite">
+              <FadeBlurText stateKey={interactionState}>{mobileInteractionText}</FadeBlurText>
             </div>
           )}
 

@@ -18,12 +18,10 @@ const Philosophy = () => {
         return;
       }
 
-      gsap.set(words, {
+      gsap.fromTo(words, {
         opacity: 0.15,
         filter: "blur(4px)",
-      });
-
-      gsap.to(words, {
+      }, {
         opacity: 1,
         filter: "blur(0px)",
         duration: 0.24,
@@ -31,13 +29,16 @@ const Philosophy = () => {
         ease: "none",
         force3D: true,
         scrollTrigger: {
-          trigger: isTouchFlow ? headingRef.current : sectionRef.current,
-          start: isTouchFlow ? "top 84%" : "10% center",
-          end: isTouchFlow ? "bottom 18%" : "73% center",
+          trigger: sectionRef.current,
+          start: isTouchFlow ? "top 78%" : "10% center",
+          end: isTouchFlow ? "bottom 34%" : "73% center",
           scrub: 0.35,
           invalidateOnRefresh: true,
+          fastScrollEnd: false,
         },
       });
+
+      window.requestAnimationFrame(() => ScrollTrigger.refresh());
     }, sectionRef);
 
     return () => ctx.revert();
