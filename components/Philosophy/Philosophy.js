@@ -10,17 +10,22 @@ const Philosophy = () => {
     const ctx = gsap.context(() => {
       const words = wordsRef.current;
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const isTouchFlow = window.matchMedia("(hover: none), (pointer: coarse)").matches;
-      const revealWindow = 0.2;
+      const applyViewportReveal = () => {
+        const viewportHeight = window.innerHeight;
+        const transitionStart = viewportHeight * 0.42;
+        const transitionEnd = viewportHeight * 0.58;
 
-      const applyRevealProgress = (progress) => {
-        words.forEach((word, index) => {
-          const start = (index / words.length) * (1 - revealWindow);
-          const localProgress = Math.min(1, Math.max(0, (progress - start) / revealWindow));
+        words.forEach((word) => {
+          const rect = word.getBoundingClientRect();
+          const wordCenter = rect.top + (rect.height * 0.5);
+          const reveal = Math.min(
+            1,
+            Math.max(0, (transitionEnd - wordCenter) / (transitionEnd - transitionStart))
+          );
 
           gsap.set(word, {
-            opacity: 0.15 + (localProgress * 0.85),
-            filter: `blur(${4 * (1 - localProgress)}px)`,
+            opacity: 0.18 + (reveal * 0.82),
+            filter: `blur(${4.5 * (1 - reveal)}px)`,
           });
         });
       };
@@ -30,16 +35,16 @@ const Philosophy = () => {
         return;
       }
 
-      applyRevealProgress(0);
+      applyViewportReveal();
 
       ScrollTrigger.create({
         trigger: sectionRef.current,
-        start: isTouchFlow ? "top 78%" : "10% center",
-        end: isTouchFlow ? "bottom 34%" : "73% center",
+        start: "top bottom",
+        end: "bottom top",
         invalidateOnRefresh: true,
         fastScrollEnd: false,
-        onUpdate: (self) => applyRevealProgress(self.progress),
-        onRefresh: (self) => applyRevealProgress(self.progress),
+        onUpdate: applyViewportReveal,
+        onRefresh: applyViewportReveal,
       });
 
       window.requestAnimationFrame(() => ScrollTrigger.refresh());

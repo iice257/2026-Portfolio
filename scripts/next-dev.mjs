@@ -4,7 +4,7 @@ import { cleanDistDir } from "./clean-dist-dir.mjs";
 
 const cwd = process.cwd();
 const nextBin = join(cwd, "node_modules", "next", "dist", "bin", "next");
-let distDir = ".next-dev";
+let distDir = `.next-dev-${process.pid}`;
 const useLocalCompatibility = !process.env.CI && !process.env.VERCEL;
 
 try {
@@ -14,8 +14,8 @@ try {
     throw error;
   }
 
-  distDir = `.next-dev-${Date.now()}`;
-  console.warn(`Could not clean .next-dev (${error.code}); using ${distDir} for this dev server.`);
+  distDir = `.next-dev-${process.pid}-${Date.now()}`;
+  console.warn(`Could not clean the dev build directory (${error.code}); using ${distDir}.`);
 }
 
 const child = spawn(process.execPath, [nextBin, "dev", ...process.argv.slice(2)], {

@@ -538,7 +538,7 @@ const Hero = () => {
                 textColor="var(--fg-primary)"
                 minFontSize={42}
                 maxWeight={790}
-                targetFps={60}
+                targetFps={36}
               />
             </div>
 
@@ -559,7 +559,7 @@ const Hero = () => {
                 baseWeight={isLockViewport ? 550 : 100}
                 maxWeight={900}
                 maxStrokeWidth={isLockViewport ? 0.55 : 0.25}
-                targetFps={60}
+                targetFps={36}
               />
             </div>
           </div>

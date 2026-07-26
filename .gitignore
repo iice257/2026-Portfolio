@@ -15,6 +15,7 @@
 /.next/
 /.next-dist-state.json
 /.next-dev/
+/.next-dev-*/
 /.next-build-*/
 /out/
 

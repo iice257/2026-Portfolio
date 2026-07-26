@@ -50,6 +50,18 @@ const DetailBlock = ({ label, title, children }) => (
   </article>
 );
 
+const ProjectNavArrow = ({ direction }) => (
+  <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <path
+      d={direction === "previous" ? "M39 14 21 32l18 18" : "m25 14 18 18-18 18"}
+      stroke="currentColor"
+      strokeWidth="2.25"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 const ProjectNumberCarousel = ({ projects, currentIndex }) => {
   const currentProject = projects[currentIndex];
 
@@ -549,7 +561,7 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
             {prevProject ? (
               <Link href={`/projects/${prevProject.slug}`} className="project-nav-link group is-prev justify-self-start items-center gap-4" data-clickable="true">
                 <span className="project-nav-caret" aria-hidden="true">
-                  &lsaquo;
+                  <ProjectNavArrow direction="previous" />
                 </span>
                 <span>
                   <span className="text-micro block mb-2 opacity-60">Previous</span>
@@ -581,7 +593,7 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
                   </span>
                 </span>
                 <span className="project-nav-caret" aria-hidden="true">
-                  &rsaquo;
+                  <ProjectNavArrow direction="next" />
                 </span>
               </Link>
             ) : (

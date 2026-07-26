@@ -11,9 +11,9 @@ export const PORTFOLIO_GALAXY_CONFIG = {
   autoCenterRepulsion: 0,
   starSpeed: 0.5,
   speed: 0.1,
-  pixelRatio: 0.8,
-  targetFps: 20,
-  maxPixelCount: 900000,
+  pixelRatio: 0.68,
+  targetFps: 16,
+  maxPixelCount: 560000,
 };
 
 const PORTFOLIO_WAVES_BASE_CONFIG = {

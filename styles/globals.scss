@@ -1558,16 +1558,21 @@ a {
 }
 
 .project-nav-caret {
-  align-self: stretch;
+  align-self: center;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(3.8rem, 7vw, 6.25rem);
-  font-weight: 200;
-  line-height: 0.8;
-  min-width: 0.44em;
+  width: clamp(3.5rem, 6vw, 5.25rem);
+  height: clamp(3.5rem, 6vw, 5.25rem);
+  flex: 0 0 auto;
   transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1),
     font-weight 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.project-nav-caret svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .project-nav-link:hover .text-body-xl,
@@ -1583,12 +1588,6 @@ a {
 .project-nav-link.is-next:hover .project-nav-caret,
 .project-nav-link.is-next:focus-visible .project-nav-caret {
   transform: translateX(0.48rem);
-}
-
-@media (min-width: 768px) {
-  .project-nav-caret {
-    translate: 0 -0.16em;
-  }
 }
 
 .project-media-preview {
@@ -2024,14 +2023,17 @@ a {
   flex: 0 0 auto;
 }
 
-.major-project-visual-caption {
+.major-project-visual-number {
   position: absolute;
   z-index: 4;
   top: 1.25rem;
-  left: 1.35rem;
-  right: 3rem;
+  right: 1.35rem;
   color: var(--fg-primary);
-  line-height: 1.45;
+  font-family: var(--font-ibm-plex-mono);
+  font-size: clamp(1.85rem, 3.2vw, 2.8rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.06em;
 }
 
 .major-card-body {
@@ -2767,7 +2769,8 @@ a {
   }
 
   .project-nav-caret {
-    font-size: clamp(2.4rem, 12vw, 3.35rem);
+    width: 3.25rem;
+    height: 3.25rem;
   }
 
   .mockup-choice-options {

@@ -599,8 +599,8 @@ const MajorProjectCard = ({ project, index, onFlip, onHover, onLeave, dimmed }) 
   >
     <div className="major-project-visual relative overflow-hidden">
       <ProjectVisual project={project} compact hideLabels />
-      <span className="major-project-visual-caption text-micro">
-        {String(index + 5).padStart(2, "0")} / {project.subtitle}
+      <span className="major-project-visual-number" aria-hidden="true">
+        {String(index + 5).padStart(2, "0")}
       </span>
     </div>
     <div className="major-card-body">

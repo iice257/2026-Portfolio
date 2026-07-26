@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/router";
 import { useHeroLock } from "./HeroLockContext";
 
 const VISIT_KEY = "portfolio.cursor.welcomed";
@@ -18,10 +19,19 @@ const InteractionStateContext = createContext({
 
 export const InteractionStateProvider = ({ children }) => {
   const { isHeroLocked } = useHeroLock();
+  const router = useRouter();
+  const isLandingPage = router.pathname === "/";
   const [greetingState, setGreetingState] = useState(null);
   const [greetingComplete, setGreetingComplete] = useState(false);
 
   useEffect(() => {
+    if (!isLandingPage) {
+      setGreetingState(null);
+      setGreetingComplete(true);
+      return undefined;
+    }
+
+    setGreetingComplete(false);
     let hasVisited = true;
     try {
       hasVisited = window.localStorage.getItem(VISIT_KEY) === "true";
@@ -33,9 +43,9 @@ export const InteractionStateProvider = ({ children }) => {
     setGreetingState(hasVisited ? INTERACTION_STATES.WELCOME_BACK : INTERACTION_STATES.FIRST_VISIT);
     const timer = window.setTimeout(() => setGreetingComplete(true), GREETING_DURATION_MS);
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [isLandingPage]);
 
-  const interactionState = !greetingComplete && greetingState
+  const interactionState = isLandingPage && !greetingComplete && greetingState
     ? greetingState
     : isHeroLocked
       ? INTERACTION_STATES.LOCKED

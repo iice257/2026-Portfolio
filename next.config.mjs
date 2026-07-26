@@ -82,7 +82,7 @@ const nextConfig = {
         headers: securityHeaders,
       },
       {
-        source: "/projects/:path*",
+        source: "/projects/previews/:path*",
         headers: publicAssetCacheHeaders,
       },
       {
