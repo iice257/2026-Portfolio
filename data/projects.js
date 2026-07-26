@@ -33,6 +33,8 @@ export const featuredProjects = [
     developerNotes: "The version of this that worries me is the one that fills and submits without asking. I keep building the reviewed version anyway, because boring forms are exactly the kind of task where good AI assistance should be obvious and uncontroversial, and most of the industry keeps shipping the scary version instead of the boring good one.",
     notes: "The version of this that worries me is the one that fills and submits without asking. I keep building the reviewed version anyway, because boring forms are exactly the kind of task where good AI assistance should be obvious and uncontroversial, and most of the industry keeps shipping the scary version instead of the boring good one.",
     desktopVideo: "/projects/videos/formmate-ai.webm",
+    desktopImage: "/projects/previews/formmate-ai-desktop.png",
+    mobileImage: "/projects/previews/formmate-ai-mobile.png",
     visual: { label: "FM AI", kicker: "Form intelligence", accent: "#7CFFCB", secondary: "#2B6CFF" },
   },
   {
@@ -67,6 +69,8 @@ export const featuredProjects = [
     developerNotes: "This is the project I'd actually use daily once sync and search are finished properly. Right now it's good for one device at a time, which is exactly half the point of a cross-device vault. Honest status: useful, not yet done.",
     notes: "This is the project I'd actually use daily once sync and search are finished properly. Right now it's good for one device at a time, which is exactly half the point of a cross-device vault. Honest status: useful, not yet done.",
     desktopVideo: "/projects/videos/pastevault.webm",
+    desktopImage: "/projects/previews/pastevault-desktop.png",
+    mobileImage: "/projects/previews/pastevault-mobile.png",
     visual: { label: "PasteVault", kicker: "Private clipboard", accent: "#A7F3D0", secondary: "#64748B" },
   },
   {
@@ -100,6 +104,8 @@ export const featuredProjects = [
     developerNotes: "The risk with any skill library is letting it turn into a junk drawer of half-documented ideas. I check this one against a simple test: would I actually reach for this skill next week, or did I write it because writing it felt productive. A few of the older ones fail that test and need pruning I haven't gotten to yet.",
     notes: "The risk with any skill library is letting it turn into a junk drawer of half-documented ideas. I check this one against a simple test: would I actually reach for this skill next week, or did I write it because writing it felt productive. A few of the older ones fail that test and need pruning I haven't gotten to yet.",
     desktopVideo: "/projects/videos/ai-agent-skills.webm",
+    desktopImage: "/projects/previews/ai-agent-skills-desktop.png",
+    mobileImage: "/projects/previews/ai-agent-skills-mobile.png",
     visual: { label: "Skills", kicker: "Agent systems", accent: "#B7F7FF", secondary: "#8B5CF6" },
   },
   {
@@ -175,7 +181,7 @@ const HIDDEN_ARCHIVE_NUMBERS = new Set([
 const archiveProjectSource = [
   { name: "Codexoors", repoName: "Codexoors", slug: "codexoors", description: "An early-access waitlist with its own identity system, community tasks, and invite unlocks.", tech: ["css", "waitlist", "community"], status: "Brand product page", notes: "Still has real polish potential if I go back to it.", url: repo("Codexoors") },
   { name: "PowergridApp", repoName: "PowergridApp", slug: "powergridapp", image: "/projects/powergrid.png", description: "A mobile concept for navigating Nigeria's power supply: availability, usage, and what to do about it.", tech: ["mobile", "energy", "utility"], status: "Product build", notes: "The original PowerGrid idea, preserved here rather than lost.", url: repo("PowergridApp") },
-  { name: "DSTRKT", repoName: "DSTRKT", slug: "dstrkt", description: "An eCommerce storefront built for the DSTRKT fashion brand.", tech: ["html", "commerce", "brand"], status: "Webstore build", notes: "Client-style commerce work, start to finish.", url: repo("DSTRKT"), liveUrl: "https://dstrkt-site.vercel.app" },
+  { name: "DSTRKT", repoName: "DSTRKT", slug: "dstrkt", description: "An eCommerce storefront built for the DSTRKT fashion brand.", tech: ["html", "commerce", "brand"], status: "Webstore build", notes: "Client-style commerce work, start to finish.", url: repo("DSTRKT"), liveUrl: "https://dstrkt-site.vercel.app", desktopImage: "/projects/previews/dstrkt-desktop.png", mobileImage: "/projects/previews/dstrkt-mobile.png" },
   { name: "Samabi Clinic", repoName: "samabiclinic", slug: "samabiclinic", description: "A React site for Samabi Functional Medicine Clinic in Port Harcourt.", tech: ["typescript", "react", "healthcare"], status: "Clinic website", notes: "Real client, real positioning, accessible build.", url: repo("samabiclinic") },
   { name: "TikTok Lyric Video Pipeline", repoName: "TikTok-Lyric-Video-Pipeline", slug: "tiktok-lyric-video-pipeline", description: "A Python pipeline that turns licensed audio and timed lyrics into TikTok-ready videos.", tech: ["python", "automation", "video"], status: "Automation pipeline", notes: "Intake, scoring, rendering, scheduling, upload. The systems thinking is the part I actually enjoyed.", url: repo("TikTok-Lyric-Video-Pipeline") },
   { name: "Codex Handoff Plus", repoName: "codex-handoff-plus", slug: "codex-handoff-plus", description: "A reliability layer so Codex iMessage handoff doesn't quietly fail.", tech: ["typescript", "codex", "handoff"], status: "Personal tooling", notes: "Part of the same agent-tooling cluster as the Skills repo.", url: repo("codex-handoff-plus") },
@@ -190,7 +196,7 @@ const archiveProjectSource = [
   { name: "Pages Forward Original", repoName: "Pages-Forward", slug: "pages-forward-original", description: "The original lighter Pages Forward bookstore website for buying physical books or ebooks and reading in-browser.", tech: ["html", "bookstore", "commerce"], status: "Earlier version", notes: "Kept as lineage for the featured rebuild.", url: repo("Pages-Forward"), liveUrl: "https://pages-forward.vercel.app" },
   { name: "Tickets", repoName: "Tickets", slug: "tickets", description: "A single-file clone of the Ticketmaster mobile experience.", tech: ["html", "clone", "mobile ui"], status: "Frontend exercise", notes: "Interaction practice, built to study someone else's UI decisions.", url: repo("Tickets"), liveUrl: "https://the-mayhem-tour.netlify.app" },
   { name: "Solana dApp", repoName: "Solana-dApp", slug: "solana-dapp", description: "A Reddit-style dApp on Solana, built in Amazon Kiro to see what the IDE could do.", tech: ["typescript", "solana", "web3"], status: "Web3 implementation", notes: "A working scaffold that demonstrates the core product flow.", url: repo("Solana-dApp") },
-  { name: "What to Watch", repoName: "What-to-watch", slug: "what-to-watch", description: "A movie catalog rebuilt as a WebGL field you browse by touch instead of by scrolling a list.", tech: ["typescript", "webgl", "visualization", "product ux"], status: "Active visualization product", notes: "The list-based movie app has been done to death. This is me trying to make discovery feel spatial instead of like scrolling a spreadsheet with posters on it.", url: repo("What-to-watch"), liveUrl: "https://what-to-watch-brown.vercel.app" },
+  { name: "What to Watch", repoName: "What-to-watch", slug: "what-to-watch", description: "A movie catalog rebuilt as a WebGL field you browse by touch instead of by scrolling a list.", tech: ["typescript", "webgl", "visualization", "product ux"], status: "Active visualization product", notes: "The list-based movie app has been done to death. This is me trying to make discovery feel spatial instead of like scrolling a spreadsheet with posters on it.", url: repo("What-to-watch"), liveUrl: "https://what-to-watch-brown.vercel.app", desktopImage: "/projects/previews/what-to-watch-desktop.png", mobileImage: "/projects/previews/what-to-watch-mobile.png" },
   { name: "Qwen Chat iOS", repoName: "qwen-chat-ios", slug: "qwen-chat-ios", description: "iOS chat experiment repository with limited public metadata.", tech: ["ios", "chat", "ai"], status: "Experiment", notes: "Kept in the archive because the repo is public but sparse.", url: repo("qwen-chat-ios") },
   { name: "StickerSmash", repoName: "StickerSmash", slug: "stickersmash", description: "Expo tutorial project completed as a quick hands-on mobile learning exercise.", tech: ["typescript", "expo", "mobile"], status: "Learning project", notes: "Useful as documented learning progression.", url: repo("StickerSmash") },
   { name: "Hyperball Airdrop", repoName: "Hyperballairdrop", slug: "hyperballairdrop", description: "Small airdrop page built for the Hyperball project.", tech: ["html", "airdrop", "landing page"], status: "Landing page", notes: "Compact campaign-style build.", url: repo("Hyperballairdrop"), liveUrl: "https://hyperballairdrop.netlify.app" },

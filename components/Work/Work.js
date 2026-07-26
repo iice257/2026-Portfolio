@@ -8,7 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 const Work = () => {
   const sectionRef = useRef(null);
   const titleRef = useRef(null);
-  const [openExperience, setOpenExperience] = useState(0);
+  const [openExperience, setOpenExperience] = useState(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -78,6 +78,7 @@ const Work = () => {
   const experiences = [
     {
       company: "W3Pets",
+      sortOrder: 2025,
       role: "Frontend Developer",
       period: "JUN 2025 - DEC 2025",
       summary:
@@ -92,6 +93,7 @@ const Work = () => {
     },
     {
       company: "Ice Design Studio",
+      sortOrder: 2019,
       role: "Freelance Web Designer",
       period: "FEB 2019 - PRESENT",
       summary:
@@ -106,6 +108,7 @@ const Work = () => {
     },
     {
       company: "GamblePause",
+      sortOrder: 2024,
       role: "Web Developer",
       period: "MAY 2024 - SEPT 2024",
       summary:
@@ -163,11 +166,20 @@ const Work = () => {
           >
             <ShuffleText text="Where I've worked" duration={0.6} shuffleTimes={4} triggerOnTap textAlign="left" />
           </h2>
+          <p className="work-section-proof text-body-md" style={{ color: "var(--fg-secondary)" }}>
+            5+ years building for the web across client work, frontend systems, and IT operations.
+          </p>
         </div>
 
         <div className="space-y-0">
-          {experiences.map((exp, i) => (
-            <article key={`${exp.role}-${i}`} className="work-item" onMouseEnter={() => setOpenExperience(i)}>
+          {[...experiences]
+            .sort((a, b) => {
+              if (a.period === "CURRENT") return -1;
+              if (b.period === "CURRENT") return 1;
+              return b.sortOrder - a.sortOrder;
+            })
+            .map((exp, i) => (
+              <article key={`${exp.role}-${i}`} className="work-item">
               <div className="work-line work-separator h-px w-full" />
 
               <div className="work-content">
@@ -176,7 +188,6 @@ const Work = () => {
                   aria-expanded={openExperience === i}
                   aria-controls={`work-panel-${i}`}
                   onClick={() => toggleExperience(i)}
-                  onFocus={() => setOpenExperience(i)}
                   className="w-full flex items-center justify-between gap-4 md:gap-6 py-6 text-left group"
                 >
                   <div className="flex items-center gap-4 md:gap-6 min-w-0">
@@ -260,20 +271,13 @@ const Work = () => {
                   )}
                 </AnimatePresence>
               </div>
-            </article>
-          ))}
+              </article>
+            ))}
 
           <div style={{ borderTop: "1px solid var(--border)" }} />
         </div>
 
         <div className="work-practice-block">
-          <div className="work-practice-strip text-micro" style={{ color: "var(--fg-muted)" }}>
-            <span>5+ years building for the web</span>
-            <span>Multiple client websites shipped</span>
-            <span>Frontend, UI, and IT systems experience</span>
-            <span>Daily AI-assisted engineering practice</span>
-          </div>
-
           <div className="work-practice-grid">
             <div className="work-practice-heading">
               <p className="text-micro mb-5" style={{ color: "var(--fg-muted)" }}>
@@ -286,27 +290,13 @@ const Work = () => {
 
             <div className="work-practice-copy">
               <p className="text-body-lg font-light leading-relaxed" style={{ color: "var(--fg-secondary)" }}>
-                Codex has been part of my daily engineering workflow from its earliest releases: planning, implementation, debugging, research, automation, and review. In parallel, I am going deeper into Python, model behavior, neural networks, and the mathematics behind modern machine learning.
+                Codex is part of my daily engineering workflow for planning, implementation, debugging, research, automation, and review. I build practical agent tools with a review-first mindset, evaluate outputs critically, and keep human judgment in the loop while deepening my foundation in Python, model behavior, neural networks, and the mathematics behind modern machine learning.
               </p>
-              <ul className="work-practice-list">
-                <li>
-                  <span className="text-micro">01</span>
-                  <p>Build practical agent tools, automations, and review-first workflows for real engineering work.</p>
-                </li>
-                <li>
-                  <span className="text-micro">02</span>
-                  <p>Use model capabilities critically: evaluate outputs, expose uncertainty, and keep humans in control.</p>
-                </li>
-                <li>
-                  <span className="text-micro">03</span>
-                  <p>Study the Python, model, neural-network, and mathematical foundations beneath the tools.</p>
-                </li>
-              </ul>
             </div>
           </div>
 
           <div className="work-practice-tags text-micro" style={{ color: "var(--fg-muted)" }}>
-            {["Codex", "Agent Workflows", "Python", "Deep Learning", "Neural Networks", "Model Evaluation"].map((item) => (
+            {["Codex", "Agent Workflows", "Python", "Deep Learning", "Neural Networks", "Model Evaluation", "AI Safety"].map((item) => (
               <span key={item}>{item}</span>
             ))}
           </div>

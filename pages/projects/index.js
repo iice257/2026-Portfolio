@@ -67,17 +67,28 @@ const previewLabel = (variant) => (variant === "mobile" ? "Mobile" : "Desktop");
 
 const getProjectPreview = (project, variant = "desktop") => {
   const video = variant === "desktop" ? project.desktopVideo : project.mobileVideo;
+  const image = variant === "desktop" ? project.desktopImage : project.mobileImage;
   if (video) return { type: "video", src: video };
+  if (image) return { type: "image", src: image };
   if (project.image) return { type: "image", src: project.image };
   return { type: "mockup" };
 };
 
 const ProjectMockupFrame = ({ project, variant = "desktop", className = "" }) => {
   const isMobile = variant === "mobile";
+  const screenshot = isMobile ? project.mobileImage : project.desktopImage;
 
   return (
     <div className={`mockup-shell ${isMobile ? "is-mobile" : "is-desktop"} ${className}`}>
-      {isMobile ? (
+      {screenshot ? (
+        <Image
+          src={screenshot}
+          alt={`${project.name} ${previewLabel(variant)} preview`}
+          fill
+          sizes={isMobile ? "(max-width: 768px) 33vw, 13rem" : "(max-width: 1024px) 100vw, 45vw"}
+          className="object-cover object-top"
+        />
+      ) : isMobile ? (
         <>
           <div className="mb-4 h-2 w-16 mx-auto" style={{ backgroundColor: "var(--fg-primary)", opacity: 0.12 }} />
           <div className="space-y-3">
@@ -517,14 +528,12 @@ const MajorProjectExpandedCard = ({ project, index, onFlip, onHover, onLeave, on
       className="major-project-expanded cursor-none"
     >
       <div className="grid h-full grid-cols-1 xl:grid-cols-12 gap-7 p-5 md:p-7 lg:p-8">
-        <div className="xl:col-span-4 flex flex-col justify-between gap-6">
+        <div className="xl:col-span-4 flex flex-col gap-5">
           <div>
             <span className="text-micro mb-4 block" style={{ color: "var(--fg-muted)" }}>
               {String(index + 5).padStart(2, "0")} / Expanded
             </span>
-            <h3 className="text-display-md font-light mb-4 lg:whitespace-nowrap" style={{ color: "var(--fg-primary)" }}>
-              <ShuffleText text={project.name} duration={0.45} shuffleTimes={3} textAlign="left" />
-            </h3>
+            <h3 className="text-display-md font-light mb-4 lg:whitespace-nowrap" style={{ color: "var(--fg-primary)" }}>{project.name}</h3>
             <p className="text-body-lg mb-5" style={{ color: "var(--fg-secondary)" }}>
               {project.description}
             </p>
@@ -535,9 +544,9 @@ const MajorProjectExpandedCard = ({ project, index, onFlip, onHover, onLeave, on
                 {project.status}
               </p>
             </div>
-          </div>
-          <div className="major-expanded-tags" onClick={(event) => event.stopPropagation()}>
-            <TagList tags={project.tech} />
+            <div className="major-expanded-tags mt-5" onClick={(event) => event.stopPropagation()}>
+              <TagList tags={project.tech} />
+            </div>
           </div>
         </div>
         <div className="xl:col-span-8 flex flex-col gap-4">
@@ -589,25 +598,23 @@ const MajorProjectCard = ({ project, index, onFlip, onHover, onLeave, dimmed }) 
     onMouseLeave={dimmed ? undefined : onLeave}
   >
     <div className="major-project-visual relative overflow-hidden">
-      <ProjectVisual project={project} compact />
+      <ProjectVisual project={project} compact hideLabels />
+      <span className="major-project-visual-caption text-micro">
+        {String(index + 5).padStart(2, "0")} / {project.subtitle}
+      </span>
     </div>
     <div className="major-card-body">
-      <div>
-        <span className="text-micro mb-4 block" style={{ color: "var(--fg-muted)" }}>
-          {String(index + 5).padStart(2, "0")}
-        </span>
-        <h3 className="text-display-sm font-light mb-3 lg:whitespace-nowrap" style={{ color: "var(--fg-primary)" }}>
-          <ShuffleText text={project.name} duration={0.45} shuffleTimes={3} textAlign="left" />
-        </h3>
+      <div className="major-card-title-row">
+        <h3 className="text-display-sm font-light lg:whitespace-nowrap" style={{ color: "var(--fg-primary)" }}>{project.name}</h3>
+        <div onClick={(event) => event.stopPropagation()}>
+          <ProjectActionLinks project={project} />
+        </div>
       </div>
       <div className="major-card-meta">
+        <TagList tags={project.tech} />
         <p className="text-body-md major-card-subtitle" style={{ color: "var(--fg-secondary)" }}>
           {project.subtitle}
         </p>
-        <div className="major-card-actions" onClick={(event) => event.stopPropagation()}>
-          <TagList tags={project.tech} />
-          <ProjectActionLinks project={project} />
-        </div>
       </div>
     </div>
   </motion.article>
@@ -1047,15 +1054,20 @@ export default function ProjectsIndex() {
               <PreviewSurface project={highlightedProject} variant="desktop" onOpen={openPreview} onHover={setProjectCursor} onLeave={clearProjectCursor}>
                 <ProjectMockupFrame project={highlightedProject} variant="desktop" className="aspect-[16/10] p-5" />
               </PreviewSurface>
+              <div className="highlight-mobile-preview-row">
+                {[0, 1, 2].map((screen) => (
+                  <PreviewSurface key={screen} project={highlightedProject} variant="mobile" onOpen={openPreview} onHover={setProjectCursor} onLeave={clearProjectCursor}>
+                    <ProjectMockupFrame project={highlightedProject} variant="mobile" className="aspect-[9/16] w-full p-3" />
+                  </PreviewSurface>
+                ))}
+              </div>
             </div>
 
             <div className="highlight-project-copy">
               <p className="text-micro mb-4" style={{ color: "var(--fg-muted)" }}>
                 Active portfolio system
               </p>
-              <h3 className="text-display-md font-light mb-5" style={{ color: "var(--fg-primary)" }}>
-                <ShuffleText text={highlightedProject.highlightTitle} duration={0.45} shuffleTimes={3} textAlign="left" />
-              </h3>
+              <h3 className="text-display-md font-light mb-5" style={{ color: "var(--fg-primary)" }}>{highlightedProject.highlightTitle}</h3>
               <p className="text-body-lg leading-relaxed mb-6" style={{ color: "var(--fg-secondary)" }}>
                 {highlightedProject.highlightSummary}
               </p>
@@ -1185,9 +1197,7 @@ export default function ProjectsIndex() {
                     <span className="text-micro md:col-span-2" style={{ color: "var(--fg-muted)" }}>
                       {String(project.archiveNumber).padStart(2, "0")}
                     </span>
-                    <span className="archive-project-title md:col-span-5 min-w-0 text-body-xl font-light md:whitespace-nowrap md:overflow-hidden md:text-ellipsis" style={{ color: "var(--fg-primary)" }}>
-                      <ShuffleText text={project.name} duration={0.4} shuffleTimes={2} textAlign="left" />
-                    </span>
+                    <span className="archive-project-title md:col-span-5 min-w-0 text-body-xl font-light md:whitespace-nowrap md:overflow-hidden md:text-ellipsis" style={{ color: "var(--fg-primary)" }}>{project.name}</span>
                     <span className="md:col-span-4 text-body-md" style={{ color: "var(--fg-secondary)" }}>
                       {project.status}
                     </span>

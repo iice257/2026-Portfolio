@@ -32,10 +32,6 @@ const HERO_CAPABILITY_TRANSITION_MS = 640;
 const LOCK_VIEWPORT_QUERY = "(max-width: 1023px)";
 const TOOLTIP_DELAY_MS = 2400;
 const TOOLTIP_VISIBLE_MS = 3200;
-const HERO_SCROLL_TRIAL_PAUSED = true;
-const HERO_SCROLL_TRIAL_ENABLED = !HERO_SCROLL_TRIAL_PAUSED
-  && process.env.NEXT_PUBLIC_HERO_SCROLL_TRIAL === "true";
-
 const LockIcon = ({ unlocked = false }) => (
   <svg
     aria-hidden="true"
@@ -416,61 +412,6 @@ const Hero = () => {
           "-=0.08"
         );
 
-      const isScrollTrial = HERO_SCROLL_TRIAL_ENABLED
-        && !reduceMotion
-        && !window.matchMedia(LOCK_VIEWPORT_QUERY).matches;
-
-      if (isScrollTrial) {
-        const trialTimeline = gsap.timeline({
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top top",
-            end: "+=100%",
-            scrub: 0.45,
-            pin: true,
-            pinSpacing: false,
-            anticipatePin: 1,
-            invalidateOnRefresh: true,
-          },
-        });
-
-        trialTimeline
-          .to(scrollIndicatorRef.current, {
-            opacity: 0,
-            duration: 0.12,
-            ease: "none",
-          }, 0)
-          .to(subtitleRef.current, {
-            y: -54,
-            scale: 1.08,
-            opacity: 0,
-            duration: 0.38,
-            ease: "power1.in",
-          }, 0.04)
-          .to(nameContainerRef.current, {
-            yPercent: -3,
-            scale: 6.8,
-            transformOrigin: "50% 47%",
-            force3D: true,
-            duration: 1,
-            ease: "power2.in",
-          }, 0)
-          .to(backdropRef.current, {
-            scale: 1.55,
-            transformOrigin: "50% 50%",
-            force3D: true,
-            duration: 1,
-            ease: "power1.in",
-          }, 0)
-          .to(sectionRef.current, {
-            opacity: 0,
-            duration: 0.32,
-            ease: "power1.in",
-          }, 0.68);
-
-        return;
-      }
-
       ScrollTrigger.create({
         trigger: sectionRef.current,
         start: "top top",
@@ -512,7 +453,6 @@ const Hero = () => {
   const mobileInteractionText = greetingText || (
     interactionState === INTERACTION_STATES.LOCKED ? "Locked" : ""
   );
-
   return (
     <section
       ref={sectionRef}
@@ -520,7 +460,6 @@ const Hero = () => {
       className={`${styles.heroSection} ${isLocked ? styles.heroSectionLocked : ""} ${hasUnlocked ? styles.heroSectionUnlocked : ""} relative min-h-[100dvh] lg:min-h-screen flex items-center justify-center overflow-hidden`}
       style={{ backgroundColor: "var(--bg-primary)" }}
       data-hero-locked={isLocked ? "true" : "false"}
-      data-hero-scroll-trial={HERO_SCROLL_TRIAL_ENABLED ? "true" : "false"}
     >
       {canRenderHeroBackdrop && theme === "dark" && (
         <div ref={backdropRef} className={styles.galaxyBackdrop} aria-hidden="true">
@@ -577,7 +516,7 @@ const Hero = () => {
             </div>
           )}
 
-          {isLockViewport && (
+          {isLockViewport && mobileInteractionText && (
             <div className={styles.mobileInteractionStatus} role="status" aria-live="polite">
               <FadeBlurText stateKey={interactionState}>{mobileInteractionText}</FadeBlurText>
             </div>

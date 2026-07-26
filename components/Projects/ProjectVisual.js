@@ -37,7 +37,7 @@ const createMetallicMask = ({ label, kicker }) => {
 const metallicSeed = (value = "") =>
   Array.from(String(value)).reduce((sum, char, index) => sum + char.charCodeAt(0) * (index + 11), 37);
 
-const ProjectVisual = ({ project, priority = false, compact = false, metallic = false }) => {
+const ProjectVisual = ({ project, priority = false, compact = false, metallic = false, hideLabels = false }) => {
   const visual = project.visual || {};
   const accent = visual.accent || project.gradient?.[0] || "#fafafa";
   const secondary = visual.secondary || project.gradient?.[1] || "#525252";
@@ -80,9 +80,7 @@ const ProjectVisual = ({ project, priority = false, compact = false, metallic = 
       />
       <div className="absolute inset-6 md:inset-8 border" style={{ borderColor: `${accent}66` }} />
       <div className="absolute left-6 right-6 top-6 z-[2] md:left-8 md:right-8 md:top-8 flex items-center justify-between">
-        <span className="text-micro" style={{ color: 'var(--fg-muted)' }}>
-          {kicker}
-        </span>
+        {!hideLabels && <span className="text-micro" style={{ color: 'var(--fg-muted)' }}>{kicker}</span>}
         <span className="h-2 w-2 rounded-full" style={{ backgroundColor: accent }} />
       </div>
       {metallicMask && (
@@ -110,7 +108,7 @@ const ProjectVisual = ({ project, priority = false, compact = false, metallic = 
           />
         </div>
       )}
-      <div className="absolute inset-x-6 bottom-6 z-[2] md:inset-x-8 md:bottom-8">
+      <div className={`absolute inset-x-6 bottom-6 z-[2] md:inset-x-8 md:bottom-8 ${hideLabels ? "is-label-free" : ""}`}>
         <div
           className="mb-5 h-24 rounded-none border p-4 backdrop-blur-sm"
           style={{
@@ -122,12 +120,14 @@ const ProjectVisual = ({ project, priority = false, compact = false, metallic = 
           <div className="mb-2 h-2 w-4/5" style={{ backgroundColor: `${secondary}88` }} />
           <div className="h-2 w-1/2" style={{ backgroundColor: `${accent}55` }} />
         </div>
-        <p
-          className={compact ? "text-display-sm font-light leading-none" : "text-display-lg font-light leading-none"}
-          style={{ color: 'var(--fg-primary)' }}
-        >
-          {label}
-        </p>
+        {!hideLabels && (
+          <p
+            className={compact ? "text-display-sm font-light leading-none" : "text-display-lg font-light leading-none"}
+            style={{ color: 'var(--fg-primary)' }}
+          >
+            {label}
+          </p>
+        )}
       </div>
     </div>
   );

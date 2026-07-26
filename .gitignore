@@ -24,6 +24,9 @@
 # misc
 .DS_Store
 *.pem
+.chrome-pass3-current/
+.playwright-cli/
+/output/
 
 # debug
 npm-debug.log*
