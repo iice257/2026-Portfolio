@@ -293,6 +293,11 @@
 }
 
 @media (max-width: 767px) {
+  .heroSectionLocked .heroTitleShell {
+    top: clamp(1.75rem, 8vw, 2.5rem);
+    transition: top var(--system-motion-duration) var(--system-motion-ease);
+  }
+
   .heroTitleShell {
     gap: clamp(1.05rem, 4vw, 1.45rem);
   }

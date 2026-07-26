@@ -510,7 +510,7 @@ const Hero = () => {
 
   const isLockControlVisible = isLockViewport && (isLocked || isHeroInView);
   const mobileInteractionText = greetingText || (
-    interactionState === INTERACTION_STATES.LOCKED ? "Locked" : "Interactive"
+    interactionState === INTERACTION_STATES.LOCKED ? "Locked" : ""
   );
 
   return (

@@ -4,7 +4,6 @@ import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 
 const Philosophy = () => {
   const sectionRef = useRef(null);
-  const headingRef = useRef(null);
   const wordsRef = useRef([]);
 
   useEffect(() => {
@@ -12,30 +11,35 @@ const Philosophy = () => {
       const words = wordsRef.current;
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const isTouchFlow = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+      const revealWindow = 0.2;
+
+      const applyRevealProgress = (progress) => {
+        words.forEach((word, index) => {
+          const start = (index / words.length) * (1 - revealWindow);
+          const localProgress = Math.min(1, Math.max(0, (progress - start) / revealWindow));
+
+          gsap.set(word, {
+            opacity: 0.15 + (localProgress * 0.85),
+            filter: `blur(${4 * (1 - localProgress)}px)`,
+          });
+        });
+      };
 
       if (reduceMotion) {
         gsap.set(words, { opacity: 1, filter: "blur(0px)" });
         return;
       }
 
-      gsap.fromTo(words, {
-        opacity: 0.15,
-        filter: "blur(4px)",
-      }, {
-        opacity: 1,
-        filter: "blur(0px)",
-        duration: 0.24,
-        stagger: 0.063,
-        ease: "none",
-        force3D: true,
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: isTouchFlow ? "top 78%" : "10% center",
-          end: isTouchFlow ? "bottom 34%" : "73% center",
-          scrub: 0.35,
-          invalidateOnRefresh: true,
-          fastScrollEnd: false,
-        },
+      applyRevealProgress(0);
+
+      ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start: isTouchFlow ? "top 78%" : "10% center",
+        end: isTouchFlow ? "bottom 34%" : "73% center",
+        invalidateOnRefresh: true,
+        fastScrollEnd: false,
+        onUpdate: (self) => applyRevealProgress(self.progress),
+        onRefresh: (self) => applyRevealProgress(self.progress),
       });
 
       window.requestAnimationFrame(() => ScrollTrigger.refresh());
@@ -56,7 +60,6 @@ const Philosophy = () => {
     >
       <div className="philosophy-copy section-container text-center">
         <h2
-          ref={headingRef}
           className="philosophy-heading font-extralight mx-auto"
           style={{ color: 'var(--fg-primary)' }}
         >

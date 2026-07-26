@@ -1,4 +1,4 @@
-export const SYSTEM_MOTION_MS = 700;
+export const SYSTEM_MOTION_MS = 850;
 export const SYSTEM_MOTION_SECONDS = SYSTEM_MOTION_MS / 1000;
 export const SYSTEM_MOTION_EASE = [0.16, 1, 0.3, 1];
 
