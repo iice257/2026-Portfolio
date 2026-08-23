@@ -93,9 +93,20 @@ function SystemPanel({ metrics, experiment, quality, setQuality }) {
       </dl>
       {expanded && (
         <div className={styles.qualitySelector} role="group" aria-label="Rendering quality">
-          {Object.entries(QUALITY_MODES).map(([id, mode]) => (
-            <button key={id} type="button" onClick={() => setQuality(id)} aria-pressed={quality === id}>{mode.label}</button>
-          ))}
+          {Object.entries(QUALITY_MODES).map(([id, mode]) => {
+            const aware = experiment.qualityAware !== false;
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setQuality(id)}
+                aria-pressed={quality === id}
+                disabled={!aware}
+                title={aware ? undefined : "This experiment has no rendering-quality lever."}
+                style={aware ? undefined : { opacity: 0.4, cursor: "not-allowed" }}
+              >{mode.label}</button>
+            );
+          })}
         </div>
       )}
     </aside>
@@ -119,7 +130,7 @@ function ExperimentSurface({ experiment, paused, params, quality, theme, resetKe
     return <SignalExperiment key={`${experiment.id}-${resetKey}-${quality}`} {...shared} />;
   }
   if (experiment.id === "text-pressure") {
-    return <TextPressureExperiment key={`${experiment.id}-${resetKey}`} params={params} theme={theme} paused={paused} />;
+    return <TextPressureExperiment key={`${experiment.id}-${resetKey}-${quality}`} params={params} theme={theme} paused={paused} quality={quality} />;
   }
   if (experiment.id === "pressure-field") {
     return <PressureField key={`${experiment.id}-${resetKey}`} paused={paused} params={params} reducedMotion={reducedMotion} quality={quality} theme={theme} />;
@@ -128,10 +139,10 @@ function ExperimentSurface({ experiment, paused, params, quality, theme, resetKe
     return <CursorTrailExperiment key={`${experiment.id}-${resetKey}-${params.mode}-${quality}`} {...shared} />;
   }
   if (experiment.id === "ascii-text") {
-    return <ASCIITextExperiment key={`${experiment.id}-${resetKey}`} params={params} theme={theme} paused={paused} />;
+    return <ASCIITextExperiment key={`${experiment.id}-${resetKey}-${quality}`} params={params} theme={theme} paused={paused} quality={quality} />;
   }
   if (experiment.id === "metallic-paint") {
-    return <MetallicPaintExperiment key={`${experiment.id}-${resetKey}`} params={params} paused={paused} />;
+    return <MetallicPaintExperiment key={`${experiment.id}-${resetKey}-${quality}`} params={params} paused={paused} quality={quality} />;
   }
   return <CursorMorphExperiment key={`${experiment.id}-${resetKey}`} params={params} />;
 }

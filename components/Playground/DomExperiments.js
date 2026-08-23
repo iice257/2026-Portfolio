@@ -109,7 +109,7 @@ export function CursorTrailExperiment({ paused, params, qualityConfig, theme }) 
       className="playground-dot-field"
       backgroundColor={background}
       dotColor={ink}
-      gridSpacing={Math.round(22 + params.decay * 5)}
+      gridSpacing={Math.round(22 + params.decay * 5) + (qualityConfig.density < 0.5 ? 8 : 0)}
       animationSpeed={0.005}
       trailOnMove
       removeWaveLine={false}
@@ -121,7 +121,7 @@ export function CursorTrailExperiment({ paused, params, qualityConfig, theme }) 
   );
 }
 
-export function ASCIITextExperiment({ params, theme, paused }) {
+export function ASCIITextExperiment({ params, theme, paused, quality }) {
   return (
     <div className="ascii-experiment">
       <ASCIIText
@@ -132,12 +132,13 @@ export function ASCIITextExperiment({ params, theme, paused }) {
         textColor={theme === "dark" ? "#fdf9f3" : "#111111"}
         enableWaves={params.enableWaves === "on"}
         paused={paused}
+        frameInterval={quality === "low" ? 50 : 33}
       />
     </div>
   );
 }
 
-export function MetallicPaintExperiment({ params, paused }) {
+export function MetallicPaintExperiment({ params, paused, quality }) {
   return (
     <div className="metallic-experiment">
       <svg className="metallic-fallback-mark" viewBox="0 0 1200 720" aria-hidden="true">
@@ -168,12 +169,13 @@ export function MetallicPaintExperiment({ params, paused }) {
         darkColor="#050505"
         tintColor="#ffffff"
         paused={paused}
+        resolutionScale={quality === "low" ? 0.7 : 1}
       />
     </div>
   );
 }
 
-export function TextPressureExperiment({ params, theme, paused }) {
+export function TextPressureExperiment({ params, theme, paused, quality }) {
   return (
     <div className="text-pressure-experiment" aria-label="The word Pressure changes width and weight near the pointer.">
       <TextPressure
@@ -186,7 +188,7 @@ export function TextPressureExperiment({ params, theme, paused }) {
         textColor={theme === "dark" ? "#f5f5f2" : "#111111"}
         baseWeight={params.weight}
         maxWeight={params.maxWeight}
-        targetFps={params.response}
+        targetFps={quality === "low" ? Math.min(params.response, 30) : params.response}
         minFontSize={44}
         paused={paused}
       />

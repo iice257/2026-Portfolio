@@ -277,7 +277,8 @@ export default function MetallicPaint({
   distortion = 1,
   contour = 0.2,
   tintColor = '#feb3ff',
-  paused = false
+  paused = false,
+  resolutionScale = 1
 }) {
   const canvasRef = useRef(null);
   const glRef = useRef(null);
@@ -292,6 +293,7 @@ export default function MetallicPaint({
   const mouseAnimRef = useRef(mouseAnimation);
   const pausedRef = useRef(paused);
   const transportRef = useRef({ start: () => {}, stop: () => {} });
+  const resolutionScaleRef = useRef(resolutionScale);
   const [isVisible, setIsVisible] = useState(false);
   const [ready, setReady] = useState(false);
   const [textureReady, setTextureReady] = useState(false);
@@ -313,6 +315,12 @@ export default function MetallicPaint({
     }
   }, [paused]);
 
+  useEffect(() => {
+    if (resolutionScaleRef.current === resolutionScale) return;
+    resolutionScaleRef.current = resolutionScale;
+    resizeCanvas();
+  }, [resolutionScale, resizeCanvas]);
+
   const resizeCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     const gl = glRef.current;
@@ -320,7 +328,7 @@ export default function MetallicPaint({
     if (!canvas || !gl) return;
 
     const rect = canvas.getBoundingClientRect();
-    const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5) * Math.max(0.5, resolutionScaleRef.current);
     const width = Math.max(2, Math.round(rect.width * pixelRatio));
     const height = Math.max(2, Math.round(rect.height * pixelRatio));
     if (canvas.width !== width || canvas.height !== height) {

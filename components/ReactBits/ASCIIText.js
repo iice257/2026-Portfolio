@@ -220,7 +220,7 @@ class CanvasTxt {
 
 class CanvAscii {
   constructor(
-    { text, asciiFontSize, textFontSize, textColor, planeBaseHeight, enableWaves },
+    { text, asciiFontSize, textFontSize, textColor, planeBaseHeight, enableWaves, frameInterval = 33 },
     containerElem,
     width,
     height
@@ -230,10 +230,8 @@ class CanvAscii {
     this.textFontSize = textFontSize;
     this.textColor = textColor;
     this.planeBaseHeight = planeBaseHeight;
-    this.container = containerElem;
-    this.width = width;
-    this.height = height;
     this.enableWaves = enableWaves;
+    this.frameInterval = Math.max(16, frameInterval);
 
     this.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 1, 1000);
     this.camera.position.z = 30;
@@ -367,7 +365,7 @@ class CanvAscii {
         return;
       }
       this.animationFrameId = requestAnimationFrame(animateFrame);
-      if (now - this.lastFrameTime < 33) return;
+      if (now - this.lastFrameTime < this.frameInterval) return;
 
       this.lastFrameTime = now;
       this.render();
@@ -439,7 +437,8 @@ export default function ASCIIText({
   textColor = '#fdf9f3',
   planeBaseHeight = 8,
   enableWaves = true,
-  paused = false
+  paused = false,
+  frameInterval = 33
 }) {
   const containerRef = useRef(null);
   const asciiRef = useRef(null);
@@ -459,7 +458,7 @@ export default function ASCIIText({
 
     const createAndInit = async (container, w, h) => {
       const instance = new CanvAscii(
-        { text, asciiFontSize, textFontSize, textColor, planeBaseHeight, enableWaves },
+        { text, asciiFontSize, textFontSize, textColor, planeBaseHeight, enableWaves, frameInterval },
         container,
         w,
         h
@@ -534,7 +533,7 @@ export default function ASCIIText({
         asciiRef.current = null;
       }
     };
-  }, [text, asciiFontSize, textFontSize, textColor, planeBaseHeight, enableWaves]);
+  }, [text, asciiFontSize, textFontSize, textColor, planeBaseHeight, enableWaves, frameInterval]);
 
   return (
     <div
