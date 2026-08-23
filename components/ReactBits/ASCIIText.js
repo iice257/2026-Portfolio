@@ -4,7 +4,6 @@ import * as THREE from 'three';
 const vertexShader = `
 varying vec2 vUv;
 uniform float uTime;
-uniform float mouse;
 uniform float uEnableWaves;
 
 void main() {
@@ -25,7 +24,6 @@ void main() {
 
 const fragmentShader = `
 varying vec2 vUv;
-uniform float mouse;
 uniform float uTime;
 uniform sampler2D uTexture;
 
@@ -107,6 +105,21 @@ class AsciiFilter {
     this.pre.style.zIndex = '9';
     this.pre.style.backgroundAttachment = 'fixed';
     this.pre.style.mixBlendMode = 'difference';
+
+    // Row-diffing state: one block span per row, updated only when its cells change.
+    this.charsetChars = this.charset.split('');
+    this.spaceCode = 254; // reserved: literal space, independent of charset indexing
+    this.charsetChars[this.spaceCode] = ' ';
+    this.prevIndices = new Uint8Array(this.cols * this.rows).fill(255);
+    this.indices = new Uint8Array(this.cols * this.rows);
+    while (this.pre.firstChild) this.pre.removeChild(this.pre.firstChild);
+    this.rowEls = [];
+    for (let y = 0; y < this.rows; y += 1) {
+      const rowEl = document.createElement('span');
+      rowEl.style.display = 'block';
+      this.pre.appendChild(rowEl);
+      this.rowEls.push(rowEl);
+    }
   }
 
   render(scene, camera) {
@@ -142,27 +155,48 @@ class AsciiFilter {
   }
 
   asciify(ctx, w, h) {
-    if (w && h) {
-      const imgData = ctx.getImageData(0, 0, w, h).data;
-      let str = '';
-      for (let y = 0; y < h; y++) {
-        for (let x = 0; x < w; x++) {
-          const i = x * 4 + y * 4 * w;
-          const [r, g, b, a] = [imgData[i], imgData[i + 1], imgData[i + 2], imgData[i + 3]];
+    if (!w || !h || !this.rowEls || this.rowEls.length < h) return;
 
-          if (a === 0) {
-            str += ' ';
-            continue;
-          }
+    const imgData = ctx.getImageData(0, 0, w, h).data;
+    const { indices, prevIndices, charsetChars, spaceCode } = this;
+    const charsetLast = charsetChars.length - 2; // last real charset index (space slot is reserved)
 
-          const gray = (0.3 * r + 0.6 * g + 0.1 * b) / 255;
-          let idx = Math.floor((1 - gray) * (this.charset.length - 1));
-          if (this.invert) idx = this.charset.length - idx - 1;
-          str += this.charset[idx];
+    for (let y = 0; y < h; y++) {
+      const rowOffset = y * w;
+      for (let x = 0; x < w; x++) {
+        const i = x * 4 + rowOffset * 4;
+
+        if (imgData[i + 3] === 0) {
+          indices[rowOffset + x] = spaceCode;
+          continue;
         }
-        str += '\n';
+
+        const gray = (0.3 * imgData[i] + 0.6 * imgData[i + 1] + 0.1 * imgData[i + 2]) / 255;
+        let idx = Math.floor((1 - gray) * charsetLast);
+        if (this.invert) idx = charsetLast - idx;
+        indices[rowOffset + x] = idx;
       }
-      this.pre.innerHTML = str;
+    }
+
+    for (let y = 0; y < h; y++) {
+      const rowOffset = y * w;
+      let dirty = false;
+      for (let x = 0; x < w; x++) {
+        if (prevIndices[rowOffset + x] !== indices[rowOffset + x]) {
+          dirty = true;
+          break;
+        }
+      }
+      if (!dirty) continue;
+
+      let rowString = '';
+      for (let x = 0; x < w; x++) {
+        rowString += charsetChars[indices[rowOffset + x]];
+      }
+      this.rowEls[y].textContent = rowString;
+      for (let x = 0; x < w; x++) {
+        prevIndices[rowOffset + x] = indices[rowOffset + x];
+      }
     }
   }
 
@@ -279,7 +313,6 @@ class CanvAscii {
       transparent: true,
       uniforms: {
         uTime: { value: 0 },
-        mouse: { value: 1.0 },
         uTexture: { value: this.texture },
         uEnableWaves: { value: this.enableWaves ? 1.0 : 0.0 }
       }
