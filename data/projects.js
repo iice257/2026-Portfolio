@@ -175,7 +175,7 @@ const EXPANDABLE_ARCHIVE_NUMBERS = new Set([
 ]);
 
 const HIDDEN_ARCHIVE_NUMBERS = new Set([
-  34, 37, 38, 41, 42, 43, 44, 45, 46, 48, 49, 51,
+  37, 38, 41, 42, 43, 44, 45, 46, 48, 49, 51,
 ]);
 
 const archiveProjectSource = [
@@ -202,7 +202,7 @@ const archiveProjectSource = [
   { name: "Hyperball Airdrop", repoName: "Hyperballairdrop", slug: "hyperballairdrop", description: "Small airdrop page built for the Hyperball project.", tech: ["html", "airdrop", "landing page"], status: "Landing page", notes: "Compact campaign-style build.", url: repo("Hyperballairdrop"), liveUrl: "https://hyperballairdrop.netlify.app" },
   { name: "Ambition Collection", repoName: "Ambition-Collection", slug: "ambition-collection", description: "A visual essay on the human psyche.", tech: ["html", "visual essay", "creative"], status: "Creative web page", notes: "More editorial than engineering, and it earns its place here anyway.", url: repo("Ambition-Collection"), liveUrl: "https://ambition-collection.vercel.app" },
   { name: "MHC Architecture Analysis", repoName: "Research---MHC-Architecture-Analysis", slug: "mhc-architecture-analysis", description: "A research writeup on Manifold Constrained Hyperconnections and AI scaling architecture.", tech: ["html", "research", "ai"], status: "Research page", notes: "Technical writing as its own kind of build.", url: repo("Research---MHC-Architecture-Analysis"), liveUrl: "https://mhc-interactive-article-by-ice-on-x.netlify.app" },
-  { name: "King's Portfolio", repoName: "king-s-portfolio", slug: "king-s-portfolio", description: "Previous portfolio website for Kingsley Aremu, showcasing projects and professional experience.", tech: ["typescript", "portfolio", "react"], status: "Previous portfolio", notes: "Useful as portfolio lineage.", url: repo("king-s-portfolio"), liveUrl: "https://kingsleyaremu.vercel.app" },
+  { name: "v1 Portfolio", repoName: "king-s-portfolio", slug: "king-s-portfolio", description: "The first version of this portfolio: a single-page Next.js build covering projects, skills, experience, and certifications.", tech: ["typescript", "next.js", "react", "portfolio"], status: "First iteration", notes: "Every version of this site stays live on its own URL, starting here. The current build is the highlighted project above.", url: repo("king-s-portfolio"), liveUrl: "https://kingsleyaremu-v1.vercel.app" },
   { name: "Val Day Site", repoName: "val-day-site", slug: "val-day-site", description: "A simple single-file Valentine's Day website with no framework or build tooling.", tech: ["html", "single page", "creative"], status: "Small experiment", notes: "Lightweight creative build.", url: repo("val-day-site"), liveUrl: "https://val-day-site.vercel.app" },
   { name: "Heads Tails Game", repoName: "Heads-Tails-Game", slug: "heads-tails-game", description: "Heads-or-tails game section built as a mini landing-page interaction for BeraKols.", tech: ["game", "landing page"], status: "Mini game", notes: "Small interactive UI piece.", url: repo("Heads-Tails-Game") },
   { name: "StreakMate", repoName: "Local portfolio data", slug: "streakmate", image: "/projects/streakmate.png", description: "Cross-platform habit tracking app for daily streaks, smart reminders, and motivational insights.", tech: ["react", "nodejs"], status: "Archived product", notes: "Preserved from earlier portfolio data as part of the complete project record.", url: "#" },

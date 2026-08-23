@@ -24,6 +24,23 @@ function SplashCursor({
 }) {
   const canvasRef = useRef(null);
   const animationFrameId = useRef(null);
+  const liveConfigRef = useRef(null);
+
+  useEffect(() => {
+    const bridge = liveConfigRef.current;
+    if (!bridge) return;
+    const { config } = bridge;
+    config.SPLAT_RADIUS = SPLAT_RADIUS;
+    config.SPLAT_FORCE = SPLAT_FORCE;
+    config.DENSITY_DISSIPATION = DENSITY_DISSIPATION;
+    config.VELOCITY_DISSIPATION = VELOCITY_DISSIPATION;
+    config.PRESSURE = PRESSURE;
+    config.CURL = CURL;
+    const resolutionChanged = config.SIM_RESOLUTION !== SIM_RESOLUTION || config.DYE_RESOLUTION !== DYE_RESOLUTION;
+    config.SIM_RESOLUTION = SIM_RESOLUTION;
+    config.DYE_RESOLUTION = DYE_RESOLUTION;
+    if (resolutionChanged && document.visibilityState !== 'hidden') bridge.initFramebuffers();
+  }, [CURL, DENSITY_DISSIPATION, DYE_RESOLUTION, PRESSURE, SIM_RESOLUTION, SPLAT_FORCE, SPLAT_RADIUS, VELOCITY_DISSIPATION]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -66,6 +83,7 @@ function SplashCursor({
     };
 
     const pointers = [new pointerPrototype()];
+    const glResources = { buffers: [], shaders: [], programs: [] };
     const context = getWebGLContext(canvas);
     if (!context.gl) return undefined;
 
@@ -156,6 +174,9 @@ function SplashCursor({
       webgl.bindFramebuffer(webgl.FRAMEBUFFER, fbo);
       webgl.framebufferTexture2D(webgl.FRAMEBUFFER, webgl.COLOR_ATTACHMENT0, webgl.TEXTURE_2D, texture, 0);
       const status = webgl.checkFramebufferStatus(webgl.FRAMEBUFFER);
+      webgl.bindFramebuffer(webgl.FRAMEBUFFER, null);
+      webgl.deleteFramebuffer(fbo);
+      webgl.deleteTexture(texture);
       return status === webgl.FRAMEBUFFER_COMPLETE;
     }
 
@@ -205,6 +226,7 @@ function SplashCursor({
       gl.attachShader(program, fragmentShader);
       gl.linkProgram(program);
       if (!gl.getProgramParameter(program, gl.LINK_STATUS)) console.trace(gl.getProgramInfoLog(program));
+      glResources.programs.push(program);
       return program;
     }
 
@@ -224,6 +246,7 @@ function SplashCursor({
       gl.shaderSource(shader, shaderSource);
       gl.compileShader(shader);
       if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) console.trace(gl.getShaderInfoLog(shader));
+      glResources.shaders.push(shader);
       return shader;
     }
 
@@ -525,12 +548,15 @@ function SplashCursor({
     );
 
     const blit = (() => {
-      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+      const vertexBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, -1, 1, 1, 1, 1, -1]), gl.STATIC_DRAW);
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
+      const indexBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
       gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([0, 1, 2, 0, 2, 3]), gl.STATIC_DRAW);
       gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
       gl.enableVertexAttribArray(0);
+      glResources.buffers.push(vertexBuffer, indexBuffer);
       return (target, clear = false) => {
         if (target == null) {
           gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
@@ -564,6 +590,18 @@ function SplashCursor({
     const gradienSubtractProgram = new Program(baseVertexShader, gradientSubtractShader);
     const displayMaterial = new Material(baseVertexShader, displayShaderSource);
 
+    function destroyFBO(fbo) {
+      if (!fbo) return;
+      gl.deleteTexture(fbo.texture);
+      gl.deleteFramebuffer(fbo.fbo);
+    }
+
+    function destroyDoubleFBO(doubleFbo) {
+      if (!doubleFbo) return;
+      destroyFBO(doubleFbo.read);
+      destroyFBO(doubleFbo.write);
+    }
+
     function initFramebuffers() {
       const simRes = getResolution(config.SIM_RESOLUTION);
       const dyeRes = getResolution(config.DYE_RESOLUTION);
@@ -578,8 +616,11 @@ function SplashCursor({
       if (!velocity) velocity = createDoubleFBO(simRes.width, simRes.height, formatRG.internalFormat, formatRG.format, texType, filtering);
       else velocity = resizeDoubleFBO(velocity, simRes.width, simRes.height, formatRG.internalFormat, formatRG.format, texType, filtering);
 
+      destroyFBO(divergence);
       divergence = createFBO(simRes.width, simRes.height, formatR.internalFormat, formatR.format, texType, gl.NEAREST);
+      destroyFBO(curl);
       curl = createFBO(simRes.width, simRes.height, formatR.internalFormat, formatR.format, texType, gl.NEAREST);
+      destroyDoubleFBO(pressure);
       pressure = createDoubleFBO(simRes.width, simRes.height, formatR.internalFormat, formatR.format, texType, gl.NEAREST);
     }
 
@@ -654,7 +695,10 @@ function SplashCursor({
 
     function resizeDoubleFBO(target, w, h, internalFormat, format, type, param) {
       if (target.width === w && target.height === h) return target;
-      target.read = resizeFBO(target.read, w, h, internalFormat, format, type, param);
+      const newRead = resizeFBO(target.read, w, h, internalFormat, format, type, param);
+      destroyFBO(target.read);
+      target.read = newRead;
+      destroyFBO(target.write);
       target.write = createFBO(w, h, internalFormat, format, type, param);
       target.width = w;
       target.height = h;
@@ -677,7 +721,8 @@ function SplashCursor({
     function updateFrame() {
       if (!isActive) return;
       if (document.visibilityState === 'hidden') {
-        animationFrameId.current = requestAnimationFrame(updateFrame);
+        animationFrameId.current = null;
+        delete canvas.dataset.playgroundLoop;
         return;
       }
       const dt = calcDeltaTime();
@@ -968,7 +1013,7 @@ function SplashCursor({
     }
 
     function scaleByPixelRatio(input) {
-      const pixelRatio = window.devicePixelRatio || 1;
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
       return Math.floor(input * pixelRatio);
     }
 
@@ -1026,11 +1071,40 @@ function SplashCursor({
       updatePointerUpData(pointers[0]);
     }
 
+    function handleVisibilityChange() {
+      if (!isActive) return;
+      if (document.visibilityState !== 'hidden') {
+        if (animationFrameId.current === null) {
+          lastUpdateTime = Date.now();
+          canvas.dataset.playgroundLoop = "active";
+          animationFrameId.current = requestAnimationFrame(updateFrame);
+        }
+      }
+    }
+
+    function releaseGl() {
+      try {
+        destroyDoubleFBO(dye);
+        destroyDoubleFBO(velocity);
+        destroyFBO(divergence);
+        destroyFBO(curl);
+        destroyDoubleFBO(pressure);
+        glResources.buffers.forEach((buffer) => gl.deleteBuffer(buffer));
+        glResources.programs.forEach((program) => gl.deleteProgram(program));
+        glResources.shaders.forEach((shader) => gl.deleteShader(shader));
+      } catch (error) {
+        console.trace(error);
+      }
+    }
+
     window.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('touchstart', handleTouchStart);
     window.addEventListener('touchmove', handleTouchMove, false);
     window.addEventListener('touchend', handleTouchEnd);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    liveConfigRef.current = { config, initFramebuffers };
 
     updateFrame();
 
@@ -1048,6 +1122,11 @@ function SplashCursor({
       window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleTouchEnd);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+
+      releaseGl();
+      gl.getExtension('WEBGL_lose_context')?.loseContext();
+      delete canvas.dataset.playgroundWebgl;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

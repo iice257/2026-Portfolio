@@ -102,9 +102,8 @@ function SystemPanel({ metrics, experiment, quality, setQuality }) {
   );
 }
 
-function ExperimentSurface({ experiment, paused, params, quality, theme, resetKey }) {
+function ExperimentSurface({ experiment, paused, params, quality, theme, resetKey, reducedMotion }) {
   const qualityConfig = QUALITY_MODES[quality];
-  const reducedMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const shared = { paused, params, qualityConfig, reducedMotion, theme };
 
   if (experiment.id === "galaxy") {
@@ -237,7 +236,15 @@ export default function Playground() {
   useEffect(() => {
     const handleKey = (event) => {
       const target = event.target;
-      if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement) return;
+      const isFormField = target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement;
+      const isInteractive = !isFormField && target instanceof HTMLElement && (
+        target.isContentEditable || Boolean(target.closest("button, a, [role='button'], [contenteditable]"))
+      );
+      if (isFormField || isInteractive) {
+        if (event.key === "Escape" && inspectorOpen) setInspectorOpen(false);
+        return;
+      }
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
       if (event.key === "ArrowDown" || event.key === "ArrowRight") {
         event.preventDefault();
         selectExperiment(EXPERIMENTS[(activeIndex + 1) % EXPERIMENTS.length].id);
@@ -265,7 +272,7 @@ export default function Playground() {
           <Link href="/" aria-label="Return to portfolio" data-cursor-label="Exit Playground">Effects Lab</Link>
           <span>/ playground</span>
         </div>
-        <div className={styles.indexLabel}>Experiments <span>{experiment.index} / 12</span></div>
+        <div className={styles.indexLabel}>Experiments <span>{experiment.index} / {EXPERIMENTS.length}</span></div>
         <nav>
           <ol>
             {EXPERIMENTS.map((item) => (
@@ -313,7 +320,7 @@ export default function Playground() {
             exit={metrics.reducedMotion ? { opacity: 1 } : { opacity: 0 }}
             transition={{ duration: metrics.reducedMotion ? 0 : 0.28, ease: [0.16, 1, 0.3, 1] }}
           >
-            <ExperimentSurface experiment={experiment} paused={paused} params={params} quality={quality} theme={theme} resetKey={resetKey} />
+            <ExperimentSurface experiment={experiment} paused={paused} params={params} quality={quality} theme={theme} resetKey={resetKey} reducedMotion={metrics.reducedMotion} />
           </motion.div>
         </AnimatePresence>
 

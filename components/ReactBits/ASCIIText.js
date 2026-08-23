@@ -45,8 +45,6 @@ const mapRange = (n, start, stop, start2, stop2) => (
   ((n - start) / (stop - start)) * (stop2 - start2) + start2
 );
 
-const getPixelRatio = () => (typeof window !== 'undefined' ? window.devicePixelRatio : 1);
-
 class AsciiFilter {
   constructor(renderer, { fontSize, fontFamily, charset, invert } = {}) {
     this.renderer = renderer;
@@ -126,8 +124,7 @@ class AsciiFilter {
   }
 
   onMouseMove(e) {
-    const ratio = getPixelRatio();
-    this.mouse = { x: e.clientX * ratio, y: e.clientY * ratio };
+    this.mouse = { x: e.clientX, y: e.clientY };
   }
 
   get dx() {
@@ -310,6 +307,22 @@ class CanvAscii {
 
     this.container.addEventListener('mousemove', this.onMouseMove);
     this.container.addEventListener('touchmove', this.onMouseMove);
+
+    this.handleVisibilityChange = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(this.animationFrameId);
+        this.animationFrameId = null;
+        delete this.container.dataset.playgroundLoop;
+      } else {
+        this.load();
+      }
+    };
+    document.addEventListener('visibilitychange', this.handleVisibilityChange);
+  }
+
+  load() {
+    this.container.dataset.playgroundLoop = 'active';
+    this.animate();
   }
 
   setSize(w, h) {
@@ -324,10 +337,6 @@ class CanvAscii {
     this.center = { x: w / 2, y: h / 2 };
   }
 
-  load() {
-    this.animate();
-  }
-
   onMouseMove(evt) {
     const e = evt.touches ? evt.touches[0] : evt;
     const bounds = this.container.getBoundingClientRect();
@@ -337,11 +346,16 @@ class CanvAscii {
   }
 
   animate() {
+    if (this.animationFrameId) return;
     this.lastFrameTime = 0;
 
     const animateFrame = (now) => {
+      if (document.hidden) {
+        this.animationFrameId = null;
+        return;
+      }
       this.animationFrameId = requestAnimationFrame(animateFrame);
-      if (document.hidden || now - this.lastFrameTime < 33) return;
+      if (now - this.lastFrameTime < 33) return;
 
       this.lastFrameTime = now;
       this.render();
@@ -386,6 +400,9 @@ class CanvAscii {
   }
 
   dispose() {
+    if (this.handleVisibilityChange) {
+      document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+    }
     cancelAnimationFrame(this.animationFrameId);
     if (this.filter) {
       this.filter.dispose();
@@ -429,8 +446,14 @@ export default function ASCIIText({
         h
       );
       await instance.init();
+      if (cancelled) {
+        instance.dispose();
+        return null;
+      }
       return instance;
     };
+
+    let resizeFrameId = null;
 
     const setup = async () => {
       const { width, height } = containerRef.current.getBoundingClientRect();
@@ -465,8 +488,12 @@ export default function ASCIIText({
         ro = new ResizeObserver(entries => {
           if (!entries[0] || !asciiRef.current) return;
           const { width: w, height: h } = entries[0].contentRect;
-          if (w > 0 && h > 0) {
-            asciiRef.current.setSize(w, h);
+          if (w > 0 && h > 0 && resizeFrameId === null) {
+            resizeFrameId = requestAnimationFrame(() => {
+              resizeFrameId = null;
+              if (cancelled || !asciiRef.current) return;
+              asciiRef.current.setSize(w, h);
+            });
           }
         });
         ro.observe(containerRef.current);
@@ -477,6 +504,10 @@ export default function ASCIIText({
 
     return () => {
       cancelled = true;
+      if (resizeFrameId !== null) {
+        cancelAnimationFrame(resizeFrameId);
+        resizeFrameId = null;
+      }
       if (observer) observer.disconnect();
       if (ro) ro.disconnect();
       if (asciiRef.current) {

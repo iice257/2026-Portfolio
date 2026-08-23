@@ -536,16 +536,59 @@ export default function MetallicPaint({
 
       gl.uniform1f(u.u_time, animTimeRef.current);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      canvas.dataset.playgroundLoop = "active";
-      rafRef.current = requestAnimationFrame(render);
     };
 
-    lastTimeRef.current = performance.now();
-    rafRef.current = requestAnimationFrame(render);
+    const loop = (time) => {
+      render(time);
+      rafRef.current = requestAnimationFrame(loop);
+    };
+
+    const start = () => {
+      if (!rafRef.current && !document.hidden && !reducedMotionQuery.matches) {
+        canvas.dataset.playgroundLoop = "active";
+        lastTimeRef.current = performance.now();
+        rafRef.current = requestAnimationFrame(loop);
+      }
+    };
+    const stop = () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      delete canvas.dataset.playgroundLoop;
+    };
+    const drawStaticFrame = () => {
+      gl.uniform1f(u.u_time, animTimeRef.current);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    };
+
+    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handleVisibilityChange = () => {
+      if (document.hidden) stop();
+      else start();
+    };
+    const handleMotionPreferenceChange = () => {
+      if (reducedMotionQuery.matches) {
+        stop();
+        drawStaticFrame();
+      } else {
+        start();
+      }
+    };
+
+    reducedMotionQuery.addEventListener('change', handleMotionPreferenceChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    if (reducedMotionQuery.matches) {
+      drawStaticFrame();
+    } else {
+      start();
+    }
 
     return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      delete canvas.dataset.playgroundLoop;
+      stop();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      reducedMotionQuery.removeEventListener('change', handleMotionPreferenceChange);
       if (mouseAnimation) {
         canvas.removeEventListener('mousemove', handleMouseMove);
       }

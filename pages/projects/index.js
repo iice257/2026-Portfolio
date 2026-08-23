@@ -811,9 +811,13 @@ export default function ProjectsIndex() {
         <link rel="canonical" href={canonicalUrl} />
         <meta property="og:title" content={`Projects | ${METADATA.author}`} />
         <meta property="og:description" content="A curated project archive by Kingsley Afolabi Aremu, including featured work, major projects, technical builds, and selected public repositories." />
+        <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:image" content={METADATA.image} />
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`Projects | ${METADATA.author}`} />
+        <meta name="twitter:description" content="A curated project archive by Kingsley Afolabi Aremu, including featured work, major projects, technical builds, and selected public repositories." />
+        <meta name="twitter:image" content={METADATA.image} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: projectsJsonLd }}

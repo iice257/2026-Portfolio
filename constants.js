@@ -12,6 +12,7 @@ export const METADATA = {
   linkedinUrl: "https://linkedin.com/in/kingsley-aremu",
   xUrl: "https://x.com/iice257",
   portfolioUrl: "https://kingsleyaremu.vercel.app",
+  v1PortfolioUrl: "https://kingsleyaremu-v1.vercel.app",
   topSearchQueries: [
     "Kingsley Afolabi Aremu",
     "Kingsley Aremu",
@@ -148,4 +149,4 @@ export const PROFILE_LINKS = SOCIAL_LINKS
   .filter((link) => link.url.startsWith("http"))
   .map((link) => link.url);
 
-export const GTAG = "G-5HCTL2TJ5W";
+export const GTAG = process.env.NEXT_PUBLIC_GA_ID || "";

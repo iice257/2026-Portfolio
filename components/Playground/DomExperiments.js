@@ -123,7 +123,7 @@ export function CursorTrailExperiment({ paused, params, qualityConfig, theme }) 
 
 export function ASCIITextExperiment({ params, theme }) {
   return (
-    <div className="ascii-experiment" data-playground-loop="active">
+    <div className="ascii-experiment">
       <ASCIIText
         text="PLAY"
         asciiFontSize={params.asciiFontSize}
@@ -138,7 +138,7 @@ export function ASCIITextExperiment({ params, theme }) {
 
 export function MetallicPaintExperiment({ params }) {
   return (
-    <div className="metallic-experiment" data-playground-loop="active">
+    <div className="metallic-experiment">
       <svg className="metallic-fallback-mark" viewBox="0 0 1200 720" aria-hidden="true">
         <rect x="146" y="146" width="908" height="428" rx="20" fill="none" stroke="currentColor" strokeWidth="12" />
         <path d="M206 218h158M836 218h158M206 500h216M778 500h216" fill="none" stroke="currentColor" strokeWidth="12" />

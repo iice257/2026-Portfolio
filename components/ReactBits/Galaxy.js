@@ -253,6 +253,8 @@ export default function Galaxy({
       }
     }
     window.addEventListener('resize', resize, false);
+    const containerObserver = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(resize);
+    containerObserver?.observe(ctn);
     resize();
 
     const geometry = new Triangle(gl);
@@ -345,6 +347,7 @@ export default function Galaxy({
 
     function handleMouseMove(e) {
       const rect = ctn.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
       const x = (e.clientX - rect.left) / rect.width;
       const y = 1.0 - (e.clientY - rect.top) / rect.height;
       targetMousePos.current = { x, y };
@@ -374,6 +377,7 @@ export default function Galaxy({
       stopLoop();
       resumeRef.current = () => {};
       stopRef.current = () => {};
+      containerObserver?.disconnect();
       window.removeEventListener('resize', resize);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       if (mouseInteraction) {

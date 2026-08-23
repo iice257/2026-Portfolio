@@ -39,7 +39,7 @@ export default function useSystemMetrics(activeRenderer) {
           frameTime: 1000 / Math.max(1, fps),
           dpr: window.devicePixelRatio || 1,
           reducedMotion: motionQuery.matches,
-          loopCount: document.querySelectorAll('[data-playground-loop="active"]').length + 1,
+          loopCount: document.querySelectorAll('[data-playground-loop="active"]').length,
           webglCount: document.querySelectorAll("canvas[data-playground-webgl]").length,
         });
         frames = 0;
