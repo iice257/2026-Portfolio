@@ -1,0 +1,42 @@
+[
+  {
+    "checkpoint": "load",
+    "pillText": "Welcome back!",
+    "pillClasses": "jsx-dc67447e43f1dd38 custom-cursor-label absolute left-0 top-0 backdrop-blur-sm px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-widest whitespace-nowrap is-standard is-greeting is-visible",
+    "morph": "default",
+    "fillOpacity": "0",
+    "hostTransform": ""
+  },
+  {
+    "checkpoint": "post-sweep",
+    "pillText": " ",
+    "pillClasses": "jsx-dc67447e43f1dd38 custom-cursor-label absolute left-0 top-0 backdrop-blur-sm px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-widest whitespace-nowrap is-standard  is-hidden",
+    "morph": "default",
+    "fillOpacity": "0",
+    "hostTransform": "715,297"
+  },
+  {
+    "checkpoint": "parked",
+    "pillText": " ",
+    "pillClasses": "jsx-dc67447e43f1dd38 custom-cursor-label absolute left-0 top-0 backdrop-blur-sm px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-widest whitespace-nowrap is-standard  is-hidden",
+    "morph": "default",
+    "fillOpacity": "0",
+    "hostTransform": "1075,427"
+  },
+  {
+    "checkpoint": "header-nav",
+    "pillText": " ",
+    "pillClasses": "jsx-dc67447e43f1dd38 custom-cursor-label absolute left-0 top-0 backdrop-blur-sm px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-widest whitespace-nowrap is-standard  is-hidden",
+    "morph": "clickable",
+    "fillOpacity": "0",
+    "hostTransform": "1175,31"
+  },
+  {
+    "checkpoint": "returned-center",
+    "pillText": " ",
+    "pillClasses": "jsx-dc67447e43f1dd38 custom-cursor-label absolute left-0 top-0 backdrop-blur-sm px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-widest whitespace-nowrap is-standard  is-hidden",
+    "morph": "default",
+    "fillOpacity": "0",
+    "hostTransform": "715,427"
+  }
+]
