@@ -38,6 +38,33 @@ const InteractiveDots = ({
   const lastTrailRef = useRef({ x: 0, y: 0, time: 0, set: false });
   const dotsRef = useRef([]);
   const colorRef = useRef(hexToRgb(dotColor));
+  const tunablesRef = useRef({
+    gridSpacing,
+    animationSpeed,
+    removeWaveLine,
+    trailOnMove,
+    trailInterval,
+    trailMinDistance,
+    pointerRadius,
+    rippleRadius,
+    interactionStrength,
+    backgroundColor,
+  });
+
+  useEffect(() => {
+    tunablesRef.current = {
+      gridSpacing,
+      animationSpeed,
+      removeWaveLine,
+      trailOnMove,
+      trailInterval,
+      trailMinDistance,
+      pointerRadius,
+      rippleRadius,
+      interactionStrength,
+      backgroundColor,
+    };
+  });
 
   useEffect(() => {
     colorRef.current = hexToRgb(dotColor);
@@ -48,10 +75,11 @@ const InteractiveDots = ({
     if (!canvas) return;
 
     const { width, height } = canvas.getBoundingClientRect();
+    const spacing = Math.max(1, tunablesRef.current.gridSpacing);
     const dots = [];
 
-    for (let x = gridSpacing / 2; x < width; x += gridSpacing) {
-      for (let y = gridSpacing / 2; y < height; y += gridSpacing) {
+    for (let x = spacing / 2; x < width; x += spacing) {
+      for (let y = spacing / 2; y < height; y += spacing) {
         dots.push({
           x,
           y,
@@ -63,7 +91,7 @@ const InteractiveDots = ({
     }
 
     dotsRef.current = dots;
-  }, [gridSpacing]);
+  }, []);
 
   const resizeCanvas = useCallback(() => {
     const canvas = canvasRef.current;
@@ -99,13 +127,14 @@ const InteractiveDots = ({
 
   const addTrailRipple = useCallback((event) => {
     updatePointer(event);
-    if (!trailOnMove || !pointerRef.current.active) return;
+    const { trailOnMove: trailEnabled, trailInterval: interval, trailMinDistance: minDistance } = tunablesRef.current;
+    if (!trailEnabled || !pointerRef.current.active) return;
 
     const now = performance.now();
     const last = lastTrailRef.current;
     const distance = last.set ? Math.hypot(pointerRef.current.x - last.x, pointerRef.current.y - last.y) : Infinity;
 
-    if (last.set && now - last.time < trailInterval && distance < trailMinDistance) return;
+    if (last.set && now - last.time < interval && distance < minDistance) return;
 
     lastTrailRef.current = {
       x: pointerRef.current.x,
@@ -126,7 +155,7 @@ const InteractiveDots = ({
       time: now,
     });
     trailPointsRef.current = trailPointsRef.current.slice(-30);
-  }, [trailInterval, trailMinDistance, trailOnMove, updatePointer]);
+  }, [updatePointer]);
 
   const addRipple = useCallback((event) => {
     updatePointer(event);
@@ -147,8 +176,8 @@ const InteractiveDots = ({
     const dx = x - pointerRef.current.x;
     const dy = y - pointerRef.current.y;
     const distance = Math.hypot(dx, dy);
-    return Math.max(0, 1 - distance / pointerRadius);
-  }, [pointerRadius]);
+    return Math.max(0, 1 - distance / tunablesRef.current.pointerRadius);
+  }, []);
 
   const getRippleInfluence = useCallback((x, y, now) => {
     let influence = 0;
@@ -158,9 +187,10 @@ const InteractiveDots = ({
       const maxAge = 3000;
       if (age >= maxAge) return;
 
+      const radiusStep = tunablesRef.current.rippleRadius;
       const distance = Math.hypot(x - ripple.x, y - ripple.y);
-      const radius = (age / maxAge) * rippleRadius;
-      const width = Math.max(32, rippleRadius * 0.2);
+      const radius = (age / maxAge) * radiusStep;
+      const width = Math.max(32, radiusStep * 0.2);
 
       if (Math.abs(distance - radius) < width) {
         influence += (1 - age / maxAge) * ripple.intensity * (1 - Math.abs(distance - radius) / width);
@@ -168,7 +198,7 @@ const InteractiveDots = ({
     });
 
     return Math.min(influence, 2);
-  }, [rippleRadius]);
+  }, []);
 
   const getTrailInfluence = (x, y, now) => {
     let influence = 0;
@@ -229,19 +259,20 @@ const InteractiveDots = ({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    timeRef.current += animationSpeed;
+    const tunables = tunablesRef.current;
+    timeRef.current += tunables.animationSpeed;
     const now = performance.now();
     const { width, height } = canvas.getBoundingClientRect();
     const { r, g, b } = colorRef.current;
 
-    ctx.fillStyle = backgroundColor;
+    ctx.fillStyle = tunables.backgroundColor;
     ctx.fillRect(0, 0, width, height);
 
     ripplesRef.current = ripplesRef.current.filter((ripple) => now - ripple.time < 3000);
     trailRipplesRef.current = trailRipplesRef.current.filter((ripple) => now - ripple.time < 690);
     trailPointsRef.current = trailPointsRef.current.filter((point) => now - point.time < 785);
 
-    const fadedTrailPoints = trailOnMove
+    const fadedTrailPoints = tunables.trailOnMove
       ? trailPointsRef.current.map((point) => {
         const progress = Math.min(1, (now - point.time) / 785);
         return {
@@ -251,14 +282,14 @@ const InteractiveDots = ({
       }).filter((point) => point.alpha > 0.03)
       : [];
 
-    if (trailOnMove) {
+    if (tunables.trailOnMove) {
       drawTaperedTrailWash(ctx, fadedTrailPoints, r, g, b);
     }
 
     dotsRef.current.forEach((dot) => {
       const influence = (getPointerInfluence(dot.originalX, dot.originalY)
         + getRippleInfluence(dot.originalX, dot.originalY, now)
-        + getTrailInfluence(dot.originalX, dot.originalY, now)) * interactionStrength;
+        + getTrailInfluence(dot.originalX, dot.originalY, now)) * tunables.interactionStrength;
       const size = 1.7 + influence * 5.2 + Math.sin(timeRef.current + dot.phase) * 0.35;
       const opacity = Math.max(
         0.18,
@@ -271,7 +302,7 @@ const InteractiveDots = ({
       ctx.fill();
     });
 
-    if (!removeWaveLine) {
+    if (!tunables.removeWaveLine) {
       ripplesRef.current.forEach((ripple) => {
         const age = now - ripple.time;
         const progress = age / 3000;
@@ -280,12 +311,12 @@ const InteractiveDots = ({
         ctx.beginPath();
         ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
         ctx.lineWidth = 1.4;
-        ctx.arc(ripple.x, ripple.y, progress * rippleRadius, 0, Math.PI * 2);
+        ctx.arc(ripple.x, ripple.y, progress * tunables.rippleRadius, 0, Math.PI * 2);
         ctx.stroke();
       });
     }
 
-    if (trailOnMove) {
+    if (tunables.trailOnMove) {
       trailRipplesRef.current.forEach((ripple) => {
         const age = now - ripple.time;
         const progress = age / 690;
@@ -300,7 +331,7 @@ const InteractiveDots = ({
     }
 
     animationFrameRef.current = window.requestAnimationFrame(animate);
-  }, [animationSpeed, backgroundColor, getPointerInfluence, getRippleInfluence, interactionStrength, removeWaveLine, rippleRadius, trailOnMove]);
+  }, [getPointerInfluence, getRippleInfluence]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -328,7 +359,7 @@ const InteractiveDots = ({
       const ctx = canvas.getContext("2d");
       const { width, height } = canvas.getBoundingClientRect();
       if (ctx) {
-        ctx.fillStyle = backgroundColor;
+        ctx.fillStyle = tunablesRef.current.backgroundColor;
         ctx.fillRect(0, 0, width, height);
       }
     }
@@ -352,7 +383,7 @@ const InteractiveDots = ({
       pointerRef.current.active = false;
       lastTrailRef.current = { x: 0, y: 0, time: 0, set: false };
     };
-  }, [active, addRipple, addTrailRipple, animate, backgroundColor, mouseInteraction, resizeCanvas]);
+  }, [active, addRipple, addTrailRipple, animate, mouseInteraction, resizeCanvas]);
 
   return (
     <div ref={containerRef} className={`interactive-dots ${className}`} aria-hidden="true">

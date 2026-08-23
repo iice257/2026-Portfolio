@@ -273,10 +273,11 @@ export default function MetallicPaint({
   waveAmplitude = 1,
   noiseScale = 0.5,
   chromaticSpread = 2,
-  mouseAnimation = false,
   distortion = 1,
   contour = 0.2,
-  tintColor = '#feb3ff'
+  tintColor = '#feb3ff',
+  paused = false,
+  resolutionScale = 1
 }) {
   const canvasRef = useRef(null);
   const glRef = useRef(null);
@@ -287,8 +288,9 @@ export default function MetallicPaint({
   const lastTimeRef = useRef(0);
   const rafRef = useRef(null);
   const speedRef = useRef(speed);
-  const mouseRef = useRef({ x: 0.5, y: 0.5, targetX: 0.5, targetY: 0.5 });
-  const mouseAnimRef = useRef(mouseAnimation);
+  const pausedRef = useRef(paused);
+  const transportRef = useRef({ start: () => {}, stop: () => {} });
+  const resolutionScaleRef = useRef(resolutionScale);
   const [isVisible, setIsVisible] = useState(false);
   const [ready, setReady] = useState(false);
   const [textureReady, setTextureReady] = useState(false);
@@ -298,8 +300,19 @@ export default function MetallicPaint({
   }, [speed]);
 
   useEffect(() => {
-    mouseAnimRef.current = mouseAnimation;
-  }, [mouseAnimation]);
+    pausedRef.current = paused;
+    if (paused) {
+      transportRef.current.stop();
+    } else {
+      transportRef.current.start();
+    }
+  }, [paused]);
+
+  useEffect(() => {
+    if (resolutionScaleRef.current === resolutionScale) return;
+    resolutionScaleRef.current = resolutionScale;
+    resizeCanvas();
+  }, [resolutionScale, resizeCanvas]);
 
   const resizeCanvas = useCallback(() => {
     const canvas = canvasRef.current;
@@ -308,7 +321,7 @@ export default function MetallicPaint({
     if (!canvas || !gl) return;
 
     const rect = canvas.getBoundingClientRect();
-    const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5) * Math.max(0.5, resolutionScaleRef.current);
     const width = Math.max(2, Math.round(rect.width * pixelRatio));
     const height = Math.max(2, Math.round(rect.height * pixelRatio));
     if (canvas.width !== width || canvas.height !== height) {
@@ -510,47 +523,71 @@ export default function MetallicPaint({
     const gl = glRef.current;
     const u = uniformsRef.current;
     const canvas = canvasRef.current;
-    const mouse = mouseRef.current;
-
-    const handleMouseMove = (event) => {
-      const rect = canvas.getBoundingClientRect();
-      mouse.targetX = (event.clientX - rect.left) / rect.width;
-      mouse.targetY = (event.clientY - rect.top) / rect.height;
-    };
-
-    if (mouseAnimation) {
-      canvas.addEventListener('mousemove', handleMouseMove);
-    }
 
     const render = (time) => {
       const delta = time - lastTimeRef.current;
       lastTimeRef.current = time;
-
-      if (mouseAnimRef.current) {
-        mouse.x += (mouse.targetX - mouse.x) * 0.08;
-        mouse.y += (mouse.targetY - mouse.y) * 0.08;
-        animTimeRef.current = mouse.x * 3000 + mouse.y * 1500;
-      } else {
-        animTimeRef.current += delta * speedRef.current;
-      }
+      animTimeRef.current += delta * speedRef.current;
 
       gl.uniform1f(u.u_time, animTimeRef.current);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      canvas.dataset.playgroundLoop = "active";
-      rafRef.current = requestAnimationFrame(render);
     };
 
-    lastTimeRef.current = performance.now();
-    rafRef.current = requestAnimationFrame(render);
+    const loop = (time) => {
+      render(time);
+      rafRef.current = requestAnimationFrame(loop);
+    };
 
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      delete canvas.dataset.playgroundLoop;
-      if (mouseAnimation) {
-        canvas.removeEventListener('mousemove', handleMouseMove);
+    const start = () => {
+      if (!rafRef.current && !document.hidden && !reducedMotionQuery.matches && !pausedRef.current) {
+        canvas.dataset.playgroundLoop = "active";
+        lastTimeRef.current = performance.now();
+        rafRef.current = requestAnimationFrame(loop);
       }
     };
-  }, [mouseAnimation, ready, textureReady]);
+    const stop = () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      delete canvas.dataset.playgroundLoop;
+    };
+    transportRef.current = { start, stop };
+    const drawStaticFrame = () => {
+      gl.uniform1f(u.u_time, animTimeRef.current);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    };
+
+    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handleVisibilityChange = () => {
+      if (document.hidden) stop();
+      else start();
+    };
+    const handleMotionPreferenceChange = () => {
+      if (reducedMotionQuery.matches) {
+        stop();
+        drawStaticFrame();
+      } else {
+        start();
+      }
+    };
+
+    reducedMotionQuery.addEventListener('change', handleMotionPreferenceChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    if (reducedMotionQuery.matches) {
+      drawStaticFrame();
+    } else {
+      start();
+    }
+
+    return () => {
+      stop();
+      transportRef.current = { start: () => {}, stop: () => {} };
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      reducedMotionQuery.removeEventListener('change', handleMotionPreferenceChange);
+    };
+  }, [ready, textureReady]);
 
   return <canvas ref={canvasRef} className="paint-container" />;
 }

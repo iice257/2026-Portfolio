@@ -12,12 +12,10 @@
   /* Theme variables - Light mode */
   --bg-primary: #fafafa;
   --bg-secondary: #f5f5f5;
-  --bg-tertiary: #e5e5e5;
   --fg-primary: #0a0a0a;
   --fg-secondary: #525252;
   --fg-muted: #a3a3a3;
   --border: #e5e5e5;
-  --accent: #0a0a0a;
   --safe-area-top: env(safe-area-inset-top, 0px);
   --safe-area-right: env(safe-area-inset-right, 0px);
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
@@ -30,12 +28,10 @@
 [data-theme="dark"] {
   --bg-primary: #0a0a0a;
   --bg-secondary: #171717;
-  --bg-tertiary: #262626;
   --fg-primary: #fafafa;
   --fg-secondary: #d4d4d4;
   --fg-muted: #737373;
   --border: #262626;
-  --accent: #fafafa;
 }
 
 /* ===========================================
@@ -2029,11 +2025,11 @@ a {
   top: 1.25rem;
   right: 1.35rem;
   color: var(--fg-primary);
-  font-family: var(--font-ibm-plex-mono);
+  font-family: var(--font-inter);
   font-size: clamp(1.85rem, 3.2vw, 2.8rem);
-  font-weight: 600;
+  font-weight: 200;
   line-height: 1;
-  letter-spacing: -0.06em;
+  letter-spacing: -0.02em;
 }
 
 .major-card-body {
@@ -3065,7 +3061,7 @@ textarea {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 100;
+  z-index: 10001;
 
   .progress-bar {
     height: 100%;

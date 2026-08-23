@@ -4,7 +4,6 @@ import * as THREE from 'three';
 const vertexShader = `
 varying vec2 vUv;
 uniform float uTime;
-uniform float mouse;
 uniform float uEnableWaves;
 
 void main() {
@@ -25,7 +24,6 @@ void main() {
 
 const fragmentShader = `
 varying vec2 vUv;
-uniform float mouse;
 uniform float uTime;
 uniform sampler2D uTexture;
 
@@ -44,8 +42,6 @@ void main() {
 const mapRange = (n, start, stop, start2, stop2) => (
   ((n - start) / (stop - start)) * (stop2 - start2) + start2
 );
-
-const getPixelRatio = () => (typeof window !== 'undefined' ? window.devicePixelRatio : 1);
 
 class AsciiFilter {
   constructor(renderer, { fontSize, fontFamily, charset, invert } = {}) {
@@ -109,6 +105,21 @@ class AsciiFilter {
     this.pre.style.zIndex = '9';
     this.pre.style.backgroundAttachment = 'fixed';
     this.pre.style.mixBlendMode = 'difference';
+
+    // Row-diffing state: one block span per row, updated only when its cells change.
+    this.charsetChars = this.charset.split('');
+    this.spaceCode = 254; // reserved: literal space, independent of charset indexing
+    this.charsetChars[this.spaceCode] = ' ';
+    this.prevIndices = new Uint8Array(this.cols * this.rows).fill(255);
+    this.indices = new Uint8Array(this.cols * this.rows);
+    while (this.pre.firstChild) this.pre.removeChild(this.pre.firstChild);
+    this.rowEls = [];
+    for (let y = 0; y < this.rows; y += 1) {
+      const rowEl = document.createElement('span');
+      rowEl.style.display = 'block';
+      this.pre.appendChild(rowEl);
+      this.rowEls.push(rowEl);
+    }
   }
 
   render(scene, camera) {
@@ -126,8 +137,7 @@ class AsciiFilter {
   }
 
   onMouseMove(e) {
-    const ratio = getPixelRatio();
-    this.mouse = { x: e.clientX * ratio, y: e.clientY * ratio };
+    this.mouse = { x: e.clientX, y: e.clientY };
   }
 
   get dx() {
@@ -145,27 +155,48 @@ class AsciiFilter {
   }
 
   asciify(ctx, w, h) {
-    if (w && h) {
-      const imgData = ctx.getImageData(0, 0, w, h).data;
-      let str = '';
-      for (let y = 0; y < h; y++) {
-        for (let x = 0; x < w; x++) {
-          const i = x * 4 + y * 4 * w;
-          const [r, g, b, a] = [imgData[i], imgData[i + 1], imgData[i + 2], imgData[i + 3]];
+    if (!w || !h || !this.rowEls || this.rowEls.length < h) return;
 
-          if (a === 0) {
-            str += ' ';
-            continue;
-          }
+    const imgData = ctx.getImageData(0, 0, w, h).data;
+    const { indices, prevIndices, charsetChars, spaceCode } = this;
+    const charsetLast = charsetChars.length - 2; // last real charset index (space slot is reserved)
 
-          const gray = (0.3 * r + 0.6 * g + 0.1 * b) / 255;
-          let idx = Math.floor((1 - gray) * (this.charset.length - 1));
-          if (this.invert) idx = this.charset.length - idx - 1;
-          str += this.charset[idx];
+    for (let y = 0; y < h; y++) {
+      const rowOffset = y * w;
+      for (let x = 0; x < w; x++) {
+        const i = x * 4 + rowOffset * 4;
+
+        if (imgData[i + 3] === 0) {
+          indices[rowOffset + x] = spaceCode;
+          continue;
         }
-        str += '\n';
+
+        const gray = (0.3 * imgData[i] + 0.6 * imgData[i + 1] + 0.1 * imgData[i + 2]) / 255;
+        let idx = Math.floor((1 - gray) * charsetLast);
+        if (this.invert) idx = charsetLast - idx;
+        indices[rowOffset + x] = idx;
       }
-      this.pre.innerHTML = str;
+    }
+
+    for (let y = 0; y < h; y++) {
+      const rowOffset = y * w;
+      let dirty = false;
+      for (let x = 0; x < w; x++) {
+        if (prevIndices[rowOffset + x] !== indices[rowOffset + x]) {
+          dirty = true;
+          break;
+        }
+      }
+      if (!dirty) continue;
+
+      let rowString = '';
+      for (let x = 0; x < w; x++) {
+        rowString += charsetChars[indices[rowOffset + x]];
+      }
+      this.rowEls[y].textContent = rowString;
+      for (let x = 0; x < w; x++) {
+        prevIndices[rowOffset + x] = indices[rowOffset + x];
+      }
     }
   }
 
@@ -223,7 +254,7 @@ class CanvasTxt {
 
 class CanvAscii {
   constructor(
-    { text, asciiFontSize, textFontSize, textColor, planeBaseHeight, enableWaves },
+    { text, asciiFontSize, textFontSize, textColor, planeBaseHeight, enableWaves, frameInterval = 33 },
     containerElem,
     width,
     height
@@ -233,10 +264,8 @@ class CanvAscii {
     this.textFontSize = textFontSize;
     this.textColor = textColor;
     this.planeBaseHeight = planeBaseHeight;
-    this.container = containerElem;
-    this.width = width;
-    this.height = height;
     this.enableWaves = enableWaves;
+    this.frameInterval = Math.max(16, frameInterval);
 
     this.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 1, 1000);
     this.camera.position.z = 30;
@@ -284,7 +313,6 @@ class CanvAscii {
       transparent: true,
       uniforms: {
         uTime: { value: 0 },
-        mouse: { value: 1.0 },
         uTexture: { value: this.texture },
         uEnableWaves: { value: this.enableWaves ? 1.0 : 0.0 }
       }
@@ -310,6 +338,34 @@ class CanvAscii {
 
     this.container.addEventListener('mousemove', this.onMouseMove);
     this.container.addEventListener('touchmove', this.onMouseMove);
+
+    this.handleVisibilityChange = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(this.animationFrameId);
+        this.animationFrameId = null;
+        delete this.container.dataset.playgroundLoop;
+      } else {
+        this.load();
+      }
+    };
+    document.addEventListener('visibilitychange', this.handleVisibilityChange);
+  }
+
+  load() {
+    if (this.paused) return;
+    this.container.dataset.playgroundLoop = 'active';
+    this.animate();
+  }
+
+  setPaused(value) {
+    this.paused = value;
+    if (value) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+      delete this.container.dataset.playgroundLoop;
+    } else if (this.filter && !document.hidden) {
+      this.load();
+    }
   }
 
   setSize(w, h) {
@@ -324,10 +380,6 @@ class CanvAscii {
     this.center = { x: w / 2, y: h / 2 };
   }
 
-  load() {
-    this.animate();
-  }
-
   onMouseMove(evt) {
     const e = evt.touches ? evt.touches[0] : evt;
     const bounds = this.container.getBoundingClientRect();
@@ -337,11 +389,16 @@ class CanvAscii {
   }
 
   animate() {
+    if (this.animationFrameId) return;
     this.lastFrameTime = 0;
 
     const animateFrame = (now) => {
+      if (document.hidden) {
+        this.animationFrameId = null;
+        return;
+      }
       this.animationFrameId = requestAnimationFrame(animateFrame);
-      if (document.hidden || now - this.lastFrameTime < 33) return;
+      if (now - this.lastFrameTime < this.frameInterval) return;
 
       this.lastFrameTime = now;
       this.render();
@@ -386,6 +443,9 @@ class CanvAscii {
   }
 
   dispose() {
+    if (this.handleVisibilityChange) {
+      document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+    }
     cancelAnimationFrame(this.animationFrameId);
     if (this.filter) {
       this.filter.dispose();
@@ -409,10 +469,18 @@ export default function ASCIIText({
   textFontSize = 200,
   textColor = '#fdf9f3',
   planeBaseHeight = 8,
-  enableWaves = true
+  enableWaves = true,
+  paused = false,
+  frameInterval = 33
 }) {
   const containerRef = useRef(null);
   const asciiRef = useRef(null);
+  const pausedRef = useRef(paused);
+
+  useEffect(() => {
+    pausedRef.current = paused;
+    asciiRef.current?.setPaused?.(paused);
+  }, [paused]);
 
   useEffect(() => {
     if (!containerRef.current) return undefined;
@@ -423,14 +491,20 @@ export default function ASCIIText({
 
     const createAndInit = async (container, w, h) => {
       const instance = new CanvAscii(
-        { text, asciiFontSize, textFontSize, textColor, planeBaseHeight, enableWaves },
+        { text, asciiFontSize, textFontSize, textColor, planeBaseHeight, enableWaves, frameInterval },
         container,
         w,
         h
       );
       await instance.init();
+      if (cancelled) {
+        instance.dispose();
+        return null;
+      }
       return instance;
     };
+
+    let resizeFrameId = null;
 
     const setup = async () => {
       const { width, height } = containerRef.current.getBoundingClientRect();
@@ -447,7 +521,7 @@ export default function ASCIIText({
               if (!cancelled) {
                 asciiRef.current = await createAndInit(containerRef.current, w, h);
                 if (!cancelled && asciiRef.current) {
-                  asciiRef.current.load();
+                  asciiRef.current.setPaused(pausedRef.current);
                 }
               }
             }
@@ -460,13 +534,17 @@ export default function ASCIIText({
 
       asciiRef.current = await createAndInit(containerRef.current, width, height);
       if (!cancelled && asciiRef.current) {
-        asciiRef.current.load();
+        asciiRef.current.setPaused(pausedRef.current);
 
         ro = new ResizeObserver(entries => {
           if (!entries[0] || !asciiRef.current) return;
           const { width: w, height: h } = entries[0].contentRect;
-          if (w > 0 && h > 0) {
-            asciiRef.current.setSize(w, h);
+          if (w > 0 && h > 0 && resizeFrameId === null) {
+            resizeFrameId = requestAnimationFrame(() => {
+              resizeFrameId = null;
+              if (cancelled || !asciiRef.current) return;
+              asciiRef.current.setSize(w, h);
+            });
           }
         });
         ro.observe(containerRef.current);
@@ -477,6 +555,10 @@ export default function ASCIIText({
 
     return () => {
       cancelled = true;
+      if (resizeFrameId !== null) {
+        cancelAnimationFrame(resizeFrameId);
+        resizeFrameId = null;
+      }
       if (observer) observer.disconnect();
       if (ro) ro.disconnect();
       if (asciiRef.current) {
@@ -484,7 +566,7 @@ export default function ASCIIText({
         asciiRef.current = null;
       }
     };
-  }, [text, asciiFontSize, textFontSize, textColor, planeBaseHeight, enableWaves]);
+  }, [text, asciiFontSize, textFontSize, textColor, planeBaseHeight, enableWaves, frameInterval]);
 
   return (
     <div

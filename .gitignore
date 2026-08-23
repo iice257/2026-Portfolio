@@ -48,3 +48,6 @@ prod-server*.log
 # vercel
 .vercel
 /.env.local
+
+# harness run artifacts (baselines are committed, runs are not)
+harness/runs/

@@ -11,7 +11,7 @@ const projectDataSource = fs
 const projectData = vm.runInNewContext(
   `${projectDataSource}
   ({ allProjects, archiveProjectRecords, expandableArchiveProjects, featuredProjects, githubProjectCount, majorProjectCount, majorProjects, quietArchiveProjects, remainingProjects });`,
-  {},
+  { process: { env: { ...process.env } } },
   { filename: "data/projects.js" }
 );
 
@@ -69,7 +69,7 @@ for (const project of allProjects) {
   }
   seenSlugs.add(project.slug);
 
-  for (const assetField of ["image", "desktopVideo", "mobileVideo"]) {
+  for (const assetField of ["image", "desktopImage", "mobileImage", "desktopVideo", "mobileVideo"]) {
     const assetPath = project[assetField];
     if (!assetPath || !assetPath.startsWith("/")) continue;
 

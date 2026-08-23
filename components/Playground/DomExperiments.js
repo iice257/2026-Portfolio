@@ -109,7 +109,7 @@ export function CursorTrailExperiment({ paused, params, qualityConfig, theme }) 
       className="playground-dot-field"
       backgroundColor={background}
       dotColor={ink}
-      gridSpacing={Math.round(22 + params.decay * 5)}
+      gridSpacing={Math.round(22 + params.decay * 5) + (qualityConfig.density < 0.5 ? 8 : 0)}
       animationSpeed={0.005}
       trailOnMove
       removeWaveLine={false}
@@ -121,9 +121,9 @@ export function CursorTrailExperiment({ paused, params, qualityConfig, theme }) 
   );
 }
 
-export function ASCIITextExperiment({ params, theme }) {
+export function ASCIITextExperiment({ params, theme, paused, quality }) {
   return (
-    <div className="ascii-experiment" data-playground-loop="active">
+    <div className="ascii-experiment">
       <ASCIIText
         text="PLAY"
         asciiFontSize={params.asciiFontSize}
@@ -131,14 +131,16 @@ export function ASCIITextExperiment({ params, theme }) {
         planeBaseHeight={params.planeBaseHeight}
         textColor={theme === "dark" ? "#fdf9f3" : "#111111"}
         enableWaves={params.enableWaves === "on"}
+        paused={paused}
+        frameInterval={quality === "low" ? 50 : 33}
       />
     </div>
   );
 }
 
-export function MetallicPaintExperiment({ params }) {
+export function MetallicPaintExperiment({ params, paused, quality }) {
   return (
-    <div className="metallic-experiment" data-playground-loop="active">
+    <div className="metallic-experiment">
       <svg className="metallic-fallback-mark" viewBox="0 0 1200 720" aria-hidden="true">
         <rect x="146" y="146" width="908" height="428" rx="20" fill="none" stroke="currentColor" strokeWidth="12" />
         <path d="M206 218h158M836 218h158M206 500h216M778 500h216" fill="none" stroke="currentColor" strokeWidth="12" />
@@ -166,12 +168,14 @@ export function MetallicPaintExperiment({ params }) {
         lightColor="#ffffff"
         darkColor="#050505"
         tintColor="#ffffff"
+        paused={paused}
+        resolutionScale={quality === "low" ? 0.7 : 1}
       />
     </div>
   );
 }
 
-export function TextPressureExperiment({ params, theme }) {
+export function TextPressureExperiment({ params, theme, paused, quality }) {
   return (
     <div className="text-pressure-experiment" aria-label="The word Pressure changes width and weight near the pointer.">
       <TextPressure
@@ -184,8 +188,9 @@ export function TextPressureExperiment({ params, theme }) {
         textColor={theme === "dark" ? "#f5f5f2" : "#111111"}
         baseWeight={params.weight}
         maxWeight={params.maxWeight}
-        targetFps={params.response}
+        targetFps={quality === "low" ? Math.min(params.response, 30) : params.response}
         minFontSize={44}
+        paused={paused}
       />
       <span className="pressure-orbit" aria-hidden="true"><i /></span>
     </div>

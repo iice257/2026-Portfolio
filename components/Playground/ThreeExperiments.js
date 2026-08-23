@@ -248,6 +248,18 @@ function createSignal(THREE, density, ink) {
 
 export default function ThreeExperiment({ mode, paused, params, qualityConfig, reducedMotion, audioLevelRef, theme }) {
   const hostRef = useRef(null);
+  const paramsRef = useRef(params);
+  const pausedRef = useRef(paused);
+  const restartRenderRef = useRef(() => {});
+
+  useEffect(() => {
+    paramsRef.current = params;
+  }, [params]);
+
+  useEffect(() => {
+    pausedRef.current = paused;
+    if (!paused) restartRenderRef.current();
+  }, [paused]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -273,7 +285,7 @@ export default function ThreeExperiment({ mode, paused, params, qualityConfig, r
       renderer.setClearColor(0x000000, 0);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, qualityConfig.dpr));
       renderer.domElement.dataset.playgroundWebgl = "true";
-      if (!paused) renderer.domElement.dataset.playgroundLoop = "active";
+      if (!pausedRef.current) renderer.domElement.dataset.playgroundLoop = "active";
       renderer.domElement.className = "playground-canvas";
       renderer.domElement.setAttribute("aria-label", `${mode} interactive WebGL experiment`);
       host.appendChild(renderer.domElement);
@@ -297,26 +309,35 @@ export default function ThreeExperiment({ mode, paused, params, qualityConfig, r
       let lastFrame = 0;
       const render = (time) => {
         animationFrame = 0;
-        if (disposed || paused || document.hidden) return;
+        if (disposed || pausedRef.current || document.hidden) {
+          delete renderer.domElement.dataset.playgroundLoop;
+          return;
+        }
         const interval = 1000 / qualityConfig.fps;
         if (time - lastFrame >= interval) {
           lastFrame = time;
-          const pointerEase = mode === "refraction" ? params.recovery : 0.045;
+          const currentParams = paramsRef.current;
+          const pointerEase = mode === "refraction" ? currentParams.recovery : 0.045;
           pointer.x += (pointer.tx - pointer.x) * pointerEase;
           pointer.y += (pointer.ty - pointer.y) * pointerEase;
-          field.update(time * 0.001, pointer, params, reducedMotion, audioLevelRef?.current || 0);
+          field.update(time * 0.001, pointer, currentParams, reducedMotion, audioLevelRef?.current || 0);
           renderer.render(scene, camera);
         }
         animationFrame = requestAnimationFrame(render);
       };
       restartRender = () => {
-        if (!disposed && !paused && !document.hidden && !animationFrame) animationFrame = requestAnimationFrame(render);
+        if (!disposed && !pausedRef.current && !document.hidden && !animationFrame) {
+          renderer.domElement.dataset.playgroundLoop = "active";
+          animationFrame = requestAnimationFrame(render);
+        }
       };
+      restartRenderRef.current = restartRender;
       animationFrame = requestAnimationFrame(render);
     });
 
     const updatePointer = (event) => {
       const rect = host.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
       pointer.tx = clamp((event.clientX - rect.left) / rect.width * 2 - 1, -1, 1);
       pointer.ty = clamp(-((event.clientY - rect.top) / rect.height * 2 - 1), -1, 1);
     };
@@ -325,6 +346,7 @@ export default function ThreeExperiment({ mode, paused, params, qualityConfig, r
 
     return () => {
       disposed = true;
+      restartRenderRef.current = () => {};
       cancelAnimationFrame(animationFrame);
       host.removeEventListener("pointermove", updatePointer);
       document.removeEventListener("visibilitychange", handleVisibility);
@@ -343,7 +365,7 @@ export default function ThreeExperiment({ mode, paused, params, qualityConfig, r
         renderer.domElement.remove();
       }
     };
-  }, [mode, paused, params, qualityConfig, reducedMotion, audioLevelRef, theme]);
+  }, [mode, qualityConfig, reducedMotion, audioLevelRef, theme]);
 
   return <div ref={hostRef} className="playground-three-surface" />;
 }
@@ -369,13 +391,25 @@ export function SignalExperiment(props) {
     let source = null;
     let cancelled = false;
     const sample = () => {
+      if (document.hidden) {
+        frame = 0;
+        return;
+      }
       analyser.getByteFrequencyData(data);
       audioLevelRef.current = data.reduce((sum, value) => sum + value, 0) / data.length / 255;
       frame = requestAnimationFrame(sample);
     };
     const handleVisibility = () => {
-      if (document.hidden) context.suspend().catch(() => {});
-      else context.resume().catch(() => {});
+      if (document.hidden) {
+        context.suspend().catch(() => {});
+        if (frame) {
+          cancelAnimationFrame(frame);
+          frame = 0;
+        }
+      } else {
+        context.resume().catch(() => {});
+        if (!frame) frame = requestAnimationFrame(sample);
+      }
     };
 
     const connect = async () => {
@@ -407,6 +441,8 @@ export function SignalExperiment(props) {
       } catch {
         setAudioActive(false);
         setAudioStatus("Microphone unavailable - the idle field remains active");
+        stream?.getTracks().forEach((track) => track.stop());
+        stream = null;
         context.close().catch(() => {});
       }
     };

@@ -23,6 +23,44 @@
   }
 }
 
+.primary__disabledButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  font-family: theme("fontFamily.sans");
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+
+  padding: 0.875rem 1.75rem;
+  background-clip: padding-box;
+  border-radius: 0;
+  color: var(--fg-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  cursor: not-allowed;
+}
+
+.secondary__disabledButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  font-family: theme("fontFamily.sans");
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+
+  padding: 0.875rem 1.75rem;
+  background-clip: padding-box;
+  border-radius: 0;
+  color: var(--fg-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  cursor: not-allowed;
+}
+
 .secondary__button {
   position: relative;
   display: inline-flex;

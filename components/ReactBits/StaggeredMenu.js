@@ -197,8 +197,10 @@ const StaggeredMenu = ({
               }}
               aria-label={item.ariaLabel || item.label}
               onClick={(e) => {
-                e.preventDefault();
-                handleItemClick(item, index);
+                if (onItemClick) {
+                  e.preventDefault();
+                  handleItemClick(item, index);
+                }
               }}
             >
               {/* Number */}

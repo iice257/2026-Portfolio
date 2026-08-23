@@ -19,7 +19,7 @@ const evalModule = (relativePath, expression) => {
   return vm.runInNewContext(
     `${source}
     ${expression};`,
-    {},
+    { process: { env: { ...process.env } } },
     { filename: relativePath },
   );
 };
@@ -65,6 +65,7 @@ const projectLine = (project) => {
 const sitemapUrls = [
   { loc: `${cleanUrl}/`, priority: "1.0", changefreq: "weekly" },
   { loc: `${cleanUrl}/projects`, priority: "0.95", changefreq: "weekly" },
+  { loc: `${cleanUrl}/playground`, priority: "0.7", changefreq: "monthly" },
   ...featuredProjects.map((project) => ({
     loc: `${cleanUrl}/projects/${project.slug}`,
     priority: "0.9",

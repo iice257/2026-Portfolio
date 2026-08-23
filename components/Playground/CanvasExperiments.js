@@ -50,6 +50,20 @@ const PRESSURE_COPY = "Creative Engineer. Interfaces That Respond. Type, Motion 
 
 export function PressureField({ paused, params, reducedMotion, quality, theme }) {
   const pointerRef = useRef({ x: -1000, y: -1000, tx: -1000, ty: -1000 });
+  const pausedRef = useRef(paused);
+  const paramsRef = useRef(params);
+  const restartRef = useRef(() => {});
+
+  useEffect(() => {
+    paramsRef.current = params;
+    restartRef.current();
+  }, [params]);
+
+  useEffect(() => {
+    pausedRef.current = paused;
+    if (!paused) restartRef.current();
+  }, [paused]);
+
   const canvasRef = useCanvasSurface((canvas, rect, dpr) => {
     const context = canvas.getContext("2d");
     const fontSize = clamp(rect.width / 24, 25, 54);
@@ -71,15 +85,19 @@ export function PressureField({ paused, params, reducedMotion, quality, theme })
 
     const render = (time) => {
       animationFrame = 0;
-      if (document.hidden || paused) return;
+      if (document.hidden || pausedRef.current) {
+        delete canvas.dataset.playgroundLoop;
+        return;
+      }
       const interval = quality === "low" ? 50 : 25;
       if (time - last < interval) {
         animationFrame = requestAnimationFrame(render);
         return;
       }
       last = time;
+      const currentParams = paramsRef.current;
       const pointer = pointerRef.current;
-      const recovery = reducedMotion ? 1 : params.recovery;
+      const recovery = reducedMotion ? 1 : currentParams.recovery;
       pointer.x += (pointer.tx - pointer.x) * recovery;
       pointer.y += (pointer.ty - pointer.y) * recovery;
 
@@ -93,7 +111,7 @@ export function PressureField({ paused, params, reducedMotion, quality, theme })
       context.lineWidth = 1;
 
       const pad = clamp(rect.width * 0.055, 24, 78);
-      const radius = reducedMotion ? 0 : params.radius;
+      const radius = reducedMotion ? 0 : currentParams.radius;
       let cursor = { segmentIndex: 0, graphemeIndex: 0 };
       let y = Math.max(100, (rect.height - lineHeight * 6) / 2);
       let lineIndex = 0;
@@ -101,8 +119,8 @@ export function PressureField({ paused, params, reducedMotion, quality, theme })
         const vertical = Math.abs(pointer.y - y);
         const intersects = vertical < radius;
         const chord = intersects ? Math.sqrt(Math.max(0, radius * radius - vertical * vertical)) : 0;
-        const modeStrength = params.mode === "compression" ? 1.18 : params.mode === "flow" ? 0.66 : 0.92;
-        const indentation = chord * params.strength * modeStrength;
+        const modeStrength = currentParams.mode === "compression" ? 1.18 : currentParams.mode === "flow" ? 0.66 : 0.92;
+        const indentation = chord * currentParams.strength * modeStrength;
         const fromLeft = pointer.x < rect.width / 2;
         const left = pad + (fromLeft ? indentation : 0);
         const right = pad + (!fromLeft ? indentation : 0);
@@ -111,12 +129,12 @@ export function PressureField({ paused, params, reducedMotion, quality, theme })
         if (!range) break;
         const line = materializeLineRange(prepared, range);
         const proximity = clamp(1 - vertical / Math.max(1, radius), 0, 1);
-        const waveAmount = params.mode === "flow" ? 16 : params.mode === "compression" ? 3 : 9;
+        const waveAmount = currentParams.mode === "flow" ? 16 : currentParams.mode === "compression" ? 3 : 9;
         const wave = reducedMotion ? 0 : Math.sin(time * 0.0015 + lineIndex * 0.85) * proximity * waveAmount;
         context.save();
         context.translate(left + wave * (fromLeft ? -1 : 1), y);
-        const compression = params.mode === "compression" ? 0.16 : params.mode === "flow" ? 0.035 : 0.09;
-        context.scale(1 - proximity * params.strength * compression, 1 + proximity * (params.mode === "elastic" ? 0.07 : 0.025));
+        const compression = currentParams.mode === "compression" ? 0.16 : currentParams.mode === "flow" ? 0.035 : 0.09;
+        context.scale(1 - proximity * currentParams.strength * compression, 1 + proximity * (currentParams.mode === "elastic" ? 0.07 : 0.025));
         context.globalAlpha = 0.48 + (1 - proximity) * 0.4;
         context.fillText(line.text, 0, 0);
         context.restore();
@@ -138,25 +156,32 @@ export function PressureField({ paused, params, reducedMotion, quality, theme })
       }
       animationFrame = requestAnimationFrame(render);
     };
+    const start = () => {
+      if (!animationFrame && !pausedRef.current && !document.hidden) {
+        canvas.dataset.playgroundLoop = "active";
+        animationFrame = requestAnimationFrame(render);
+      }
+    };
+    restartRef.current = start;
     const handleVisibility = () => {
-      if (!document.hidden && !paused && !animationFrame) animationFrame = requestAnimationFrame(render);
+      if (!document.hidden) start();
     };
 
     pointerRef.current = { x: rect.width * 0.52, y: rect.height * 0.5, tx: rect.width * 0.52, ty: rect.height * 0.5 };
     canvas.addEventListener("pointermove", setPointer);
     canvas.addEventListener("pointerleave", clearPointer);
     document.addEventListener("visibilitychange", handleVisibility);
-    if (!paused) canvas.dataset.playgroundLoop = "active";
-    animationFrame = requestAnimationFrame(render);
+    start();
 
     return () => {
+      restartRef.current = () => {};
       cancelAnimationFrame(animationFrame);
       canvas.removeEventListener("pointermove", setPointer);
       canvas.removeEventListener("pointerleave", clearPointer);
       document.removeEventListener("visibilitychange", handleVisibility);
       delete canvas.dataset.playgroundLoop;
     };
-  }, [paused, params.radius, params.strength, params.recovery, params.mode, reducedMotion, quality, theme]);
+  }, [reducedMotion, quality, theme]);
 
-  return <canvas ref={canvasRef} className="playground-canvas" aria-label="Multiline typography bends and reflows around pointer pressure." />;
+  return <canvas ref={canvasRef} className="playground-canvas" role="img" aria-label="Multiline typography bends and reflows around pointer pressure." />;
 }

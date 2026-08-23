@@ -73,27 +73,27 @@ Kingsley Afolabi Aremu, also known as iice257, is a Lagos-based full-stack engin
 
 ## Featured Work
 
-- FormMate AI: FormMate AI turns a form URL and a short conversational intake into editable draft responses. Automation stops before submission, leaving the user to review, correct, and decide what gets used. Tech/focus: typescript, ai, voice, automation. repo: https://github.com/iice257/FormMate | live: https://form-mate-ai.vercel.app
-- PasteVault: PasteVault is an installable personal clipboard for saving and finding text, code, links, and JSON across devices. It replaces the habit of messaging yourself with a focused, searchable workspace. Tech/focus: javascript, pwa, productivity, clipboard. repo: https://github.com/iice257/PasteVault | live: https://pastevault-lime.vercel.app
-- AI Agent Skills: AI Agent Skills is a collection of small, reusable workflows for research, planning, parsing, publishing, and maintenance. Together, they turn recurring agent work into explicit procedures instead of one-off prompts. Tech/focus: python, codex, agents, automation. repo: https://github.com/iice257/Skills-quickstarter | live: https://skills-quickstarter.vercel.app
-- Restore AI: Restore AI is a mobile image-repair workflow for restoration, upscaling, resizing, and recoloring. It frames technical image processing as a simple before-and-after decision for personal and professional photos. Tech/focus: mobile, ai image, restoration, ux. repo: https://github.com/iice257/RestoreAI
+- FormMate AI: FormMate started from a small annoyance: retyping the same personal details into every application form on the internet. Paste the form's URL, talk through your information out loud or in text, and it drafts the answers. Nothing goes in until you've looked at it. Review-first was deliberate, not a limitation, since the moment a form-filler can submit without you checking, it stops being a productivity tool and starts being a spam tool. Tech/focus: typescript, ai, voice, automation. repo: https://github.com/iice257/FormMate | live: https://form-mate-ai.vercel.app
+- PasteVault: I got tired of messaging myself snippets of text just to move them from laptop to phone. PasteVault is what came out of that: an installable, searchable vault for text, code, links, and JSON that lives across devices without routing through a chat thread you weren't using for that. Tech/focus: javascript, pwa, productivity, clipboard. repo: https://github.com/iice257/PasteVault | live: https://pastevault-lime.vercel.app
+- AI Agent Skills: AI Agent Skills isn't one product. It's the toolkit that came out of noticing I was solving the same handful of problems every time I started a new AI-assisted task: research, parsing, publishing, updating. It sits next to a few sibling repos that make up a small personal automation stack. Tech/focus: python, codex, agents, automation. repo: https://github.com/iice257/Skills-quickstarter | live: https://skills-quickstarter.vercel.app
+- Restore AI: Restore AI is a mobile concept for the moment you're trying to save a damaged or low-resolution photo that actually matters to someone: restoring, upscaling, recoloring, and resizing it without stitching together five different apps. Tech/focus: mobile, ai image, restoration, ux. repo: https://github.com/iice257/RestoreAI
 
 ## Highlighted Portfolio System
 
-- 2026 Portfolio: The current portfolio website and the codebase powering this page. Tech/focus: next.js, performance, interaction design, ci. repo: https://github.com/iice257/2026-Portfolio | live: https://kingsleyaremu.vercel.app
+- 2026 Portfolio: The site you're on right now, and the reason it's not a template. Tech/focus: next.js, performance, interaction design, ci. repo: https://github.com/iice257/2026-Portfolio | live: https://kingsleyaremu.vercel.app
 
 ## Major Project Signals
 
-- Bountic: A bounty board for funding agent-assisted open-source tasks with USDC. Tech/focus: crypto, agents, open source. repo: https://github.com/iice257/bountic | live: https://bountic.vercel.app
-- Loop Monitor: A local dashboard for tracking agent runs, bounty queues, and judge results. Tech/focus: dashboard, agents, ops. repo: https://github.com/iice257/loop-monitor
-- Rustchain: A DePIN network where vintage hardware participates in a Proof-of-Antiquity protocol. Tech/focus: blockchain, depin, hardware. repo: https://github.com/iice257/Rustchain | live: https://rustchain.org
-- Pages Forward: A rebuilt bookstore surface with clearer browsing, product framing, and commerce intent. Tech/focus: javascript, commerce, frontend, content. repo: https://github.com/iice257/Pages-forward-rebuild
-- SignalOps: A security and operations cockpit for triage, status, and action queues. Tech/focus: typescript, security, ops. repo: https://github.com/iice257/signalops | live: https://signalops-orpin.vercel.app
-- Unfollowr: A dashboard for reviewing follow status, engagement, and cleanup actions. Tech/focus: typescript, dashboard, social. repo: https://github.com/iice257/Unfollowr
+- Bountic: A bounty board that pays USDC for finishing what an agent started. Tech/focus: crypto, agents, open source. repo: https://github.com/iice257/bountic | live: https://bountic.vercel.app
+- Loop Monitor: The dashboard I built so I'd stop guessing what my agents were actually doing. Tech/focus: dashboard, agents, ops. repo: https://github.com/iice257/loop-monitor
+- Rustchain: A DePIN network where the only requirement for hardware is that it's old. Tech/focus: blockchain, depin, hardware. repo: https://github.com/iice257/Rustchain | live: https://rustchain.org
+- Pages Forward: The second, better version of a bookstore I'd already built once. Tech/focus: javascript, commerce, frontend, content. repo: https://github.com/iice257/Pages-forward-rebuild
+- SignalOps: A security triage cockpit for the part of the job that's mostly scanning and deciding. Tech/focus: typescript, security, ops. repo: https://github.com/iice257/signalops | live: https://signalops-orpin.vercel.app
+- Unfollowr: Follow-list cleanup that scores instead of guessing. Tech/focus: typescript, dashboard, social. repo: https://github.com/iice257/Unfollowr
 
 ## Complete Public Project Archive
 
-This portfolio indexes 43 public or portfolio-tracked projects. The complete archive is visible at https://kingsleyaremu.vercel.app/projects and is represented in machine-readable form at https://kingsleyaremu.vercel.app/portfolio.json.
+This portfolio indexes 44 public or portfolio-tracked projects. The complete archive is visible at https://kingsleyaremu.vercel.app/projects and is represented in machine-readable form at https://kingsleyaremu.vercel.app/portfolio.json.
 
 ## Crawling Notes
 

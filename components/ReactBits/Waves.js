@@ -148,6 +148,8 @@ export default function Waves({
   const pausedRef = useRef(paused);
   const resumeRef = useRef(() => {});
   const stopRef = useRef(() => {});
+  const rebuildRef = useRef(() => {});
+  const gapsRef = useRef({ xGap, yGap });
 
   useEffect(() => {
     pausedRef.current = paused;
@@ -173,6 +175,12 @@ export default function Waves({
       lineWidth,
     };
   }, [lineColor, waveSpeedX, waveSpeedY, waveAmpX, waveAmpY, friction, tension, maxCursorMove, xGap, yGap, lineWidth]);
+
+  useEffect(() => {
+    const changed = gapsRef.current.xGap !== xGap || gapsRef.current.yGap !== yGap;
+    gapsRef.current = { xGap, yGap };
+    if (changed) rebuildRef.current();
+  }, [xGap, yGap]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -202,17 +210,19 @@ export default function Waves({
       const outerWidth = width + 200;
       const outerHeight = height + 30;
       const { xGap: lineXGap, yGap: lineYGap } = configRef.current;
-      const totalLines = Math.ceil(outerWidth / lineXGap);
-      const totalPoints = Math.ceil(outerHeight / lineYGap);
-      const xStart = (width - lineXGap * totalLines) / 2;
-      const yStart = (height - lineYGap * totalPoints) / 2;
+      const safeXGap = Math.max(1, lineXGap);
+      const safeYGap = Math.max(1, lineYGap);
+      const totalLines = Math.ceil(outerWidth / safeXGap);
+      const totalPoints = Math.ceil(outerHeight / safeYGap);
+      const xStart = (width - safeXGap * totalLines) / 2;
+      const yStart = (height - safeYGap * totalPoints) / 2;
 
       for (let i = 0; i <= totalLines; i += 1) {
         const points = [];
         for (let j = 0; j <= totalPoints; j += 1) {
           points.push({
-            x: xStart + lineXGap * i,
-            y: yStart + lineYGap * j,
+            x: xStart + safeXGap * i,
+            y: yStart + safeYGap * j,
             wave: { x: 0, y: 0 },
             cursor: { x: 0, y: 0, vx: 0, vy: 0 },
           });
@@ -350,9 +360,6 @@ export default function Waves({
         mouse.lx = mouse.x;
         mouse.ly = mouse.y;
         mouse.a = Math.atan2(dy, dx);
-
-        container.style.setProperty("--x", `${mouse.sx}px`);
-        container.style.setProperty("--y", `${mouse.sy}px`);
       }
 
       movePoints(time);
@@ -411,13 +418,14 @@ export default function Waves({
     }
     resumeRef.current = startLoop;
     stopRef.current = stopLoop;
+    rebuildRef.current = scheduleRebuild;
     startLoop();
     const resizeObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(scheduleRebuild);
     resizeObserver?.observe(container);
     window.addEventListener("resize", scheduleRebuild);
     if (mouseInteraction) {
       window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("touchmove", handleTouchMove, { passive: false });
+      window.addEventListener("touchmove", handleTouchMove, { passive: true });
     }
 
     function handleVisibilityChange() {
@@ -445,6 +453,7 @@ export default function Waves({
       }
       resumeRef.current = () => {};
       stopRef.current = () => {};
+      rebuildRef.current = () => {};
     };
   }, [pixelRatio, targetFps, maxPixelCount, mouseInteraction]);
 

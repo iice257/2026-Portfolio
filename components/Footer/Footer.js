@@ -1,7 +1,7 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
-import { CONTACT_LINKS, MENULINKS } from "../../constants";
+import { CONTACT_LINKS, MENULINKS, METADATA } from "../../constants";
 import { PORTFOLIO_GALAXY_CONFIG } from "../ReactBits/galaxyConfig";
 import InteractiveDots from "../ReactBits/InteractiveDots";
 import ShuffleText from "../ReactBits/ShuffleText";
@@ -196,9 +196,22 @@ const Footer = () => {
           <p className="text-body-sm" style={{ color: "var(--fg-muted)" }}>
             &copy; {currentYear} KA
           </p>
-          <p className="text-body-sm" style={{ color: "var(--fg-muted)" }}>
-            Full-Stack Engineer.
-          </p>
+          <div className="flex items-center gap-6">
+            <p className="text-body-sm" style={{ color: "var(--fg-muted)" }}>
+              Full-Stack Engineer.
+            </p>
+            <a
+              href={METADATA.v1PortfolioUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-body-sm link-underline inline-flex items-center gap-1.5"
+              style={{ color: "var(--fg-muted)" }}
+              data-cursor-label="Open v1 Portfolio"
+            >
+              <span>v1 Portfolio</span>
+              <IconArrowUpRight aria-hidden="true" />
+            </a>
+          </div>
         </div>
       </div>
     </footer>
