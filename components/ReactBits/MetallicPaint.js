@@ -273,7 +273,6 @@ export default function MetallicPaint({
   waveAmplitude = 1,
   noiseScale = 0.5,
   chromaticSpread = 2,
-  mouseAnimation = false,
   distortion = 1,
   contour = 0.2,
   tintColor = '#feb3ff',
@@ -289,8 +288,6 @@ export default function MetallicPaint({
   const lastTimeRef = useRef(0);
   const rafRef = useRef(null);
   const speedRef = useRef(speed);
-  const mouseRef = useRef({ x: 0.5, y: 0.5, targetX: 0.5, targetY: 0.5 });
-  const mouseAnimRef = useRef(mouseAnimation);
   const pausedRef = useRef(paused);
   const transportRef = useRef({ start: () => {}, stop: () => {} });
   const resolutionScaleRef = useRef(resolutionScale);
@@ -301,10 +298,6 @@ export default function MetallicPaint({
   useEffect(() => {
     speedRef.current = speed;
   }, [speed]);
-
-  useEffect(() => {
-    mouseAnimRef.current = mouseAnimation;
-  }, [mouseAnimation]);
 
   useEffect(() => {
     pausedRef.current = paused;
@@ -530,29 +523,11 @@ export default function MetallicPaint({
     const gl = glRef.current;
     const u = uniformsRef.current;
     const canvas = canvasRef.current;
-    const mouse = mouseRef.current;
-
-    const handleMouseMove = (event) => {
-      const rect = canvas.getBoundingClientRect();
-      mouse.targetX = (event.clientX - rect.left) / rect.width;
-      mouse.targetY = (event.clientY - rect.top) / rect.height;
-    };
-
-    if (mouseAnimation) {
-      canvas.addEventListener('mousemove', handleMouseMove);
-    }
 
     const render = (time) => {
       const delta = time - lastTimeRef.current;
       lastTimeRef.current = time;
-
-      if (mouseAnimRef.current) {
-        mouse.x += (mouse.targetX - mouse.x) * 0.08;
-        mouse.y += (mouse.targetY - mouse.y) * 0.08;
-        animTimeRef.current = mouse.x * 3000 + mouse.y * 1500;
-      } else {
-        animTimeRef.current += delta * speedRef.current;
-      }
+      animTimeRef.current += delta * speedRef.current;
 
       gl.uniform1f(u.u_time, animTimeRef.current);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -611,11 +586,8 @@ export default function MetallicPaint({
       transportRef.current = { start: () => {}, stop: () => {} };
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       reducedMotionQuery.removeEventListener('change', handleMotionPreferenceChange);
-      if (mouseAnimation) {
-        canvas.removeEventListener('mousemove', handleMouseMove);
-      }
     };
-  }, [mouseAnimation, ready, textureReady]);
+  }, [ready, textureReady]);
 
   return <canvas ref={canvasRef} className="paint-container" />;
 }

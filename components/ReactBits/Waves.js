@@ -316,8 +316,6 @@ export default function Waves({
     }
 
     let lastFrameTime = 0;
-    let lastPointerStyleX = "";
-    let lastPointerStyleY = "";
 
     function stopLoop() {
       if (frameIdRef.current) {
@@ -362,15 +360,6 @@ export default function Waves({
         mouse.lx = mouse.x;
         mouse.ly = mouse.y;
         mouse.a = Math.atan2(dy, dx);
-
-        const pointerStyleX = `${mouse.sx.toFixed(1)}px`;
-        const pointerStyleY = `${mouse.sy.toFixed(1)}px`;
-        if (pointerStyleX !== lastPointerStyleX || pointerStyleY !== lastPointerStyleY) {
-          lastPointerStyleX = pointerStyleX;
-          lastPointerStyleY = pointerStyleY;
-          container.style.setProperty("--x", pointerStyleX);
-          container.style.setProperty("--y", pointerStyleY);
-        }
       }
 
       movePoints(time);
