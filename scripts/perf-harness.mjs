@@ -302,6 +302,11 @@ async function runScenario(browser, scenario, runLabel) {
     await flushAndSettle(page);
     stateLog.push(await snapshotCursorState(page, "returned-center"));
   } else {
+    // Park the pointer in a neutral dead zone BEFORE scrolling: after the
+    // scroll, whatever content lands under a content-positioned pointer makes
+    // cursor/hover resolution layout-jitter-dependent and non-deterministic.
+    await page.mouse.move(60, 880, { steps: 4 });
+    await flushAndSettle(page);
     await page.evaluate((y) => { window.scrollTo(0, y); }, scenario.scrollY);
     await new Promise((resolve) => setTimeout(resolve, 250));
     // Force all lazy media to finish decoding before we freeze the frame.
@@ -451,6 +456,10 @@ if (SELFTEST) {
     );
     const baselineStates = JSON.parse(fs.readFileSync(baselineStatesPath, "utf8"));
     const statesIdentical = behaviorLogsMatch(baselineStates, result.stateLog);
+    fs.writeFileSync(
+      path.join(runsDir, `${result.scenario}.states.json`),
+      JSON.stringify(result.stateLog, null, 2)
+    );
 
     const pixelsOk = mismatchedPixels >= 0 && mismatchedPixels <= MAX_NOISE_PIXELS;
     const passed = pixelsOk && statesIdentical && result.errors.length === 0;

@@ -55,6 +55,8 @@ const CustomCursor = () => {
   const loadingTimelineRef = useRef(null);
   const refreshFrameRef = useRef(null);
   const resolvedStateRef = useRef({ text: "", variant: "default", clickable: false });
+  const bridgeScanRef = useRef({ root: null, x: 0, y: 0, result: null, generation: -1 });
+  const bridgeScanGenerationRef = useRef(0);
 
   useEffect(() => {
     cursorTextRef.current = cursorText;
@@ -90,10 +92,14 @@ const CustomCursor = () => {
     };
 
     const applyCursorContext = (nextText, nextVariant) => {
+      // Only push context updates that actually change the value: identical
+      // setStates still schedule a provider render on every mousemove.
+      const textChanged = cursorTextRef.current !== nextText;
+      const variantChanged = cursorVariantRef.current !== nextVariant;
       cursorTextRef.current = nextText;
       cursorVariantRef.current = nextVariant;
-      setCursorText(nextText);
-      setCursorVariant(nextVariant);
+      if (textChanged) setCursorText(nextText);
+      if (variantChanged) setCursorVariant(nextVariant);
     };
 
     const isUsableInteractive = (element) => {
@@ -104,6 +110,20 @@ const CustomCursor = () => {
 
     const findNearbyInteractive = (x, y, bridgeRoot) => {
       if (!bridgeRoot) return null;
+
+      // Same root + same rounded position + no invalidating event since the
+      // last scan => the scan is deterministic, so reuse it. Distinct positions
+      // and any scheduleCursorRefresh (scroll/resize/pointerup/transitions)
+      // bypass the cache, so results stay exact.
+      const cache = bridgeScanRef.current;
+      if (
+        cache.root === bridgeRoot
+        && cache.generation === bridgeScanGenerationRef.current
+        && Math.abs(cache.x - x) < 0.5
+        && Math.abs(cache.y - y) < 0.5
+      ) {
+        return cache.result;
+      }
 
       const interactives = bridgeRoot.querySelectorAll(INTERACTIVE_SELECTOR);
       let nearest = null;
@@ -124,6 +144,7 @@ const CustomCursor = () => {
         }
       }
 
+      bridgeScanRef.current = { root: bridgeRoot, x, y, result: nearest, generation: bridgeScanGenerationRef.current };
       return nearest;
     };
 
@@ -240,6 +261,7 @@ const CustomCursor = () => {
     };
 
     const scheduleCursorRefresh = () => {
+      bridgeScanGenerationRef.current += 1;
       if (refreshFrameRef.current) return;
       refreshFrameRef.current = window.requestAnimationFrame(() => {
         refreshFrameRef.current = null;
