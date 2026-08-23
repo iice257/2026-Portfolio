@@ -145,6 +145,8 @@ export const EXPERIMENTS = [
     technologies: ["SVG", "POINTER EVENTS"],
     status: "Live",
     renderer: "SVG / DOM",
+    pausable: false,
+    qualityAware: false,
     origin: [
       { relationship: "Used in", projectName: "Portfolio cursor system", projectUrl: "/" },
       { relationship: "Built for", projectName: "SVG / pointer events / motion" },

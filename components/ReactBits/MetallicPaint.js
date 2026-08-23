@@ -276,7 +276,8 @@ export default function MetallicPaint({
   mouseAnimation = false,
   distortion = 1,
   contour = 0.2,
-  tintColor = '#feb3ff'
+  tintColor = '#feb3ff',
+  paused = false
 }) {
   const canvasRef = useRef(null);
   const glRef = useRef(null);
@@ -289,6 +290,8 @@ export default function MetallicPaint({
   const speedRef = useRef(speed);
   const mouseRef = useRef({ x: 0.5, y: 0.5, targetX: 0.5, targetY: 0.5 });
   const mouseAnimRef = useRef(mouseAnimation);
+  const pausedRef = useRef(paused);
+  const transportRef = useRef({ start: () => {}, stop: () => {} });
   const [isVisible, setIsVisible] = useState(false);
   const [ready, setReady] = useState(false);
   const [textureReady, setTextureReady] = useState(false);
@@ -300,6 +303,15 @@ export default function MetallicPaint({
   useEffect(() => {
     mouseAnimRef.current = mouseAnimation;
   }, [mouseAnimation]);
+
+  useEffect(() => {
+    pausedRef.current = paused;
+    if (paused) {
+      transportRef.current.stop();
+    } else {
+      transportRef.current.start();
+    }
+  }, [paused]);
 
   const resizeCanvas = useCallback(() => {
     const canvas = canvasRef.current;
@@ -544,7 +556,7 @@ export default function MetallicPaint({
     };
 
     const start = () => {
-      if (!rafRef.current && !document.hidden && !reducedMotionQuery.matches) {
+      if (!rafRef.current && !document.hidden && !reducedMotionQuery.matches && !pausedRef.current) {
         canvas.dataset.playgroundLoop = "active";
         lastTimeRef.current = performance.now();
         rafRef.current = requestAnimationFrame(loop);
@@ -557,6 +569,7 @@ export default function MetallicPaint({
       }
       delete canvas.dataset.playgroundLoop;
     };
+    transportRef.current = { start, stop };
     const drawStaticFrame = () => {
       gl.uniform1f(u.u_time, animTimeRef.current);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -587,6 +600,7 @@ export default function MetallicPaint({
 
     return () => {
       stop();
+      transportRef.current = { start: () => {}, stop: () => {} };
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       reducedMotionQuery.removeEventListener('change', handleMotionPreferenceChange);
       if (mouseAnimation) {

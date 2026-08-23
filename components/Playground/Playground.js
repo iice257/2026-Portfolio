@@ -119,7 +119,7 @@ function ExperimentSurface({ experiment, paused, params, quality, theme, resetKe
     return <SignalExperiment key={`${experiment.id}-${resetKey}-${quality}`} {...shared} />;
   }
   if (experiment.id === "text-pressure") {
-    return <TextPressureExperiment key={`${experiment.id}-${resetKey}`} params={params} theme={theme} />;
+    return <TextPressureExperiment key={`${experiment.id}-${resetKey}`} params={params} theme={theme} paused={paused} />;
   }
   if (experiment.id === "pressure-field") {
     return <PressureField key={`${experiment.id}-${resetKey}`} paused={paused} params={params} reducedMotion={reducedMotion} quality={quality} theme={theme} />;
@@ -128,10 +128,10 @@ function ExperimentSurface({ experiment, paused, params, quality, theme, resetKe
     return <CursorTrailExperiment key={`${experiment.id}-${resetKey}-${params.mode}-${quality}`} {...shared} />;
   }
   if (experiment.id === "ascii-text") {
-    return <ASCIITextExperiment key={`${experiment.id}-${resetKey}`} params={params} theme={theme} />;
+    return <ASCIITextExperiment key={`${experiment.id}-${resetKey}`} params={params} theme={theme} paused={paused} />;
   }
   if (experiment.id === "metallic-paint") {
-    return <MetallicPaintExperiment key={`${experiment.id}-${resetKey}`} params={params} />;
+    return <MetallicPaintExperiment key={`${experiment.id}-${resetKey}`} params={params} paused={paused} />;
   }
   return <CursorMorphExperiment key={`${experiment.id}-${resetKey}`} params={params} />;
 }
@@ -245,6 +245,7 @@ export default function Playground() {
         return;
       }
       if (event.metaKey || event.ctrlKey || event.altKey) return;
+      const canPause = EXPERIMENTS[activeIndex].pausable !== false;
       if (event.key === "ArrowDown" || event.key === "ArrowRight") {
         event.preventDefault();
         selectExperiment(EXPERIMENTS[(activeIndex + 1) % EXPERIMENTS.length].id);
@@ -255,7 +256,7 @@ export default function Playground() {
       }
       if (event.key === " ") {
         event.preventDefault();
-        setPaused((value) => !value);
+        if (canPause) setPaused((value) => !value);
       }
       if (event.key.toLowerCase() === "r") resetExperiment();
       if (event.key.toLowerCase() === "i") setInspectorOpen((value) => !value);
@@ -264,6 +265,8 @@ export default function Playground() {
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, [activeIndex, inspectorOpen, resetExperiment, selectExperiment]);
+
+  const canPause = experiment.pausable !== false;
 
   return (
     <main id="main-content" className={`${styles.root} playground-route`} data-playground-theme={theme}>
@@ -345,7 +348,14 @@ export default function Playground() {
         <SystemPanel metrics={metrics} experiment={experiment} quality={quality} setQuality={setQuality} />
 
         <div className={styles.transport} role="group" aria-label="Experiment controls">
-          <button type="button" onClick={() => setPaused((value) => !value)} aria-pressed={paused}><span>{paused ? "Play" : "II"}</span><em>{paused ? "Resume" : "Pause"}</em></button>
+          <button
+            type="button"
+            onClick={() => setPaused((value) => !value)}
+            aria-pressed={paused}
+            disabled={!canPause}
+            title={canPause ? undefined : "This experiment is interactive rather than time-based, so it cannot be paused."}
+            style={canPause ? undefined : { opacity: 0.4, cursor: "not-allowed" }}
+          ><span>{paused ? "Play" : "II"}</span><em>{paused ? "Resume" : "Pause"}</em></button>
           <button type="button" onClick={resetExperiment}><span>Reset</span><em>Reset</em></button>
           <button type="button" onClick={() => setInspectorOpen((value) => !value)} aria-expanded={inspectorOpen}><span>Tune</span><em>Parameters</em></button>
         </div>

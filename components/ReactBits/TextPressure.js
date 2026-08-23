@@ -39,7 +39,8 @@ const TextPressure = ({
   baseWeight = 100,
   maxWeight = 900,
   maxStrokeWidth = 0,
-  targetFps = 60
+  targetFps = 60,
+  paused = false
 }) => {
   const containerRef = useRef(null);
   const titleRef = useRef(null);
@@ -50,6 +51,11 @@ const TextPressure = ({
   const cursorRef = useRef({ x: 0, y: 0 });
   const isVisibleRef = useRef(false);
   const frameVisibilityRef = useRef(null);
+  const pausedRef = useRef(paused);
+
+  useEffect(() => {
+    pausedRef.current = paused;
+  }, [paused]);
 
   const [fontSize, setFontSize] = useState(minFontSize);
   const [scaleY, setScaleY] = useState(1);
@@ -161,7 +167,7 @@ const TextPressure = ({
     const animate = (time) => {
       rafId = null;
 
-      if (!isVisibleRef.current || document.hidden || motionQuery.matches) {
+      if (!isVisibleRef.current || document.hidden || motionQuery.matches || pausedRef.current) {
         lastFrameTime = 0;
         lastRenderedTime = 0;
         return;
@@ -247,13 +253,13 @@ const TextPressure = ({
     };
 
     const startAnimation = () => {
-      if (rafId === null && isVisibleRef.current && !document.hidden && !motionQuery.matches) {
+      if (rafId === null && isVisibleRef.current && !document.hidden && !motionQuery.matches && !pausedRef.current) {
         rafId = requestAnimationFrame(animate);
       }
     };
 
     const activatePointer = (x, y) => {
-      if (!isVisibleRef.current || document.hidden || motionQuery.matches) return;
+      if (!isVisibleRef.current || document.hidden || motionQuery.matches || pausedRef.current) return;
 
       cursorRef.current.x = x;
       cursorRef.current.y = y;

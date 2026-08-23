@@ -321,8 +321,20 @@ class CanvAscii {
   }
 
   load() {
+    if (this.paused) return;
     this.container.dataset.playgroundLoop = 'active';
     this.animate();
+  }
+
+  setPaused(value) {
+    this.paused = value;
+    if (value) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+      delete this.container.dataset.playgroundLoop;
+    } else if (this.filter && !document.hidden) {
+      this.load();
+    }
   }
 
   setSize(w, h) {
@@ -426,10 +438,17 @@ export default function ASCIIText({
   textFontSize = 200,
   textColor = '#fdf9f3',
   planeBaseHeight = 8,
-  enableWaves = true
+  enableWaves = true,
+  paused = false
 }) {
   const containerRef = useRef(null);
   const asciiRef = useRef(null);
+  const pausedRef = useRef(paused);
+
+  useEffect(() => {
+    pausedRef.current = paused;
+    asciiRef.current?.setPaused?.(paused);
+  }, [paused]);
 
   useEffect(() => {
     if (!containerRef.current) return undefined;
@@ -470,7 +489,7 @@ export default function ASCIIText({
               if (!cancelled) {
                 asciiRef.current = await createAndInit(containerRef.current, w, h);
                 if (!cancelled && asciiRef.current) {
-                  asciiRef.current.load();
+                  asciiRef.current.setPaused(pausedRef.current);
                 }
               }
             }
@@ -483,7 +502,7 @@ export default function ASCIIText({
 
       asciiRef.current = await createAndInit(containerRef.current, width, height);
       if (!cancelled && asciiRef.current) {
-        asciiRef.current.load();
+        asciiRef.current.setPaused(pausedRef.current);
 
         ro = new ResizeObserver(entries => {
           if (!entries[0] || !asciiRef.current) return;
