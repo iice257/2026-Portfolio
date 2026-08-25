@@ -2,7 +2,7 @@
   {
     "checkpoint": "load",
     "pillText": "Welcome back!",
-    "pillClasses": "jsx-dc67447e43f1dd38 custom-cursor-label absolute left-0 top-0 backdrop-blur-sm px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-widest whitespace-nowrap is-standard is-greeting is-visible",
+    "pillClasses": "jsx-cee34f47c5f97001 custom-cursor-label absolute left-0 top-0 backdrop-blur-sm px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-widest whitespace-nowrap is-standard is-greeting is-visible",
     "morph": "default",
     "fillOpacity": "0",
     "hostTransform": ""
@@ -10,9 +10,9 @@
   {
     "checkpoint": "scrolled-1150",
     "pillText": "Welcome back!",
-    "pillClasses": "jsx-dc67447e43f1dd38 custom-cursor-label absolute left-0 top-0 backdrop-blur-sm px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-widest whitespace-nowrap is-standard is-greeting is-visible",
+    "pillClasses": "jsx-cee34f47c5f97001 custom-cursor-label absolute left-0 top-0 backdrop-blur-sm px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-widest whitespace-nowrap is-standard is-greeting is-visible",
     "morph": "default",
     "fillOpacity": "0",
-    "hostTransform": ""
+    "hostTransform": "55,877"
   }
 ]

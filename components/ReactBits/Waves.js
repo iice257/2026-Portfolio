@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { addPointerMoveListener, addTouchMoveListener } from "../../utils/pointerBus";
 
 class Grad {
   constructor(x, y, z) {
@@ -423,9 +424,11 @@ export default function Waves({
     const resizeObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(scheduleRebuild);
     resizeObserver?.observe(container);
     window.addEventListener("resize", scheduleRebuild);
+    let removeMoveListeners = () => {};
     if (mouseInteraction) {
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("touchmove", handleTouchMove, { passive: true });
+      const unMove = addPointerMoveListener(handleMouseMove);
+      const unTouch = addTouchMoveListener(handleTouchMove);
+      removeMoveListeners = () => { unMove(); unTouch(); };
     }
 
     function handleVisibilityChange() {
@@ -442,10 +445,7 @@ export default function Waves({
       resizeObserver?.disconnect();
       window.removeEventListener("resize", scheduleRebuild);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      if (mouseInteraction) {
-        window.removeEventListener("mousemove", handleMouseMove);
-        window.removeEventListener("touchmove", handleTouchMove);
-      }
+      removeMoveListeners();
       stopLoop();
       if (resizeFrameRef.current !== null) {
         cancelAnimationFrame(resizeFrameRef.current);

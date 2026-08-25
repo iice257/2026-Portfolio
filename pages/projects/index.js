@@ -18,6 +18,7 @@ import {
 import Footer from "@/components/Footer/Footer";
 import ProjectVisual from "@/components/Projects/ProjectVisual";
 import ControlledVideo from "@/components/Projects/ControlledVideo";
+import Scrollbar from "@/components/Scrollbar/Scrollbar";
 import ShuffleText from "@/components/ReactBits/ShuffleText";
 import { IconArrowUpRight, IconGithub } from "@/components/Icons";
 import { useCursor } from "../../context/CursorContext";
@@ -824,6 +825,8 @@ export default function ProjectsIndex() {
         />
       </Head>
 
+      <Scrollbar />
+
       <main id="main-content" className="projects-index-page min-h-screen" style={{ backgroundColor: "var(--bg-primary)" }}>
         <section className="section-container pt-40 pb-24">
           <Link
@@ -838,7 +841,7 @@ export default function ProjectsIndex() {
                 <ShuffleText text="Projects" duration={0.48} shuffleTimes={3} textAlign="left" />
               </h1>
               <p className="projects-index-intro text-editorial font-light max-w-3xl" style={{ color: "var(--fg-secondary)" }}>
-                Ten projects I&apos;d walk you through unprompted, and forty-some more that show the actual shape of getting here: product ideas, agent tooling, and the experiments and forks that come with building things regularly.
+                Twelve projects I&apos;d walk you through unprompted, and forty-some more that show the actual shape of getting here: product ideas, agent tooling, and the experiments and forks that come with building things regularly.
               </p>
             </div>
             <div className="lg:col-span-4 grid grid-cols-2 gap-6">
@@ -1038,7 +1041,7 @@ export default function ProjectsIndex() {
           </div>
         </section>
 
-        <section className="section-container pb-32">
+        <section id="site-as-a-system" className="section-container pb-32 scroll-mt-24">
           <div className="mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
               <p className="text-micro mb-4" style={{ color: "var(--fg-muted)" }}>
@@ -1096,7 +1099,7 @@ export default function ProjectsIndex() {
               Major
             </p>
             <h2 className="projects-index-section-title text-display-lg font-light mb-4" style={{ color: "var(--fg-primary)" }}>
-              Six more, still standing
+              Eight more, still standing
             </h2>
             <p className="text-body-lg max-w-2xl" style={{ color: "var(--fg-secondary)" }}>
               Flip a card for the stack, the status, and what I actually think of it now.

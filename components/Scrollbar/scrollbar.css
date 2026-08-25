@@ -1,0 +1,50 @@
+html.sbc-active {
+  scrollbar-width: none;
+}
+
+html.sbc-active::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none;
+  color: var(--dot-color);
+}
+
+@media (max-width: 767px) {
+  .scrollbar {
+    display: none;
+  }
+}
+
+.scrollbar line {
+  stroke: currentColor;
+  stroke-width: var(--stroke-width, 4);
+  stroke-linecap: round;
+  transition: stroke 250ms ease;
+}
+
+.scrollbar .hit-area {
+  fill: none;
+  pointer-events: none;
+}
+
+.scrollbar .arrow-hit {
+  fill: none;
+  pointer-events: none;
+}
+
+.scrollbar[data-state="idle"] .arrow-hit {
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.scrollbar[data-state="tracking"] .hit-area {
+  pointer-events: all;
+  cursor: pointer;
+}

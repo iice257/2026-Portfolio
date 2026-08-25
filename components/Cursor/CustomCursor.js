@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useCursor } from '../../context/CursorContext';
 import { gsap } from 'gsap';
 import { useInteractionState } from '../../context/InteractionStateContext';
+import { addPointerMoveListener } from '../../utils/pointerBus';
 
 const DEFAULT_CURSOR_PATH = "M5.5 3 C5.5 3 5.5 3 5.5 3 L11.5 26.5 C11.5 26.5 11.5 26.5 11.5 26.5 L16.2 17.8 C16.2 17.8 16.2 17.8 16.2 17.8 L25.5 17.8 C25.5 17.8 25.5 17.8 25.5 17.8 L5.5 3 Z";
 const CLICKABLE_CURSOR_PATH = "M5.5 3 C5.95 3.3 6.2 3.45 6.55 3.72 L24.65 17.05 C25.65 17.8 25.2 18.55 23.95 18.55 L16.75 18.55 C16.2 18.55 15.9 18.8 15.65 19.25 L12.2 25.65 C11.65 26.65 10.95 26.35 10.65 25.15 L5.5 3 Z";
@@ -55,6 +56,8 @@ const CustomCursor = () => {
   const loadingTimelineRef = useRef(null);
   const refreshFrameRef = useRef(null);
   const resolvedStateRef = useRef({ text: "", variant: "default", clickable: false });
+  const bridgeScanRef = useRef({ root: null, x: 0, y: 0, result: null, generation: -1 });
+  const bridgeScanGenerationRef = useRef(0);
 
   useEffect(() => {
     cursorTextRef.current = cursorText;
@@ -90,10 +93,14 @@ const CustomCursor = () => {
     };
 
     const applyCursorContext = (nextText, nextVariant) => {
+      // Only push context updates that actually change the value: identical
+      // setStates still schedule a provider render on every mousemove.
+      const textChanged = cursorTextRef.current !== nextText;
+      const variantChanged = cursorVariantRef.current !== nextVariant;
       cursorTextRef.current = nextText;
       cursorVariantRef.current = nextVariant;
-      setCursorText(nextText);
-      setCursorVariant(nextVariant);
+      if (textChanged) setCursorText(nextText);
+      if (variantChanged) setCursorVariant(nextVariant);
     };
 
     const isUsableInteractive = (element) => {
@@ -104,6 +111,20 @@ const CustomCursor = () => {
 
     const findNearbyInteractive = (x, y, bridgeRoot) => {
       if (!bridgeRoot) return null;
+
+      // Same root + same rounded position + no invalidating event since the
+      // last scan => the scan is deterministic, so reuse it. Distinct positions
+      // and any scheduleCursorRefresh (scroll/resize/pointerup/transitions)
+      // bypass the cache, so results stay exact.
+      const cache = bridgeScanRef.current;
+      if (
+        cache.root === bridgeRoot
+        && cache.generation === bridgeScanGenerationRef.current
+        && Math.abs(cache.x - x) < 0.5
+        && Math.abs(cache.y - y) < 0.5
+      ) {
+        return cache.result;
+      }
 
       const interactives = bridgeRoot.querySelectorAll(INTERACTIVE_SELECTOR);
       let nearest = null;
@@ -124,6 +145,7 @@ const CustomCursor = () => {
         }
       }
 
+      bridgeScanRef.current = { root: bridgeRoot, x, y, result: nearest, generation: bridgeScanGenerationRef.current };
       return nearest;
     };
 
@@ -240,6 +262,7 @@ const CustomCursor = () => {
     };
 
     const scheduleCursorRefresh = () => {
+      bridgeScanGenerationRef.current += 1;
       if (refreshFrameRef.current) return;
       refreshFrameRef.current = window.requestAnimationFrame(() => {
         refreshFrameRef.current = null;
@@ -279,7 +302,7 @@ const CustomCursor = () => {
       scheduleCursorRefresh();
     };
 
-    window.addEventListener('mousemove', onMouseMove);
+    const removePointerMoveListener = addPointerMoveListener(onMouseMove);
     window.addEventListener('scroll', scheduleCursorRefresh, true);
     window.addEventListener('resize', scheduleCursorRefresh);
     window.addEventListener('portfolio:cursor-refresh', scheduleCursorRefresh);
@@ -293,7 +316,7 @@ const CustomCursor = () => {
     document.addEventListener('mouseenter', onMouseEnter);
 
     return () => {
-      window.removeEventListener('mousemove', onMouseMove);
+      removePointerMoveListener();
       window.removeEventListener('scroll', scheduleCursorRefresh, true);
       window.removeEventListener('resize', scheduleCursorRefresh);
       window.removeEventListener('portfolio:cursor-refresh', scheduleCursorRefresh);

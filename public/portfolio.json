@@ -70,9 +70,9 @@
     "Nigeria frontend engineer portfolio"
   ],
   "projectCounts": {
-    "all": 44,
+    "all": 46,
     "featured": 4,
-    "major": 6,
+    "major": 8,
     "archive": 33
   },
   "featuredProjects": [
@@ -285,6 +285,29 @@
   },
   "majorProjects": [
     {
+      "name": "PORGE",
+      "repoName": "PORGE",
+      "slug": "porge",
+      "subtitle": "Storefront rescue, documented",
+      "description": "A private Shopify fashion store I rescued from a terrible inherited build, redesigned to the pixel, and turned into a style documentary.",
+      "url": "https://github.com/iice257/PORGE",
+      "liveUrl": "https://porge.vercel.app",
+      "tech": [
+        "shopify",
+        "next.js",
+        "design system",
+        "client work"
+      ],
+      "status": "Private store, live case study",
+      "notes": "Freelance client work. The store stays private (founder's call, pre-launch), so the case study stands in for the link I can't share yet. The split hero, the negative-space categories, and a CTA carried entirely by a walking man are my proudest pixels this year.",
+      "visual": {
+        "label": "PORGÉ",
+        "kicker": "Storefront rescue",
+        "accent": "#EDEDED",
+        "secondary": "#383838"
+      }
+    },
+    {
       "name": "Bountic",
       "repoName": "bountic",
       "slug": "bountic",
@@ -391,6 +414,28 @@
         "kicker": "Security ops",
         "accent": "#F87171",
         "secondary": "#60A5FA"
+      }
+    },
+    {
+      "name": "Agent iMessage Handoff",
+      "repoName": "agent-imessage-handoff",
+      "slug": "agent-imessage-handoff",
+      "subtitle": "Run coding agents over iMessage",
+      "description": "One shared relay and three harness bridges so Codex and opencode sessions continue from your phone.",
+      "url": "https://github.com/iice257/agent-imessage-handoff",
+      "tech": [
+        "typescript",
+        "cloudflare workers",
+        "imessage",
+        "agents"
+      ],
+      "status": "Shipped and in daily use",
+      "notes": "The consolidation of three fragmented repos into one agent-ready monorepo: shared Cloudflare relay, Codex bridge, a reliability-layer variant, and an opencode port. Point any agent at it for setup, or fork it to bridge a new harness.",
+      "visual": {
+        "label": "Handoff",
+        "kicker": "Agent comms",
+        "accent": "#34D399",
+        "secondary": "#6366F1"
       }
     },
     {
@@ -510,8 +555,8 @@
         "codex",
         "handoff"
       ],
-      "status": "Personal tooling",
-      "notes": "Part of the same agent-tooling cluster as the Skills repo.",
+      "status": "Archived; folded into agent-imessage-handoff",
+      "notes": "Part of the same agent-tooling cluster as the Skills repo. Now archived and consolidated into the agent-imessage-handoff monorepo.",
       "url": "https://github.com/iice257/codex-handoff-plus",
       "archiveNumber": 16,
       "archiveTier": "expandable"
@@ -606,8 +651,8 @@
         "imessage",
         "codex"
       ],
-      "status": "Experiment",
-      "notes": "Earlier version of the handoff tooling idea.",
+      "status": "Archived; folded into agent-imessage-handoff",
+      "notes": "Earlier version of the handoff tooling idea. Now archived and consolidated into the agent-imessage-handoff monorepo.",
       "url": "https://github.com/iice257/codex-imessage-handoff",
       "archiveNumber": 22,
       "archiveTier": "quiet"
@@ -960,5 +1005,5 @@
       "archiveTier": "expandable"
     }
   ],
-  "generatedAt": "2026-08-23"
+  "generatedAt": "2026-08-25"
 }

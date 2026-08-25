@@ -20,6 +20,7 @@ import "../components/ReactBits/StaggeredMenu.css";
 import "../components/ReactBits/Galaxy.css";
 import "../components/ReactBits/Waves.css";
 import "../components/ReactBits/MetallicPaint.css";
+import "../components/Scrollbar/scrollbar.css";
 import { GTAG } from "../constants";
 
 const inter = Inter({
