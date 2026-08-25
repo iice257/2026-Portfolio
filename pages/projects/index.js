@@ -18,6 +18,7 @@ import {
 import Footer from "@/components/Footer/Footer";
 import ProjectVisual from "@/components/Projects/ProjectVisual";
 import ControlledVideo from "@/components/Projects/ControlledVideo";
+import Scrollbar from "@/components/Scrollbar/Scrollbar";
 import ShuffleText from "@/components/ReactBits/ShuffleText";
 import { IconArrowUpRight, IconGithub } from "@/components/Icons";
 import { useCursor } from "../../context/CursorContext";
@@ -824,6 +825,8 @@ export default function ProjectsIndex() {
         />
       </Head>
 
+      <Scrollbar />
+
       <main id="main-content" className="projects-index-page min-h-screen" style={{ backgroundColor: "var(--bg-primary)" }}>
         <section className="section-container pt-40 pb-24">
           <Link
@@ -1038,7 +1041,7 @@ export default function ProjectsIndex() {
           </div>
         </section>
 
-        <section className="section-container pb-32">
+        <section id="site-as-a-system" className="section-container pb-32 scroll-mt-24">
           <div className="mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
               <p className="text-micro mb-4" style={{ color: "var(--fg-muted)" }}>

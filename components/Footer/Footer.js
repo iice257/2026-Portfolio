@@ -200,6 +200,14 @@ const Footer = () => {
             <p className="text-body-sm" style={{ color: "var(--fg-muted)" }}>
               Full-Stack Engineer.
             </p>
+            <Link
+              href="/projects#site-as-a-system"
+              className="text-body-sm link-underline"
+              style={{ color: "var(--fg-muted)" }}
+              data-cursor-label="About this site"
+            >
+              About this site
+            </Link>
             <a
               href={METADATA.v1PortfolioUrl}
               target="_blank"

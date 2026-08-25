@@ -7,6 +7,7 @@ import { METADATA } from "../../constants";
 import Footer from "@/components/Footer/Footer";
 import ProjectVisual from "@/components/Projects/ProjectVisual";
 import ControlledVideo from "@/components/Projects/ControlledVideo";
+import Scrollbar from "@/components/Scrollbar/Scrollbar";
 import ShuffleText from "@/components/ReactBits/ShuffleText";
 import { useCursor } from "../../context/CursorContext";
 import { useBodyScrollLock } from "../../utils/useBodyScrollLock";
@@ -472,6 +473,8 @@ export default function ProjectDetail({ project, projectIndex, prevProject, next
           dangerouslySetInnerHTML={{ __html: projectJsonLd }}
         />
       </Head>
+
+      <Scrollbar />
 
       <main id="main-content" className="min-h-screen" style={{ backgroundColor: "var(--bg-primary)" }}>
         <section className="section-container pt-32 pb-12">
