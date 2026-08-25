@@ -841,7 +841,7 @@ export default function ProjectsIndex() {
                 <ShuffleText text="Projects" duration={0.48} shuffleTimes={3} textAlign="left" />
               </h1>
               <p className="projects-index-intro text-editorial font-light max-w-3xl" style={{ color: "var(--fg-secondary)" }}>
-                Eleven projects I&apos;d walk you through unprompted, and forty-some more that show the actual shape of getting here: product ideas, agent tooling, and the experiments and forks that come with building things regularly.
+                Twelve projects I&apos;d walk you through unprompted, and forty-some more that show the actual shape of getting here: product ideas, agent tooling, and the experiments and forks that come with building things regularly.
               </p>
             </div>
             <div className="lg:col-span-4 grid grid-cols-2 gap-6">
@@ -1099,7 +1099,7 @@ export default function ProjectsIndex() {
               Major
             </p>
             <h2 className="projects-index-section-title text-display-lg font-light mb-4" style={{ color: "var(--fg-primary)" }}>
-              Seven more, still standing
+              Eight more, still standing
             </h2>
             <p className="text-body-lg max-w-2xl" style={{ color: "var(--fg-secondary)" }}>
               Flip a card for the stack, the status, and what I actually think of it now.

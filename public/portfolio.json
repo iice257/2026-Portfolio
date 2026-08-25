@@ -70,9 +70,9 @@
     "Nigeria frontend engineer portfolio"
   ],
   "projectCounts": {
-    "all": 45,
+    "all": 46,
     "featured": 4,
-    "major": 7,
+    "major": 8,
     "archive": 33
   },
   "featuredProjects": [
@@ -417,6 +417,28 @@
       }
     },
     {
+      "name": "Agent iMessage Handoff",
+      "repoName": "agent-imessage-handoff",
+      "slug": "agent-imessage-handoff",
+      "subtitle": "Run coding agents over iMessage",
+      "description": "One shared relay and three harness bridges so Codex and opencode sessions continue from your phone.",
+      "url": "https://github.com/iice257/agent-imessage-handoff",
+      "tech": [
+        "typescript",
+        "cloudflare workers",
+        "imessage",
+        "agents"
+      ],
+      "status": "Shipped and in daily use",
+      "notes": "The consolidation of three fragmented repos into one agent-ready monorepo: shared Cloudflare relay, Codex bridge, a reliability-layer variant, and an opencode port. Point any agent at it for setup, or fork it to bridge a new harness.",
+      "visual": {
+        "label": "Handoff",
+        "kicker": "Agent comms",
+        "accent": "#34D399",
+        "secondary": "#6366F1"
+      }
+    },
+    {
       "name": "Unfollowr",
       "repoName": "Unfollowr",
       "slug": "unfollowr",
@@ -533,8 +555,8 @@
         "codex",
         "handoff"
       ],
-      "status": "Personal tooling",
-      "notes": "Part of the same agent-tooling cluster as the Skills repo.",
+      "status": "Archived; folded into agent-imessage-handoff",
+      "notes": "Part of the same agent-tooling cluster as the Skills repo. Now archived and consolidated into the agent-imessage-handoff monorepo.",
       "url": "https://github.com/iice257/codex-handoff-plus",
       "archiveNumber": 16,
       "archiveTier": "expandable"
@@ -629,8 +651,8 @@
         "imessage",
         "codex"
       ],
-      "status": "Experiment",
-      "notes": "Earlier version of the handoff tooling idea.",
+      "status": "Archived; folded into agent-imessage-handoff",
+      "notes": "Earlier version of the handoff tooling idea. Now archived and consolidated into the agent-imessage-handoff monorepo.",
       "url": "https://github.com/iice257/codex-imessage-handoff",
       "archiveNumber": 22,
       "archiveTier": "quiet"

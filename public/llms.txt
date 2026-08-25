@@ -90,11 +90,12 @@ Kingsley Afolabi Aremu, also known as iice257, is a Lagos-based full-stack engin
 - Rustchain: A DePIN network where the only requirement for hardware is that it's old. Tech/focus: blockchain, depin, hardware. repo: https://github.com/iice257/Rustchain | live: https://rustchain.org
 - Pages Forward: The second, better version of a bookstore I'd already built once. Tech/focus: javascript, commerce, frontend, content. repo: https://github.com/iice257/Pages-forward-rebuild
 - SignalOps: A security triage cockpit for the part of the job that's mostly scanning and deciding. Tech/focus: typescript, security, ops. repo: https://github.com/iice257/signalops | live: https://signalops-orpin.vercel.app
+- Agent iMessage Handoff: One shared relay and three harness bridges so Codex and opencode sessions continue from your phone. Tech/focus: typescript, cloudflare workers, imessage, agents. repo: https://github.com/iice257/agent-imessage-handoff
 - Unfollowr: Follow-list cleanup that scores instead of guessing. Tech/focus: typescript, dashboard, social. repo: https://github.com/iice257/Unfollowr
 
 ## Complete Public Project Archive
 
-This portfolio indexes 45 public or portfolio-tracked projects. The complete archive is visible at https://kingsleyaremu.vercel.app/projects and is represented in machine-readable form at https://kingsleyaremu.vercel.app/portfolio.json.
+This portfolio indexes 46 public or portfolio-tracked projects. The complete archive is visible at https://kingsleyaremu.vercel.app/projects and is represented in machine-readable form at https://kingsleyaremu.vercel.app/portfolio.json.
 
 ## Crawling Notes
 
