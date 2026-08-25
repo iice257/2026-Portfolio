@@ -70,9 +70,9 @@
     "Nigeria frontend engineer portfolio"
   ],
   "projectCounts": {
-    "all": 44,
+    "all": 45,
     "featured": 4,
-    "major": 6,
+    "major": 7,
     "archive": 33
   },
   "featuredProjects": [
@@ -284,6 +284,29 @@
     }
   },
   "majorProjects": [
+    {
+      "name": "PORGE",
+      "repoName": "PORGE",
+      "slug": "porge",
+      "subtitle": "Storefront rescue, documented",
+      "description": "A private Shopify fashion store I rescued from a terrible inherited build, redesigned to the pixel, and turned into a style documentary.",
+      "url": "https://github.com/iice257/PORGE",
+      "liveUrl": "https://porge.vercel.app",
+      "tech": [
+        "shopify",
+        "next.js",
+        "design system",
+        "client work"
+      ],
+      "status": "Private store, live case study",
+      "notes": "Freelance client work. The store stays private (founder's call, pre-launch), so the case study stands in for the link I can't share yet. The split hero, the negative-space categories, and a CTA carried entirely by a walking man are my proudest pixels this year.",
+      "visual": {
+        "label": "PORGÉ",
+        "kicker": "Storefront rescue",
+        "accent": "#EDEDED",
+        "secondary": "#383838"
+      }
+    },
     {
       "name": "Bountic",
       "repoName": "bountic",
@@ -960,5 +983,5 @@
       "archiveTier": "expandable"
     }
   ],
-  "generatedAt": "2026-08-24"
+  "generatedAt": "2026-08-25"
 }

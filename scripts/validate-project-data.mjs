@@ -92,8 +92,8 @@ if (featuredProjects.length !== 4) {
   errors.push("featuredProjects should contain the four premium project pages.");
 }
 
-if (majorProjects.length !== 6) {
-  errors.push("majorProjects should contain exactly six major projects.");
+if (majorProjects.length !== 7) {
+  errors.push("majorProjects should contain exactly seven major projects.");
 }
 
 for (const project of featuredProjects) {
@@ -108,8 +108,8 @@ for (const project of featuredProjects) {
   }
 }
 
-if (majorProjectCount !== featuredProjects.length + 6) {
-  errors.push("majorProjectCount should equal featured projects plus six major projects.");
+if (majorProjectCount !== featuredProjects.length + 7) {
+  errors.push("majorProjectCount should equal featured projects plus seven major projects.");
 }
 
 if (githubProjectCount !== allProjects.filter((project) => project.url !== "#").length) {
