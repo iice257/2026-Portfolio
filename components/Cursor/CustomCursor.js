@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useCursor } from '../../context/CursorContext';
 import { gsap } from 'gsap';
 import { useInteractionState } from '../../context/InteractionStateContext';
+import { addPointerMoveListener } from '../../utils/pointerBus';
 
 const DEFAULT_CURSOR_PATH = "M5.5 3 C5.5 3 5.5 3 5.5 3 L11.5 26.5 C11.5 26.5 11.5 26.5 11.5 26.5 L16.2 17.8 C16.2 17.8 16.2 17.8 16.2 17.8 L25.5 17.8 C25.5 17.8 25.5 17.8 25.5 17.8 L5.5 3 Z";
 const CLICKABLE_CURSOR_PATH = "M5.5 3 C5.95 3.3 6.2 3.45 6.55 3.72 L24.65 17.05 C25.65 17.8 25.2 18.55 23.95 18.55 L16.75 18.55 C16.2 18.55 15.9 18.8 15.65 19.25 L12.2 25.65 C11.65 26.65 10.95 26.35 10.65 25.15 L5.5 3 Z";
@@ -301,7 +302,7 @@ const CustomCursor = () => {
       scheduleCursorRefresh();
     };
 
-    window.addEventListener('mousemove', onMouseMove);
+    const removePointerMoveListener = addPointerMoveListener(onMouseMove);
     window.addEventListener('scroll', scheduleCursorRefresh, true);
     window.addEventListener('resize', scheduleCursorRefresh);
     window.addEventListener('portfolio:cursor-refresh', scheduleCursorRefresh);
@@ -315,7 +316,7 @@ const CustomCursor = () => {
     document.addEventListener('mouseenter', onMouseEnter);
 
     return () => {
-      window.removeEventListener('mousemove', onMouseMove);
+      removePointerMoveListener();
       window.removeEventListener('scroll', scheduleCursorRefresh, true);
       window.removeEventListener('resize', scheduleCursorRefresh);
       window.removeEventListener('portfolio:cursor-refresh', scheduleCursorRefresh);
